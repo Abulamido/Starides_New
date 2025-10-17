@@ -1,3 +1,4 @@
+'use client';
 
 import {
     Card,
@@ -221,4 +222,3 @@ import {
       </div>
     );
   }
-  
