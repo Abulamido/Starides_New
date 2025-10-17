@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { Input } from '@/components/ui/input';
 import { Search, Menu } from 'lucide-react';
