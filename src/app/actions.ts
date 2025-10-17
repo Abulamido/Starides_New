@@ -1,7 +1,9 @@
+
 'use server';
 
 import { getPersonalizedRecommendations } from '@/ai/flows/personalized-product-recommendations';
 import { mockProducts, type Product } from '@/lib/data';
+import { revalidatePath } from 'next/cache';
 
 // In a real app, customerId, browsingHistory, and purchaseHistory would come from your database
 const MOCK_CUSTOMER_DATA = {
@@ -56,4 +58,23 @@ export async function fetchRecommendations(): Promise<{
       error: 'Failed to fetch recommendations.',
     };
   }
+}
+
+// In a real app, this would write to a database.
+// For now, we'll just log it and revalidate paths to show updated UI.
+export async function placeOrder(order: {items: any[], total: number, customer: string}) {
+    console.log("--- New Order Placed ---");
+    console.log("Customer:", order.customer);
+    console.log("Total: $", order.total.toFixed(2));
+    console.log("Items:", order.items.map(i => `${i.id} (x${i.quantity})`).join(', '));
+    console.log("------------------------");
+    
+    // This is a placeholder for a slow database write
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Revalidate all the paths where order/delivery data is shown
+    revalidatePath('/customer/orders');
+    revalidatePath('/admin');
+    revalidatePath('/vendor');
+    revalidatePath('/rider');
 }

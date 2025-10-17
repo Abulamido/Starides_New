@@ -1,3 +1,4 @@
+
 'use client';
 
 import { usePathname } from 'next/navigation';
@@ -23,7 +24,11 @@ export default function CustomerDashboardLayout({
     { href: '/customer/wallet', label: 'Wallet', icon: Wallet },
     { href: '/customer/recommendations', label: 'For You', icon: Star },
     { href: '/customer/settings', label: 'Settings', icon: Settings },
-  ].map((item) => ({ ...item, active: pathname === item.href }));
+  ].map((item) => ({
+    ...item,
+    active:
+      pathname === item.href || (item.href === '/customer/orders' && pathname.startsWith('/customer/orders')),
+  }));
 
   return (
     <DashboardLayout

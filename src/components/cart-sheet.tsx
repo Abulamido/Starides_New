@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -9,11 +10,12 @@ import {
   SheetFooter,
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { ShoppingCart, Trash2, Plus, Minus } from 'lucide-react';
+import { ShoppingCart, Trash2, Plus, Minus, CreditCard } from 'lucide-react';
 import { useCart } from '@/context/cart-context';
 import { ScrollArea } from './ui/scroll-area';
 import Image from 'next/image';
 import { Separator } from './ui/separator';
+import Link from 'next/link';
 
 export function CartSheet() {
   const { cartItems, cartCount, cartTotal, updateQuantity, removeFromCart } = useCart();
@@ -92,8 +94,11 @@ export function CartSheet() {
                   <span>Subtotal</span>
                   <span>${cartTotal.toFixed(2)}</span>
                 </div>
-                <Button className="w-full" size="lg">
-                  Proceed to Checkout
+                <Button className="w-full" size="lg" asChild>
+                    <Link href="/customer/checkout">
+                        <CreditCard className="mr-2 h-4 w-4" />
+                        Proceed to Checkout
+                    </Link>
                 </Button>
               </div>
             </SheetFooter>
