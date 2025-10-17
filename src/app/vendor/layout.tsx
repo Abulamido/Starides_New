@@ -13,10 +13,10 @@ export default function VendorDashboardLayout({
 }) {
   const navItems: NavItem[] = [
     { href: '/vendor', label: 'Dashboard', icon: LayoutGrid, active: true },
-    { href: '#', label: 'Products', icon: Package },
-    { href: '#', label: 'Orders', icon: Package },
-    { href: '#', label: 'Earnings', icon: DollarSign },
-    { href: '#', label: 'Settings', icon: Settings },
+    { href: '/vendor/products', label: 'Products', icon: Package },
+    { href: '/vendor/orders', label: 'Orders', icon: Package },
+    { href: '/vendor/earnings', label: 'Earnings', icon: DollarSign },
+    { href: '/vendor/settings', label: 'Settings', icon: Settings },
   ];
 
   return (

@@ -16,13 +16,13 @@ export default function AdminDashboardLayout({
 }) {
   const navItems: NavItem[] = [
     { href: '/admin', label: 'Dashboard', icon: BarChart, active: true },
-    { href: '#', label: 'Users', icon: Users },
-    { href: '#', label: 'Vendors', icon: Store },
-    { href: '#', label: 'Riders', icon: Shield },
-    { href: '#', label: 'Products', icon: Package },
-    { href: '#', label: 'Orders', icon: Package },
-    { href: '#', label: 'Payments', icon: CreditCard },
-    { href: '#', label: 'Settings', icon: Settings },
+    { href: '/admin/users', label: 'Users', icon: Users },
+    { href: '/admin/vendors', label: 'Vendors', icon: Store },
+    { href: '/admin/riders', label: 'Riders', icon: Shield },
+    { href: '/admin/products', label: 'Products', icon: Package },
+    { href: '/admin/orders', label: 'Orders', icon: Package },
+    { href: '/admin/payments', label: 'Payments', icon: CreditCard },
+    { href: '/admin/settings', label: 'Settings', icon: Settings },
   ];
 
   return (

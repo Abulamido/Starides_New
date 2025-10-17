@@ -14,10 +14,10 @@ export default function CustomerDashboardLayout({
 }) {
   const navItems: NavItem[] = [
     { href: '/customer', label: 'Browse', icon: LayoutGrid, active: true },
-    { href: '#', label: 'My Orders', icon: Package },
-    { href: '#', label: 'Wallet', icon: Wallet },
-    { href: '#', label: 'Recommendations', icon: Star },
-    { href: '#', label: 'Settings', icon: Settings },
+    { href: '/customer/orders', label: 'My Orders', icon: Package },
+    { href: '/customer/wallet', label: 'Wallet', icon: Wallet },
+    { href: '/customer/recommendations', label: 'Recommendations', icon: Star },
+    { href: '/customer/settings', label: 'Settings', icon: Settings },
   ];
 
   return (

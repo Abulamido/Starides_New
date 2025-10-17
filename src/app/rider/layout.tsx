@@ -13,9 +13,9 @@ export default function RiderDashboardLayout({
 }) {
   const navItems: NavItem[] = [
     { href: '/rider', label: 'Deliveries', icon: Bike, active: true },
-    { href: '#', label: 'Live Map', icon: Map },
-    { href: '#', label: 'My Earnings', icon: DollarSign },
-    { href: '#', label: 'Settings', icon: Settings },
+    { href: '/rider/map', label: 'Live Map', icon: Map },
+    { href: '/rider/earnings', label: 'My Earnings', icon: DollarSign },
+    { href: '/rider/settings', label: 'Settings', icon: Settings },
   ];
 
   return (
