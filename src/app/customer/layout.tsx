@@ -1,3 +1,6 @@
+'use client';
+
+import { usePathname } from 'next/navigation';
 import { DashboardLayout, type NavItem } from '@/components/dashboard-layout';
 import {
   LayoutGrid,
@@ -12,13 +15,15 @@ export default function CustomerDashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+
   const navItems: NavItem[] = [
-    { href: '/customer', label: 'Browse', icon: LayoutGrid, active: true },
+    { href: '/customer', label: 'Browse', icon: LayoutGrid },
     { href: '/customer/orders', label: 'My Orders', icon: Package },
     { href: '/customer/wallet', label: 'Wallet', icon: Wallet },
     { href: '/customer/recommendations', label: 'For You', icon: Star },
     { href: '/customer/settings', label: 'Settings', icon: Settings },
-  ];
+  ].map((item) => ({ ...item, active: pathname === item.href }));
 
   return (
     <DashboardLayout
