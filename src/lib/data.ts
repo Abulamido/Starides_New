@@ -27,8 +27,7 @@ export const mockProducts: Product[] = [
   },
   {
     id: 'prod-002',
-    name: 'Smartwatch
-',
+    name: 'Smartwatch',
     price: 199.99,
     category: 'Electronics',
     image: getImageUrl('product-2'),
