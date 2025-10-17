@@ -16,8 +16,8 @@ import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
 import { UserNav } from './user-nav';
 import { Separator } from './ui/separator';
-import { Button } from './ui/button';
 import { StaridesLogo } from './starides-logo';
+import { CartSheet } from './cart-sheet';
 
 export type NavItem = {
   href: string;
@@ -36,16 +36,14 @@ type DashboardLayoutProps = {
 export function DashboardLayout({
   children,
   navItems,
-  userName,
-  userRole,
 }: DashboardLayoutProps) {
   return (
     <SidebarProvider>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen">
         <Sidebar>
           <SidebarHeader>
             <div className="flex items-center gap-2">
-              <StaridesLogo className="size-6 text-primary" />
+              <StaridesLogo className="size-7 text-primary" />
               <span className="text-lg font-semibold text-foreground">
                 Starides
               </span>
@@ -75,7 +73,7 @@ export function DashboardLayout({
           </SidebarFooter>
         </Sidebar>
         <SidebarInset>
-          <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
+          <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm md:px-6">
             <div className="flex items-center gap-2 md:hidden">
               <SidebarTrigger />
               <StaridesLogo className="size-6 text-primary" />
@@ -91,6 +89,7 @@ export function DashboardLayout({
                   />
                 </div>
               </form>
+              <CartSheet />
               <div className="hidden md:block">
                 <UserNav />
               </div>

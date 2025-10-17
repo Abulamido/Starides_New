@@ -6,14 +6,15 @@ import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu, Search } from 'lucide-react';
 import { StaridesLogo } from './starides-logo';
+import { CartSheet } from './cart-sheet';
 
 export function Header() {
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center">
         <div className="mr-4 hidden md:flex">
           <Link href="/" className="mr-6 flex items-center space-x-2">
-            <StaridesLogo className="h-6 w-auto" />
+            <StaridesLogo className="h-6 w-auto text-primary" />
             <span className="hidden font-bold sm:inline-block">
               Starides
             </span>
@@ -32,7 +33,7 @@ export function Header() {
           </SheetTrigger>
           <SheetContent side="left" className="pr-0">
             <Link href="/" className="mr-6 flex items-center space-x-2">
-              <StaridesLogo className="h-6 w-auto" />
+              <StaridesLogo className="h-6 w-auto text-primary" />
               <span className="font-bold">Starides</span>
             </Link>
             <div className="my-4 h-[calc(100vh-8rem)] pb-10 pl-6">
@@ -63,6 +64,7 @@ export function Header() {
             <Button asChild>
                 <Link href="/auth">Sign Up</Link>
             </Button>
+             <CartSheet />
           </nav>
         </div>
       </div>

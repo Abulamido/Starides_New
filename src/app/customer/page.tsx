@@ -6,7 +6,7 @@ export default function CustomerDashboard() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">
           Welcome back, John!
         </h1>
         <p className="text-muted-foreground">
@@ -17,7 +17,7 @@ export default function CustomerDashboard() {
       <AiRecommendations />
 
       <div>
-        <h2 className="mb-4 text-2xl font-semibold tracking-tight">
+        <h2 className="mb-4 text-2xl font-semibold tracking-tight text-foreground">
           Browse All Products
         </h2>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
