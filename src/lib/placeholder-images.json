@@ -1,3 +1,58 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero-1",
+      "description": "A vibrant and busy marketplace scene.",
+      "imageUrl": "https://picsum.photos/seed/marketplace/1920/1080",
+      "imageHint": "marketplace logistics"
+    },
+    {
+      "id": "product-1",
+      "description": "A modern wireless headphone.",
+      "imageUrl": "https://picsum.photos/seed/headphone/400/400",
+      "imageHint": "wireless headphones"
+    },
+    {
+      "id": "product-2",
+      "description": "A stylish smartwatch.",
+      "imageUrl": "https://picsum.photos/seed/smartwatch/400/400",
+      "imageHint": "smartwatch fitness"
+    },
+    {
+      "id": "product-3",
+      "description": "A professional camera.",
+      "imageUrl": "https://picsum.photos/seed/camera/400/400",
+      "imageHint": "professional camera"
+    },
+    {
+      "id": "product-4",
+      "description": "A comfortable running shoe.",
+      "imageUrl": "https://picsum.photos/seed/shoes/400/400",
+      "imageHint": "running shoes"
+    },
+    {
+      "id": "product-5",
+      "description": "An elegant leather backpack.",
+      "imageUrl": "https://picsum.photos/seed/backpack/400/400",
+      "imageHint": "leather backpack"
+    },
+    {
+      "id": "product-6",
+      "description": "A sleek coffee maker.",
+      "imageUrl": "https://picsum.photos/seed/coffee/400/400",
+      "imageHint": "coffee maker"
+    },
+    {
+      "id": "product-7",
+      "description": "A modern drone.",
+      "imageUrl": "https://picsum.photos/seed/drone/400/400",
+      "imageHint": "camera drone"
+    },
+    {
+      "id": "product-8",
+      "description": "A classic fountain pen.",
+      "imageUrl": "https://picsum.photos/seed/pen/400/400",
+      "imageHint": "fountain pen"
+    }
+  ]
 }
