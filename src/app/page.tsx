@@ -3,9 +3,10 @@ import { Button } from '@/components/ui/button';
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ShoppingCart, Store, Bike, ArrowRight } from 'lucide-react';
+import { Store, Bike, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { placeholderImages } from '@/lib/placeholder-images';
+import { StaridesLogo } from '@/components/starides-logo';
 
 export default function Home() {
   const heroImage = placeholderImages.find((img) => img.id === 'hero-1');
@@ -52,7 +53,7 @@ export default function Home() {
               <Card className="transform text-center transition-transform hover:scale-105 hover:shadow-xl">
                 <CardHeader>
                   <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
-                    <ShoppingCart className="h-8 w-8" />
+                    <StaridesLogo className="h-8 w-8" />
                   </div>
                   <CardTitle className="mt-4 font-headline text-2xl">
                     For Customers

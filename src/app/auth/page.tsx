@@ -8,8 +8,10 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LoginForm } from '@/components/login-form';
 import { SignupForm } from '@/components/signup-form';
-import { ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
+import { StaridesLogo } from '@/components/starides-logo';
+import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
 
 export default function AuthenticationPage() {
   return (
@@ -17,7 +19,7 @@ export default function AuthenticationPage() {
       <div className="w-full max-w-md">
         <div className="mb-4 flex justify-center">
             <Link href="/" className="flex items-center space-x-2 text-foreground">
-                <ShoppingBag className="h-8 w-8" />
+                <StaridesLogo className="h-8 w-auto" />
                 <span className="text-2xl font-bold">Starides</span>
             </Link>
         </div>
@@ -53,6 +55,29 @@ export default function AuthenticationPage() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        <Card className="mt-4">
+          <CardHeader>
+            <CardTitle>Test Dashboards</CardTitle>
+            <CardDescription>
+              For testing purposes, you can directly access the dashboards.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col space-y-2">
+            <Button asChild>
+              <Link href="/customer">Customer Dashboard</Link>
+            </Button>
+            <Button asChild>
+              <Link href="/vendor">Vendor Dashboard</Link>
+            </Button>
+            <Button asChild>
+              <Link href="/rider">Rider Dashboard</Link>
+            </Button>
+            <Button asChild>
+              <Link href="/admin">Admin Dashboard</Link>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

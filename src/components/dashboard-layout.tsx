@@ -13,10 +13,11 @@ import {
   SidebarFooter,
 } from '@/components/ui/sidebar';
 import { Input } from '@/components/ui/input';
-import { Search, ShoppingBag } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { UserNav } from './user-nav';
 import { Separator } from './ui/separator';
 import { Button } from './ui/button';
+import { StaridesLogo } from './starides-logo';
 
 export type NavItem = {
   href: string;
@@ -44,7 +45,7 @@ export function DashboardLayout({
         <Sidebar>
           <SidebarHeader>
             <div className="flex items-center gap-2">
-              <ShoppingBag className="size-6 text-primary" />
+              <StaridesLogo className="size-6 text-primary" />
               <span className="text-lg font-semibold text-foreground">
                 Starides
               </span>
@@ -77,7 +78,7 @@ export function DashboardLayout({
           <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
             <div className="flex items-center gap-2 md:hidden">
               <SidebarTrigger />
-              <ShoppingBag className="size-6 text-primary" />
+              <StaridesLogo className="size-6 text-primary" />
             </div>
             <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
               <form className="ml-auto flex-1 sm:flex-initial">

@@ -4,7 +4,8 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, Search, ShoppingBag } from 'lucide-react';
+import { Menu, Search } from 'lucide-react';
+import { StaridesLogo } from './starides-logo';
 
 export function Header() {
   return (
@@ -12,7 +13,7 @@ export function Header() {
       <div className="container flex h-16 items-center">
         <div className="mr-4 hidden md:flex">
           <Link href="/" className="mr-6 flex items-center space-x-2">
-            <ShoppingBag className="h-6 w-6" />
+            <StaridesLogo className="h-6 w-auto" />
             <span className="hidden font-bold sm:inline-block">
               Starides
             </span>
@@ -31,7 +32,7 @@ export function Header() {
           </SheetTrigger>
           <SheetContent side="left" className="pr-0">
             <Link href="/" className="mr-6 flex items-center space-x-2">
-              <ShoppingBag className="h-6 w-6" />
+              <StaridesLogo className="h-6 w-auto" />
               <span className="font-bold">Starides</span>
             </Link>
             <div className="my-4 h-[calc(100vh-8rem)] pb-10 pl-6">
