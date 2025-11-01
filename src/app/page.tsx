@@ -1,3 +1,4 @@
+
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/header';
@@ -152,20 +153,24 @@ export default function Home() {
                 Simple, fast, and efficient
               </p>
             </div>
-            <div className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-4">
+            <div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-4">
               {howItWorksSteps.map((item) => (
-                <div
+                <Card
                   key={item.step}
-                  className="flex flex-col items-center text-center"
+                  className="transform text-center transition-transform hover:scale-105 hover:shadow-[8px_8px_16px_#c1c8d0,-8px_-8px_16px_#ffffff] dark:hover:shadow-[8px_8px_16px_#11131a,-8px_-8px_16px_#232734]"
                 >
-                  <div className="neumorphic-flat flex h-20 w-20 items-center justify-center rounded-full border-2 border-primary bg-background text-primary">
-                    <item.icon className="h-10 w-10" />
-                  </div>
-                  <h3 className="mt-5 text-xl font-semibold">{item.title}</h3>
-                  <p className="mt-2 text-muted-foreground">
-                    {item.description}
-                  </p>
-                </div>
+                  <CardHeader className="items-center">
+                    <div className="flex h-20 w-20 items-center justify-center rounded-full neumorphic-pressed text-primary">
+                      <item.icon className="h-10 w-10" />
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <h3 className="text-xl font-semibold">{item.title}</h3>
+                    <p className="mt-2 text-muted-foreground">
+                      {item.description}
+                    </p>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           </div>
