@@ -8,8 +8,8 @@ import {
   Package,
   CreditCard,
   BarChart,
-  Settings,
   Shield,
+  Home,
 } from 'lucide-react';
 
 export default function AdminDashboardLayout({
@@ -20,14 +20,13 @@ export default function AdminDashboardLayout({
   const pathname = usePathname();
 
   const navItems: NavItem[] = [
-    { href: '/admin', label: 'Dashboard', icon: BarChart },
+    { href: '/admin', label: 'Dashboard', icon: Home },
     { href: '/admin/users', label: 'Users', icon: Users },
     { href: '/admin/vendors', label: 'Vendors', icon: Store },
     { href: '/admin/riders', label: 'Riders', icon: Shield },
-    { href: '/admin/products', label: 'Products', icon: Package },
     { href: '/admin/orders', label: 'Orders', icon: Package },
     { href: '/admin/payments', label: 'Payments', icon: CreditCard },
-    { href: '/admin/settings', label: 'Settings', icon: Settings },
+    { href: '/admin/analytics', label: 'Analytics', icon: BarChart },
   ].map((item) => ({ ...item, active: pathname === item.href }));
 
 
@@ -35,7 +34,9 @@ export default function AdminDashboardLayout({
     <DashboardLayout
       navItems={navItems}
       userName="Admin User"
+      userEmail="admin@starides.app"
       userRole="Administrator"
+      isVendor
     >
       {children}
     </DashboardLayout>

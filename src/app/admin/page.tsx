@@ -23,53 +23,43 @@ import {
     Package,
     DollarSign,
     Activity,
+    Bike,
+    CheckCircle,
+    ArrowRight,
   } from 'lucide-react';
-  import {
-    Bar,
-    BarChart,
-    Line,
-    LineChart,
-    ResponsiveContainer,
-    XAxis,
-    YAxis,
-    Tooltip,
-    Legend,
-  } from 'recharts';
+import Link from 'next/link';
   
   const stats = [
     {
-      title: 'Total Revenue',
-      value: '$45,231.89',
-      change: '+20.1% from last month',
-      icon: DollarSign,
-    },
-    {
       title: 'Total Users',
       value: '1,250',
-      change: '+180 since last month',
       icon: Users,
+    },
+    {
+        title: 'Active Vendors',
+        value: '231',
+        icon: Store,
+    },
+    {
+        title: 'Active Riders',
+        value: '89',
+        icon: Bike,
     },
     {
       title: 'Total Orders',
       value: '2,350',
-      change: '+15.2% from last month',
       icon: Package,
     },
     {
-      title: 'Active Vendors',
-      value: '231',
-      change: '+12 since last month',
-      icon: Store,
+      title: 'Completed',
+      value: '2,150',
+      icon: CheckCircle,
     },
-  ];
-  
-  const revenueData = [
-    { name: 'Jan', revenue: 4000 },
-    { name: 'Feb', revenue: 3000 },
-    { name: 'Mar', revenue: 5000 },
-    { name: 'Apr', revenue: 4500 },
-    { name: 'May', revenue: 6000 },
-    { name: 'Jun', revenue: 5500 },
+    {
+        title: 'Revenue',
+        value: '$45,231',
+        icon: DollarSign,
+    },
   ];
   
   const recentOrders = [
@@ -105,20 +95,17 @@ import {
     },
   ];
   
-  type StatusVariant = 'default' | 'secondary' | 'destructive' | 'outline';
-  
-  const getStatusVariant = (status: string): StatusVariant => {
+  const getStatusBadgeColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'delivered':
-        return 'default';
+        return 'bg-green-100 text-green-800';
       case 'shipped':
-        return 'outline';
       case 'processing':
-        return 'secondary';
+        return 'bg-blue-100 text-blue-800';
       case 'canceled':
-        return 'destructive';
+        return 'bg-red-100 text-red-800';
       default:
-        return 'secondary';
+        return 'bg-gray-100 text-gray-800';
     }
   };
   
@@ -132,52 +119,52 @@ import {
           </p>
         </div>
   
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           {stats.map((stat) => (
             <Card key={stat.title}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
+                <CardTitle className="text-sm font-medium text-muted-foreground">{stat.title}</CardTitle>
                 <stat.icon className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stat.value}</div>
-                <p className="text-xs text-muted-foreground">{stat.change}</p>
               </CardContent>
             </Card>
           ))}
         </div>
   
-        <div className="grid gap-6 lg:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Revenue Overview</CardTitle>
-              <CardDescription>Last 6 months performance.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={revenueData}>
-                  <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                  <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickFormatter={(value) => `$${value}`} />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'hsl(var(--background))',
-                      borderColor: 'hsl(var(--border))',
-                    }}
-                  />
-                  <Legend />
-                  <Line
-                    type="monotone"
-                    dataKey="revenue"
-                    stroke="hsl(var(--primary))"
-                    strokeWidth={2}
-                    dot={{ fill: 'hsl(var(--primary))' }}
-                    activeDot={{ r: 8 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-          <Card>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <Card>
+                <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                    <Activity className="h-5 w-5" />
+                    Platform Analytics
+                </CardTitle>
+                <CardDescription>View platform insights and reports</CardDescription>
+                </CardHeader>
+                <CardContent>
+                <Link href="/admin/analytics" className="flex items-center text-sm font-medium text-primary hover:underline">
+                    View Analytics <ArrowRight className="ml-1 h-4 w-4" />
+                </Link>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                    <Package className="h-5 w-5" />
+                    Manage Orders
+                </CardTitle>
+                <CardDescription>25 new orders to process</CardDescription>
+                </CardHeader>
+                <CardContent>
+                <Link href="/admin/orders" className="flex items-center text-sm font-medium text-primary hover:underline">
+                    View Orders <ArrowRight className="ml-1 h-4 w-4" />
+                </Link>
+                </CardContent>
+            </Card>
+        </div>
+        
+        <Card>
             <CardHeader>
               <CardTitle>Recent Orders</CardTitle>
               <CardDescription>A list of the latest platform orders.</CardDescription>
@@ -199,7 +186,7 @@ import {
                       <TableCell>{order.customer}</TableCell>
                       <TableCell className="text-right">${order.amount.toFixed(2)}</TableCell>
                       <TableCell className="text-center">
-                        <Badge variant={getStatusVariant(order.status)}>{order.status}</Badge>
+                        <Badge variant={'outline'} className={`border-none capitalize ${getStatusBadgeColor(order.status)}`}>{order.status}</Badge>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -207,7 +194,6 @@ import {
               </Table>
             </CardContent>
           </Card>
-        </div>
       </div>
     );
   }
