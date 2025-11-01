@@ -22,77 +22,49 @@ import {
     DollarSign,
     Activity,
     CreditCard,
+    Clock,
+    CheckCircle,
+    ArrowRight,
+    Store,
   } from 'lucide-react';
-  import {
-    Line,
-    LineChart,
-    ResponsiveContainer,
-    XAxis,
-    YAxis,
-    Tooltip,
-  } from 'recharts';
+  import Link from 'next/link';
+
   
   const stats = [
     {
-      title: 'Total Revenue',
-      value: '$12,345.67',
-      change: '+12.5% this month',
-      icon: DollarSign,
-    },
-    {
       title: 'Total Orders',
-      value: '542',
-      change: '+8.2% this month',
+      value: '2',
       icon: Package,
     },
     {
-      title: 'Pending Orders',
-      value: '12',
-      change: 'Needs attention',
-      icon: Activity,
+      title: 'Pending',
+      value: '0',
+      icon: Clock,
     },
     {
-      title: 'New Customers',
-      value: '38',
-      change: '+5 this week',
-      icon: Users,
+      title: 'Completed',
+      value: '2',
+      icon: CheckCircle,
+    },
+    {
+      title: 'Revenue',
+      value: '$13,510',
+      icon: DollarSign,
     },
   ];
-  
-  const salesData = [
-    { date: '2023-10-01', sales: 240 },
-    { date: '2023-10-02', sales: 138 },
-    { date: '2023-10-03', sales: 980 },
-    { date: '2023-10-04', sales: 398 },
-    { date: '2023-10-05', sales: 480 },
-    { date: '2023-10-06', sales: 380 },
-    { date: '2023-10-07', sales: 430 },
-  ];
-  
+    
   const recentOrders = [
     {
-      orderId: 'ORD-V001',
-      customer: 'Alice Johnson',
-      amount: 89.99,
-      status: 'Processing',
+      orderId: '#68fdd589',
+      items: 1,
+      amount: 9005.00,
+      status: 'Delivered',
     },
     {
-      orderId: 'ORD-V002',
-      customer: 'Bob Williams',
-      amount: 45.0,
-      status: 'Shipped',
-    },
-    {
-      orderId: 'ORD-V003',
-      customer: 'Charlie Brown',
-      amount: 199.5,
-      status: 'Shipped',
-    },
-    {
-      orderId: 'ORD-V004',
-      customer: 'Diana Prince',
-      amount: 32.75,
-      status: 'Processing',
+      orderId: '#68fdd590',
+      items: 2,
+      amount: 4505.00,
+      status: 'Delivered',
     },
   ];
   
@@ -112,105 +84,100 @@ import {
         return 'secondary';
     }
   };
+
+  const getStatusBadgeColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'delivered':
+        return 'bg-green-100 text-green-800';
+      case 'shipped':
+        return 'bg-blue-100 text-blue-800';
+      case 'processing':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'canceled':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+  
   
   export default function VendorDashboard() {
     return (
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Vendor Dashboard</h1>
-          <p className="text-muted-foreground">
-            Here's an overview of your store's performance.
-          </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">ABU EATS</h1>
+            <div className="flex items-center gap-2 mt-1">
+                <Badge variant="outline" className="border-green-300 bg-green-50 text-green-700">Approved</Badge>
+                <Badge variant="outline" className="border-blue-300 bg-blue-50 text-blue-700">Active</Badge>
+            </div>
+          </div>
         </div>
   
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {stats.map((stat) => (
             <Card key={stat.title}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-                <stat.icon className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-sm font-medium text-muted-foreground">{stat.title}</CardTitle>
+                <stat.icon className="h-5 w-5 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
-                <p className="text-xs text-muted-foreground">{stat.change}</p>
+                <div className="text-3xl font-bold">{stat.value}</div>
               </CardContent>
             </Card>
           ))}
         </div>
   
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
-          <Card className="lg:col-span-3">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <Card>
             <CardHeader>
-              <CardTitle>Sales This Week</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Store className="h-5 w-5" />
+                Manage Products
+              </CardTitle>
+              <CardDescription>1 of 1 products active</CardDescription>
             </CardHeader>
-            <CardContent className="pl-2">
-              <ResponsiveContainer width="100%" height={350}>
-                <LineChart data={salesData}>
-                  <XAxis
-                    dataKey="date"
-                    stroke="hsl(var(--muted-foreground))"
-                    fontSize={12}
-                    tickFormatter={(value) =>
-                      new Date(value).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                      })
-                    }
-                  />
-                  <YAxis
-                    stroke="hsl(var(--muted-foreground))"
-                    fontSize={12}
-                    tickFormatter={(value) => `$${value}`}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'hsl(var(--background))',
-                      borderColor: 'hsl(var(--border))',
-                    }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="sales"
-                    strokeWidth={2}
-                    stroke="hsl(var(--primary))"
-                    dot={false}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+            <CardContent>
+              <Link href="/vendor/products" className="flex items-center text-sm font-medium text-primary hover:underline">
+                View Products <ArrowRight className="ml-1 h-4 w-4" />
+              </Link>
             </CardContent>
           </Card>
-          <Card className="lg:col-span-2">
+           <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Package className="h-5 w-5" />
+                View Orders
+              </CardTitle>
+              <CardDescription>0 pending orders to process</CardDescription>
+            </CardHeader>
+            <CardContent>
+               <Link href="/vendor/orders" className="flex items-center text-sm font-medium text-primary hover:underline">
+                View Orders <ArrowRight className="ml-1 h-4 w-4" />
+              </Link>
+            </CardContent>
+          </Card>
+        </div>
+
+         <Card>
             <CardHeader>
               <CardTitle>Recent Orders</CardTitle>
-              <CardDescription>
-                Your most recent orders that need attention.
-              </CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Customer</TableHead>
-                    <TableHead className="text-center">Status</TableHead>
-                    <TableHead className="text-right">Amount</TableHead>
-                  </TableRow>
-                </TableHeader>
                 <TableBody>
                   {recentOrders.map((order) => (
-                    <TableRow key={order.orderId}>
+                    <TableRow key={order.orderId} className='border-b-border/20'>
                       <TableCell>
-                        <div className="font-medium">{order.customer}</div>
+                        <div className="font-medium">Order {order.orderId}</div>
                         <div className="text-sm text-muted-foreground">
-                          {order.orderId}
+                          {order.items} items &bull; ${order.amount.toFixed(2)}
                         </div>
                       </TableCell>
-                       <TableCell className="text-center">
-                        <Badge variant={getStatusVariant(order.status)}>
+                      <TableCell className="text-right">
+                        <Badge className={`border-none ${getStatusBadgeColor(order.status)}`}>
                           {order.status}
                         </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        ${order.amount.toFixed(2)}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -218,7 +185,6 @@ import {
               </Table>
             </CardContent>
           </Card>
-        </div>
       </div>
     );
   }

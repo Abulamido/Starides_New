@@ -3,10 +3,13 @@
 import { usePathname } from 'next/navigation';
 import { DashboardLayout, type NavItem } from '@/components/dashboard-layout';
 import {
-  LayoutGrid,
+  Home,
   Package,
   DollarSign,
   Settings,
+  BarChart,
+  Star,
+  Store,
 } from 'lucide-react';
 
 export default function VendorDashboardLayout({
@@ -17,9 +20,11 @@ export default function VendorDashboardLayout({
   const pathname = usePathname();
 
   const navItems: NavItem[] = [
-    { href: '/vendor', label: 'Dashboard', icon: LayoutGrid },
-    { href: '/vendor/products', label: 'Products', icon: Package },
+    { href: '/vendor', label: 'Dashboard', icon: Home },
+    { href: '/vendor/products', label: 'Products', icon: Store },
     { href: '/vendor/orders', label: 'Orders', icon: Package },
+    { href: '/vendor/analytics', label: 'Analytics', icon: BarChart },
+    { href: '/vendor/reviews', label: 'Reviews', icon: Star },
     { href: '/vendor/earnings', label: 'Earnings', icon: DollarSign },
     { href: '/vendor/settings', label: 'Settings', icon: Settings },
   ].map((item) => ({...item, active: pathname === item.href}));
@@ -27,8 +32,10 @@ export default function VendorDashboardLayout({
   return (
     <DashboardLayout
       navItems={navItems}
-      userName="Jane Smith"
+      userName="Abubakar Lamido"
+      userEmail="lamido665@gmail.com"
       userRole="Vendor"
+      isVendor
     >
       {children}
     </DashboardLayout>
