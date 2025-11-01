@@ -12,17 +12,18 @@ import {
   CheckCircle,
   MapPin,
   Star,
+  Rocket,
+  PlayCircle,
 } from 'lucide-react';
 import Link from 'next/link';
-import { placeholderImages } from '@/lib/placeholder-images';
+import { StaridesLogo } from '@/components/starides-logo';
 
 export default function Home() {
-  const heroImage = placeholderImages.find((img) => img.id === 'hero-1');
-
   const features = [
     {
       title: 'Secure Payments',
-      description: 'Multiple payment options with bank-level security and encryption.',
+      description:
+        'Multiple payment options with bank-level security and encryption.',
       icon: Shield,
     },
     {
@@ -69,30 +70,46 @@ export default function Home() {
       <Header />
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative h-[60vh] w-full md:h-[70vh]">
-          {heroImage && (
-            <Image
-              src={heroImage.imageUrl}
-              alt={heroImage.description}
-              fill
-              className="object-cover"
-              priority
-              data-ai-hint={heroImage.imageHint}
-            />
-          )}
-          <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/50 to-transparent" />
-          <div className="relative z-10 flex h-full flex-col items-center justify-center text-center">
-            <h1 className="text-4xl font-bold tracking-tighter text-foreground md:text-6xl lg:text-7xl">
-              Starides Unified Marketplace
-            </h1>
-            <p className="mt-4 max-w-2xl text-lg text-foreground/80 md:text-xl">
-              Your one-stop solution for shopping, selling, and delivering.
-            </p>
-            <Button asChild size="lg" className="mt-8">
-              <Link href="/auth">
-                Get Started <ArrowRight className="ml-2" />
-              </Link>
-            </Button>
+        <section className="relative w-full overflow-hidden py-20 md:py-32 lg:py-40">
+          <div className="container mx-auto grid grid-cols-1 items-center gap-12 px-4 md:grid-cols-2 lg:gap-20">
+            <div className="flex flex-col items-start text-left">
+              <div className="neumorphic-flat mb-4 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-primary">
+                <Rocket className="h-4 w-4" />
+                The Future of Delivery
+              </div>
+              <h1 className="text-4xl font-bold tracking-tighter text-foreground sm:text-5xl md:text-6xl lg:text-7xl">
+                Your <span className="text-primary">All-in-One</span>
+                <br />
+                Marketplace Platform
+              </h1>
+              <p className="mt-4 max-w-lg text-lg text-muted-foreground">
+                Connect customers, vendors, and riders in one seamless
+                ecosystem. Real-time tracking, secure payments, and instant
+                delivery at your fingertips.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-4">
+                <Button asChild size="lg">
+                  <Link href="/auth">
+                    Get Started Now <ArrowRight className="ml-2" />
+                  </Link>
+                </Button>
+                <Button asChild size="lg" variant="secondary">
+                  <Link href="#">
+                    <PlayCircle className="mr-2" /> Watch Demo
+                  </Link>
+                </Button>
+              </div>
+            </div>
+            <div className="relative flex h-full min-h-[300px] items-center justify-center">
+              <div className="neumorphic-flat flex h-64 w-full max-w-md items-center justify-center rounded-2xl p-8 md:h-80">
+                <div className="flex items-center gap-4">
+                  <StaridesLogo className="h-24 w-auto text-primary" />
+                  <span className="text-6xl font-bold text-foreground/80">
+                    RIDES
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
