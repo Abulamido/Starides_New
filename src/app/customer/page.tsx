@@ -86,7 +86,7 @@ export default function CustomerDashboard() {
       <div>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
           {isLoading && [...Array(6)].map((_, i) => <VendorCardSkeleton key={i} />)}
-          {!isLoading && vendors && vendors.map((vendor) => (
+          {!isLoading && vendors && vendors.length > 0 && vendors.map((vendor) => (
             <Link key={vendor.id} href={`/customer/vendor/${vendor.id}`}>
               <VendorCard vendor={vendor} />
             </Link>
