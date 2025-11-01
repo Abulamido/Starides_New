@@ -1,10 +1,31 @@
 
+'use client';
 import { AdminRiderCard } from '@/components/admin-rider-card';
-import { mockAdminRiders } from '@/lib/data';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection } from 'firebase/firestore';
+import type { AdminRider } from '@/lib/data';
+import { Skeleton } from '@/components/ui/skeleton';
+
+function RiderCardSkeleton() {
+    return (
+        <div className="p-4 border rounded-lg space-y-2">
+            <Skeleton className="h-5 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
+            <div className="flex gap-2">
+                <Skeleton className="h-6 w-20" />
+                <Skeleton className="h-6 w-20" />
+            </div>
+        </div>
+    )
+}
 
 export default function AdminRidersPage() {
+    const firestore = useFirestore();
+    const ridersQuery = useMemoFirebase(() => firestore ? collection(firestore, 'riders') : null, [firestore]);
+    const { data: riders, isLoading: isLoadingRiders } = useCollection<AdminRider>(ridersQuery);
+
   return (
     <div className="space-y-6">
       <div>
@@ -22,10 +43,16 @@ export default function AdminRidersPage() {
         />
       </div>
        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {mockAdminRiders.map((rider) => (
+          {isLoadingRiders && [...Array(6)].map((_, i) => <RiderCardSkeleton key={i} />)}
+          {riders?.map((rider) => (
             <AdminRiderCard key={rider.id} rider={rider} />
           ))}
         </div>
+        {!isLoadingRiders && riders?.length === 0 && (
+            <div className="text-center text-muted-foreground py-10 col-span-full">
+                <p>No riders found.</p>
+            </div>
+        )}
     </div>
   );
 }

@@ -1,12 +1,57 @@
 
-import { mockVendors } from '@/lib/data';
+'use client';
 import { ProductCard } from '@/components/product-card';
 import Image from 'next/image';
 import { Star, MapPin } from 'lucide-react';
 import { notFound } from 'next/navigation';
+import { useDoc, useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { doc, collection, query, where } from 'firebase/firestore';
+import type { Vendor, Product } from '@/lib/data';
+import { Skeleton } from '@/components/ui/skeleton';
+
+function VendorPageSkeleton() {
+    return (
+        <div className="space-y-8">
+            <Skeleton className="relative h-48 w-full rounded-lg md:h-64" />
+            <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                    <Skeleton className="h-6 w-32" />
+                    <Skeleton className="h-6 w-24" />
+                </div>
+            </div>
+            <div>
+                <Skeleton className="h-8 w-40 mb-6" />
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {[...Array(4)].map((_, i) => (
+                         <div key={i} className="space-y-2">
+                            <Skeleton className="aspect-square w-full" />
+                            <Skeleton className="h-6 w-3/4" />
+                            <Skeleton className="h-6 w-1/4" />
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+}
+
 
 export default function VendorPage({ params }: { params: { id: string } }) {
-  const vendor = mockVendors.find((v) => v.id === params.id);
+  const firestore = useFirestore();
+  
+  const vendorRef = useMemoFirebase(() => firestore ? doc(firestore, 'vendors', params.id) : null, [firestore, params.id]);
+  const { data: vendor, isLoading: isLoadingVendor } = useDoc<Vendor>(vendorRef);
+
+  const productsQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'products'), where('vendorId', '==', params.id));
+  }, [firestore, params.id]);
+  const { data: menu, isLoading: isLoadingMenu } = useCollection<Product>(productsQuery);
+
+
+  if (isLoadingVendor || isLoadingMenu) {
+      return <VendorPageSkeleton />;
+  }
 
   if (!vendor) {
     notFound();
@@ -49,9 +94,9 @@ export default function VendorPage({ params }: { params: { id: string } }) {
 
       <div>
         <h2 className="text-2xl font-bold tracking-tight">Menu</h2>
-        {vendor.menu && vendor.menu.length > 0 ? (
+        {menu && menu.length > 0 ? (
           <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {vendor.menu.map((product) => (
+            {menu.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>

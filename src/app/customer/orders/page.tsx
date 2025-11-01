@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Eye, FileText, Terminal, ShoppingCart } from 'lucide-react';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { useCollection, useFirestore, useUser, useMemoFirebase } from '@/firebase';
 import { collection, query, where, orderBy } from 'firebase/firestore';
 import type { Order } from '@/lib/data';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -54,17 +54,16 @@ const getStatusVariant = (status: string): StatusVariant => {
 
 export default function MyOrdersPage() {
   const firestore = useFirestore();
-  // In a real app, you would get the current user's ID
-  const mockUserId = 'customer-123';
+  const { user, isUserLoading } = useUser();
 
   const ordersQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
+    if (!firestore || !user) return null;
     return query(
       collection(firestore, 'orders'), 
-      where('customerId', '==', mockUserId),
+      where('customerId', '==', user.uid),
       orderBy('orderDate', 'desc')
     );
-  }, [firestore, mockUserId]);
+  }, [firestore, user]);
 
   const { data: orders, isLoading, error } = useCollection<Order>(ordersQuery);
 
@@ -73,6 +72,8 @@ export default function MyOrdersPage() {
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
     return format(date, 'PPP');
   };
+
+  const showLoading = isLoading || isUserLoading;
 
   return (
     <div className="space-y-6">
@@ -107,7 +108,7 @@ export default function MyOrdersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {isLoading && (
+              {showLoading && (
                   <>
                     <OrderRowSkeleton />
                     <OrderRowSkeleton />
@@ -138,7 +139,7 @@ export default function MyOrdersPage() {
               ))}
             </TableBody>
           </Table>
-            {!isLoading && orders?.length === 0 && (
+            {!showLoading && orders?.length === 0 && (
                 <div className="flex flex-col items-center justify-center gap-4 py-16 text-center text-muted-foreground">
                     <ShoppingCart className="h-16 w-16" />
                     <p className="font-semibold">You haven't placed any orders yet.</p>

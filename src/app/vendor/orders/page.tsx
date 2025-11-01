@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { useCollection, useFirestore, useUser, useMemoFirebase } from '@/firebase';
 import { collection, query, where, orderBy } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
@@ -50,17 +50,16 @@ function OrderRowSkeleton() {
 
 export default function VendorOrdersPage() {
   const firestore = useFirestore();
-  // In a real app, you would get the current vendor's ID
-  const mockVendorId = 'vendor-007';
+  const { user, isUserLoading } = useUser();
 
   const ordersQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
+    if (!firestore || !user) return null;
     return query(
         collection(firestore, 'orders'), 
-        where('vendorId', '==', mockVendorId),
+        where('vendorId', '==', user.uid), // Assuming vendor's user.uid is their vendor ID
         orderBy('orderDate', 'desc')
     );
-  }, [firestore, mockVendorId]);
+  }, [firestore, user]);
 
   const { data: orders, isLoading, error } = useCollection<Order>(ordersQuery);
 
@@ -69,6 +68,8 @@ export default function VendorOrdersPage() {
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
     return format(date, 'PPP');
   };
+
+  const showLoading = isLoading || isUserLoading;
   
   return (
     <div className="space-y-6">
@@ -104,7 +105,7 @@ export default function VendorOrdersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {isLoading && (
+              {showLoading && (
                 <>
                   <OrderRowSkeleton />
                   <OrderRowSkeleton />
@@ -124,7 +125,7 @@ export default function VendorOrdersPage() {
             </TableBody>
           </Table>
 
-          {!isLoading && orders?.length === 0 && (
+          {!showLoading && orders?.length === 0 && (
              <div className="flex flex-col items-center justify-center gap-4 py-16 text-center text-muted-foreground">
                 <Package className="h-16 w-16" />
                 <p className="font-semibold">No orders yet.</p>

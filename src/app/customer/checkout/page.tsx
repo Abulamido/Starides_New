@@ -26,6 +26,7 @@ import { useToast } from '@/hooks/use-toast';
 import { placeOrder } from '@/app/actions';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
+import { useUser } from '@/firebase';
 
 export default function CheckoutPage() {
   const { cartItems, cartTotal, clearCart } = useCart();
@@ -33,10 +34,24 @@ export default function CheckoutPage() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('cash');
+  const { user } = useUser();
 
   const handlePlaceOrder = async () => {
+    if (!user) {
+      toast({
+        variant: 'destructive',
+        title: 'Authentication Error',
+        description: 'You must be logged in to place an order.',
+      });
+      return;
+    }
+    if (cartItems.length === 0) return;
+
     setIsLoading(true);
     try {
+      // Assuming all items in cart are from the same vendor for this example
+      const vendorId = cartItems[0].product.vendorId;
+
       await placeOrder({
         items: cartItems.map(item => ({ 
             id: item.product.id, 
@@ -45,6 +60,8 @@ export default function CheckoutPage() {
             price: item.product.price
         })),
         total: cartTotal,
+        customerId: user.uid,
+        vendorId: vendorId,
       });
       
       toast({
@@ -183,7 +200,7 @@ export default function CheckoutPage() {
                 className="w-full"
                 size="lg"
                 onClick={handlePlaceOrder}
-                disabled={isLoading}
+                disabled={isLoading || !user}
               >
                 {isLoading ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

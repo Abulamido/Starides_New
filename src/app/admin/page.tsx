@@ -1,22 +1,62 @@
+
 'use client';
 
 import { AdminVendorCard } from '@/components/admin-vendor-card';
 import { AdminRiderCard } from '@/components/admin-rider-card';
-import { mockAdminVendors, mockAdminRiders } from '@/lib/data';
 import Link from 'next/link';
 import { ArrowRight, Users, Store, Bike, Package, CheckCircle, DollarSign, MapPin, BarChart } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection } from 'firebase/firestore';
+import type { AdminVendor, AdminRider } from '@/lib/data';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const stats = [
-    { title: 'Users', value: '5', icon: Users },
-    { title: 'Active Vendors', value: '13', icon: Store },
-    { title: 'Active Riders', value: '7', icon: Bike },
-    { title: 'Total Orders', value: '11', icon: Package },
-    { title: 'Completed', value: '7', icon: CheckCircle },
-    { title: 'Revenue', value: '₦14K', icon: DollarSign },
+    { title: 'Users', value: '0', icon: Users },
+    { title: 'Active Vendors', value: '0', icon: Store },
+    { title: 'Active Riders', value: '0', icon: Bike },
+    { title: 'Total Orders', value: '0', icon: Package },
+    { title: 'Completed', value: '0', icon: CheckCircle },
+    { title: 'Revenue', value: '₦0', icon: DollarSign },
 ];
 
+function RiderCardSkeleton() {
+    return (
+        <div className="p-4 border rounded-lg space-y-2">
+            <Skeleton className="h-5 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
+            <div className="flex gap-2">
+                <Skeleton className="h-6 w-20" />
+                <Skeleton className="h-6 w-20" />
+            </div>
+        </div>
+    )
+}
+
+function VendorCardSkeleton() {
+     return (
+        <div className="p-4 border rounded-lg space-y-2">
+            <Skeleton className="h-5 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
+            <div className="flex gap-2">
+                <Skeleton className="h-6 w-20" />
+                <Skeleton className="h-6 w-20" />
+            </div>
+        </div>
+    )
+}
+
+
 export default function AdminDashboard() {
+    const firestore = useFirestore();
+
+    const vendorsQuery = useMemoFirebase(() => firestore ? collection(firestore, 'vendors') : null, [firestore]);
+    const { data: vendors, isLoading: isLoadingVendors } = useCollection<AdminVendor>(vendorsQuery);
+
+    const ridersQuery = useMemoFirebase(() => firestore ? collection(firestore, 'riders') : null, [firestore]);
+    const { data: riders, isLoading: isLoadingRiders } = useCollection<AdminRider>(ridersQuery);
+
+
   return (
     <div className="space-y-8">
         <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
@@ -81,7 +121,8 @@ export default function AdminDashboard() {
           </Link>
         </div>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {mockAdminVendors.map((vendor) => (
+          {isLoadingVendors && [...Array(3)].map((_, i) => <VendorCardSkeleton key={i} />)}
+          {vendors?.map((vendor) => (
             <AdminVendorCard key={vendor.id} vendor={vendor} />
           ))}
         </div>
@@ -100,7 +141,8 @@ export default function AdminDashboard() {
           </Link>
         </div>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {mockAdminRiders.map((rider) => (
+          {isLoadingRiders && [...Array(3)].map((_, i) => <RiderCardSkeleton key={i} />)}
+          {riders?.map((rider) => (
             <AdminRiderCard key={rider.id} rider={rider} />
           ))}
         </div>

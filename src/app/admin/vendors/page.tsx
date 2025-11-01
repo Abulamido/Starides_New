@@ -1,10 +1,31 @@
 
+'use client';
 import { AdminVendorCard } from '@/components/admin-vendor-card';
-import { mockAdminVendors } from '@/lib/data';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection } from 'firebase/firestore';
+import type { AdminVendor } from '@/lib/data';
+import { Skeleton } from '@/components/ui/skeleton';
+
+function VendorCardSkeleton() {
+     return (
+        <div className="p-4 border rounded-lg space-y-2">
+            <Skeleton className="h-5 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
+            <div className="flex gap-2">
+                <Skeleton className="h-6 w-20" />
+                <Skeleton className="h-6 w-20" />
+            </div>
+        </div>
+    )
+}
 
 export default function AdminVendorsPage() {
+    const firestore = useFirestore();
+    const vendorsQuery = useMemoFirebase(() => firestore ? collection(firestore, 'vendors') : null, [firestore]);
+    const { data: vendors, isLoading: isLoadingVendors } = useCollection<AdminVendor>(vendorsQuery);
+
   return (
     <div className="space-y-6">
       <div>
@@ -22,10 +43,16 @@ export default function AdminVendorsPage() {
         />
       </div>
        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {mockAdminVendors.map((vendor) => (
+          {isLoadingVendors && [...Array(6)].map((_, i) => <VendorCardSkeleton key={i} />)}
+          {vendors?.map((vendor) => (
             <AdminVendorCard key={vendor.id} vendor={vendor} />
           ))}
         </div>
+        {!isLoadingVendors && vendors?.length === 0 && (
+            <div className="text-center text-muted-foreground py-10 col-span-full">
+                <p>No vendors found.</p>
+            </div>
+        )}
     </div>
   );
 }

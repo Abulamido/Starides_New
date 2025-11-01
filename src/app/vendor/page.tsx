@@ -18,57 +18,20 @@ import {
   } from '@/components/ui/table';
   import { Badge } from '@/components/ui/badge';
   import {
-    Users,
     Package,
     DollarSign,
-    Activity,
-    CreditCard,
     Clock,
     CheckCircle,
     ArrowRight,
     Store,
   } from 'lucide-react';
   import Link from 'next/link';
+import { useCollection, useFirestore, useUser, useMemoFirebase } from '@/firebase';
+import { collection, query, where, orderBy, limit } from 'firebase/firestore';
+import type { Order } from '@/lib/data';
+import { Skeleton } from '@/components/ui/skeleton';
 
-  
-  const stats = [
-    {
-      title: 'Total Orders',
-      value: '2',
-      icon: Package,
-    },
-    {
-      title: 'Pending',
-      value: '0',
-      icon: Clock,
-    },
-    {
-      title: 'Completed',
-      value: '2',
-      icon: CheckCircle,
-    },
-    {
-      title: 'Revenue',
-      value: '₦13,510',
-      icon: DollarSign,
-    },
-  ];
-    
-  const recentOrders = [
-    {
-      orderId: '#68fdd589',
-      items: 1,
-      amount: 9005.00,
-      status: 'Delivered',
-    },
-    {
-      orderId: '#68fdd590',
-      items: 2,
-      amount: 4505.00,
-      status: 'Delivered',
-    },
-  ];
-  
+
   type StatusVariant = 'default' | 'secondary' | 'destructive' | 'outline';
   
   const getStatusVariant = (status: string): StatusVariant => {
@@ -103,11 +66,51 @@ import {
   
   
   export default function VendorDashboard() {
+    const firestore = useFirestore();
+    const { user, isUserLoading } = useUser();
+
+    const ordersQuery = useMemoFirebase(() => {
+        if (!firestore || !user) return null;
+        return query(
+            collection(firestore, 'orders'),
+            where('vendorId', '==', user.uid), // Assuming vendor's user.uid is their vendor ID
+        );
+    }, [firestore, user]);
+
+    const recentOrdersQuery = useMemoFirebase(() => {
+        if (!ordersQuery) return null;
+        return query(ordersQuery, orderBy('orderDate', 'desc'), limit(5));
+    }, [ordersQuery]);
+
+
+    const { data: allOrders, isLoading: isLoadingAll } = useCollection<Order>(ordersQuery);
+    const { data: recentOrders, isLoading: isLoadingRecent } = useCollection<Order>(recentOrdersQuery);
+
+    const stats = useMemo(() => {
+        if (!allOrders) return { total: 0, pending: 0, completed: 0, revenue: 0 };
+        return {
+            total: allOrders.length,
+            pending: allOrders.filter(o => o.status === 'Processing').length,
+            completed: allOrders.filter(o => o.status === 'Delivered').length,
+            revenue: allOrders.reduce((acc, o) => acc + o.totalAmount, 0)
+        }
+    }, [allOrders]);
+    
+    const statCards = [
+        { title: 'Total Orders', value: stats.total, icon: Package },
+        { title: 'Pending', value: stats.pending, icon: Clock },
+        { title: 'Completed', value: stats.completed, icon: CheckCircle },
+        { title: 'Revenue', value: `₦${stats.revenue.toFixed(2)}`, icon: DollarSign },
+    ];
+
+
+    const showLoading = isUserLoading || isLoadingAll || isLoadingRecent;
+
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold">ABU EATS</h1>
+            <h1 className="text-2xl font-bold">{user?.displayName || 'Vendor'}</h1>
             <div className="flex items-center gap-2 mt-1">
                 <Badge variant="outline" className="border-green-300 bg-green-50 text-green-700">Approved</Badge>
                 <Badge variant="outline" className="border-blue-300 bg-blue-50 text-blue-700">Active</Badge>
@@ -116,14 +119,14 @@ import {
         </div>
   
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {stats.map((stat) => (
+          {statCards.map((stat) => (
             <Card key={stat.title}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">{stat.title}</CardTitle>
                 <stat.icon className="h-5 w-5 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold">{stat.value}</div>
+                {showLoading ? <Skeleton className="h-8 w-20" /> : <div className="text-3xl font-bold">{stat.value}</div>}
               </CardContent>
             </Card>
           ))}
@@ -136,7 +139,7 @@ import {
                 <Store className="h-5 w-5" />
                 Manage Products
               </CardTitle>
-              <CardDescription>1 of 1 products active</CardDescription>
+              <CardDescription>View your active products</CardDescription>
             </CardHeader>
             <CardContent>
               <Link href="/vendor/products" className="flex items-center text-sm font-medium text-primary hover:underline">
@@ -150,7 +153,7 @@ import {
                 <Package className="h-5 w-5" />
                 View Orders
               </CardTitle>
-              <CardDescription>0 pending orders to process</CardDescription>
+              <CardDescription>{stats.pending} pending orders to process</CardDescription>
             </CardHeader>
             <CardContent>
                <Link href="/vendor/orders" className="flex items-center text-sm font-medium text-primary hover:underline">
@@ -167,12 +170,15 @@ import {
             <CardContent>
               <Table>
                 <TableBody>
-                  {recentOrders.map((order) => (
-                    <TableRow key={order.orderId} className='border-b-border/20'>
+                  {showLoading && (
+                    <TableRow><TableCell><Skeleton className="h-10 w-full"/></TableCell></TableRow>
+                  )}
+                  {recentOrders?.map((order) => (
+                    <TableRow key={order.id} className='border-b-border/20'>
                       <TableCell>
-                        <div className="font-medium">Order {order.orderId}</div>
+                        <div className="font-medium">Order {order.id.substring(0, 7)}</div>
                         <div className="text-sm text-muted-foreground">
-                          {order.items} items &bull; ₦{order.amount.toFixed(2)}
+                          {order.products.reduce((acc, p) => acc + p.quantity, 0)} items &bull; ₦{order.totalAmount.toFixed(2)}
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
@@ -182,6 +188,13 @@ import {
                       </TableCell>
                     </TableRow>
                   ))}
+                   {!showLoading && recentOrders?.length === 0 && (
+                    <TableRow>
+                        <TableCell className="text-center text-muted-foreground py-10">
+                            No recent orders.
+                        </TableCell>
+                    </TableRow>
+                  )}
                 </TableBody>
               </Table>
             </CardContent>

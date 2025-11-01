@@ -1,4 +1,5 @@
 
+'use client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
@@ -11,17 +12,42 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from "@/components/ui/badge";
+import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
+import { collection } from "firebase/firestore";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const mockUsers = [
-    { id: 'user-001', name: 'John Doe', email: 'john@example.com', role: 'Customer', joined: '2023-10-01' },
-    { id: 'user-002', name: 'Jane Smith', email: 'jane@example.com', role: 'Customer', joined: '2023-10-05' },
-    { id: 'user-003', name: 'Abubakar Lamido', email: 'lamido665@gmail.com', role: 'Admin', joined: '2023-09-15' },
-    { id: 'user-004', name: 'Vendor One', email: 'vendor1@example.com', role: 'Vendor', joined: '2023-09-20' },
-    { id: 'user-005', name: 'Rider One', email: 'rider1@example.com', role: 'Rider', joined: '2023-09-22' },
-];
+type User = {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+    createdAt: any;
+}
 
+
+function UserRowSkeleton() {
+    return (
+        <TableRow>
+            <TableCell><Skeleton className="h-5 w-32" /></TableCell>
+            <TableCell><Skeleton className="h-5 w-48" /></TableCell>
+            <TableCell><Skeleton className="h-5 w-20" /></TableCell>
+            <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+        </TableRow>
+    )
+}
 
 export default function AdminUsersPage() {
+    const firestore = useFirestore();
+    const usersQuery = useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]);
+    const { data: users, isLoading } = useCollection<User>(usersQuery);
+
+    const formatDate = (timestamp: any) => {
+        if (!timestamp) return 'N/A';
+        const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+        return date.toLocaleDateString();
+    };
+
+
   return (
     <div className="space-y-6">
       <div>
@@ -56,14 +82,22 @@ export default function AdminUsersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {mockUsers.map((user) => (
+              {isLoading && [...Array(5)].map((_, i) => <UserRowSkeleton key={i} />)}
+              {users?.map((user) => (
                 <TableRow key={user.id}>
-                  <TableCell className="font-medium">{user.name}</TableCell>
+                  <TableCell className="font-medium">{user.name || `${user.firstName} ${user.lastName}`}</TableCell>
                   <TableCell>{user.email}</TableCell>
                   <TableCell><Badge variant="outline">{user.role}</Badge></TableCell>
-                  <TableCell>{user.joined}</TableCell>
+                  <TableCell>{formatDate(user.createdAt)}</TableCell>
                 </TableRow>
               ))}
+               {!isLoading && users?.length === 0 && (
+                <TableRow>
+                    <TableCell colSpan={4} className="text-center text-muted-foreground py-10">
+                        No users found.
+                    </TableCell>
+                </TableRow>
+               )}
             </TableBody>
           </Table>
         </CardContent>

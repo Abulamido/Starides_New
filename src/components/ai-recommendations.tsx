@@ -1,7 +1,8 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Star, Loader2 } from 'lucide-react';
+import { Star } from 'lucide-react';
 import type { Product } from '@/lib/data';
 import { fetchRecommendations } from '@/app/actions';
 import { ProductCard } from './product-card';
@@ -15,7 +16,13 @@ import {
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { Skeleton } from './ui/skeleton';
 
-export function AiRecommendations() {
+type AiRecommendationsProps = {
+    customerId: string;
+    browsingHistory: string[];
+    purchaseHistory: string[];
+}
+
+export function AiRecommendations({ customerId, browsingHistory, purchaseHistory }: AiRecommendationsProps) {
   const [recommendations, setRecommendations] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +31,7 @@ export function AiRecommendations() {
     async function loadRecommendations() {
       try {
         setLoading(true);
-        const result = await fetchRecommendations();
+        const result = await fetchRecommendations(customerId, browsingHistory, purchaseHistory);
         if (result.error) {
           setError(result.error);
         } else {
@@ -37,7 +44,7 @@ export function AiRecommendations() {
       }
     }
     loadRecommendations();
-  }, []);
+  }, [customerId, browsingHistory, purchaseHistory]);
 
   if (loading) {
     return (
@@ -69,7 +76,15 @@ export function AiRecommendations() {
   }
 
   if (recommendations.length === 0) {
-    return null;
+    return (
+         <div>
+            <h2 className="mb-4 flex items-center text-2xl font-semibold tracking-tight">
+                <Star className="mr-2 h-6 w-6 text-yellow-400" />
+                Just For You
+            </h2>
+            <p className="text-muted-foreground">No recommendations available at this time.</p>
+        </div>
+    );
   }
 
   return (
@@ -81,7 +96,7 @@ export function AiRecommendations() {
       <Carousel
         opts={{
           align: 'start',
-          loop: true,
+          loop: recommendations.length > 1,
         }}
         className="w-full"
       >
