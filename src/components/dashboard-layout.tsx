@@ -62,8 +62,8 @@ function NavLinks({ navItems, isMobile = false }: { navItems: NavItem[], isMobil
 
 function SidebarContent({ navItems, userName, userEmail }: { navItems: NavItem[], userName: string, userEmail?: string }) {
   return (
-    <div className="flex h-full max-h-screen flex-col gap-2">
-      <div className="flex h-16 items-center border-b px-4 lg:h-[60px] lg:px-6">
+    <div className="flex h-full flex-col gap-2">
+      <div className="flex h-16 shrink-0 items-center border-b px-4 lg:h-[60px] lg:px-6">
         <Link href="/" className="flex items-center gap-2 font-semibold text-foreground">
           <StaridesLogo className="h-8 w-auto text-primary" />
           <span className="text-xl font-bold">Starides</span>
@@ -114,7 +114,7 @@ export function DashboardLayout({
 
   if (isVendor) {
     return (
-       <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+       <div className="grid h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
         <div className="hidden border-r bg-background md:block">
            <SidebarContent navItems={navItems} userName={userName} userEmail={userEmail} />
         </div>
@@ -142,7 +142,7 @@ export function DashboardLayout({
              <ThemeToggle />
              <UserNav />
            </header>
-          <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-secondary/40">
+          <main className="flex flex-1 flex-col gap-4 overflow-auto p-4 lg:gap-6 lg:p-6 bg-secondary/40">
             {children}
           </main>
         </div>
