@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -31,7 +32,7 @@ export default function WalletPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-bold">${currentBalance.toFixed(2)}</div>
+            <div className="text-4xl font-bold">₦{currentBalance.toFixed(2)}</div>
             <p className="text-xs text-muted-foreground">+20.1% from last month</p>
           </CardContent>
         </Card>
@@ -74,7 +75,7 @@ export default function WalletPage() {
                               <TableCell className={`text-right font-semibold ${tx.type === 'credit' ? 'text-green-400' : 'text-red-400'}`}>
                                   <div className='flex items-center justify-end gap-2'>
                                   {tx.type === 'credit' ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownLeft className="h-4 w-4" />}
-                                  ${Math.abs(tx.amount).toFixed(2)}
+                                  ₦{Math.abs(tx.amount).toFixed(2)}
                                   </div>
                               </TableCell>
                           </TableRow>

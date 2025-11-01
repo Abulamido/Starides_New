@@ -1,3 +1,4 @@
+
 import { VendorCard } from '@/components/vendor-card';
 import { mockVendors } from '@/lib/data';
 import { Button } from '@/components/ui/button';
@@ -11,6 +12,7 @@ import {
   Laptop,
   Shirt,
 } from 'lucide-react';
+import Link from 'next/link';
 
 const categories = [
   { name: 'All', icon: Store },
@@ -58,7 +60,9 @@ export default function CustomerDashboard() {
       <div>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
           {mockVendors.map((vendor) => (
-            <VendorCard key={vendor.id} vendor={vendor} />
+            <Link key={vendor.id} href={`/customer/vendor/${vendor.id}`}>
+              <VendorCard vendor={vendor} />
+            </Link>
           ))}
         </div>
       </div>

@@ -1,3 +1,4 @@
+
 'use client';
 
 import Image from 'next/image';
@@ -60,7 +61,7 @@ export function ProductCard({ product }: ProductCardProps) {
       </CardContent>
       <CardFooter className="flex items-center justify-between p-4 pt-0">
         <p className="text-lg font-bold">
-          ${product.price.toFixed(2)}
+          ₦{product.price.toFixed(2)}
         </p>
       </CardFooter>
     </Card>

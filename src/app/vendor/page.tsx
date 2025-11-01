@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -48,7 +49,7 @@ import {
     },
     {
       title: 'Revenue',
-      value: '$13,510',
+      value: '₦13,510',
       icon: DollarSign,
     },
   ];
@@ -171,7 +172,7 @@ import {
                       <TableCell>
                         <div className="font-medium">Order {order.orderId}</div>
                         <div className="text-sm text-muted-foreground">
-                          {order.items} items &bull; ${order.amount.toFixed(2)}
+                          {order.items} items &bull; ₦{order.amount.toFixed(2)}
                         </div>
                       </TableCell>
                       <TableCell className="text-right">

@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -102,7 +103,7 @@ export default function MyOrdersPage() {
                     <Badge variant={getStatusVariant(order.status)}>{order.status}</Badge>
                   </TableCell>
                   <TableCell>{order.items}</TableCell>
-                  <TableCell className="text-right">${order.total.toFixed(2)}</TableCell>
+                  <TableCell className="text-right">₦{order.total.toFixed(2)}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                         <Button variant="ghost" size="icon" className="h-8 w-8">

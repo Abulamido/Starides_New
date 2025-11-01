@@ -1,3 +1,4 @@
+
 import { placeholderImages } from './placeholder-images';
 
 export type Product = {
@@ -18,6 +19,7 @@ export type Vendor = {
   category: 'Grocery' | 'Electronics' | 'Restaurant' | 'Fashion' | 'Pharmacy';
   image: string;
   imageHint: string;
+  menu: Product[];
 }
 
 export type AdminVendor = {
@@ -111,6 +113,30 @@ export const mockProducts: Product[] = [
     image: getImageUrl('product-8'),
     imageHint: getImageHint('product-8'),
   },
+  {
+    id: 'prod-009',
+    name: 'Jollof Rice with Chicken',
+    price: 15.00,
+    category: 'Food',
+    image: 'https://picsum.photos/seed/jollof/400/400',
+    imageHint: 'jollof rice',
+  },
+  {
+    id: 'prod-010',
+    name: 'Fried Rice with Plantain',
+    price: 12.00,
+    category: 'Food',
+    image: 'https://picsum.photos/seed/friedrice/400/400',
+    imageHint: 'fried rice',
+  },
+  {
+    id: 'prod-011',
+    name: 'Beef Shawarma',
+    price: 8.00,
+    category: 'Food',
+    image: 'https://picsum.photos/seed/shawarma/400/400',
+    imageHint: 'shawarma wrap',
+  },
 ];
 
 
@@ -124,6 +150,7 @@ export const mockVendors: Vendor[] = [
     category: 'Grocery',
     image: getImageUrl('vendor-grocery'),
     imageHint: getImageHint('vendor-grocery'),
+    menu: [],
   },
   {
     id: 'vendor-002',
@@ -134,6 +161,7 @@ export const mockVendors: Vendor[] = [
     category: 'Electronics',
     image: getImageUrl('vendor-electronics'),
     imageHint: getImageHint('vendor-electronics'),
+    menu: [mockProducts[0], mockProducts[1], mockProducts[2], mockProducts[6]],
   },
   {
     id: 'vendor-003',
@@ -144,6 +172,7 @@ export const mockVendors: Vendor[] = [
     category: 'Restaurant',
     image: getImageUrl('vendor-restaurant'),
     imageHint: getImageHint('vendor-restaurant'),
+    menu: [],
   },
     {
     id: 'vendor-004',
@@ -154,6 +183,7 @@ export const mockVendors: Vendor[] = [
     category: 'Pharmacy',
     image: getImageUrl('vendor-pharmacy'),
     imageHint: getImageHint('vendor-pharmacy'),
+    menu: [],
   },
   {
     id: 'vendor-005',
@@ -164,6 +194,7 @@ export const mockVendors: Vendor[] = [
     category: 'Fashion',
     image: getImageUrl('vendor-fashion'),
     imageHint: getImageHint('vendor-fashion'),
+    menu: [mockProducts[3], mockProducts[4]],
   },
   {
     id: 'vendor-006',
@@ -174,6 +205,18 @@ export const mockVendors: Vendor[] = [
     category: 'Restaurant',
     image: getImageUrl('vendor-restaurant-2'),
     imageHint: getImageHint('vendor-restaurant-2'),
+    menu: [],
+  },
+  {
+    id: 'vendor-007',
+    name: 'ABU EATS',
+    description: 'Delicious Nigerian Dishes.',
+    rating: 4.9,
+    reviewCount: 1024,
+    category: 'Restaurant',
+    image: 'https://picsum.photos/seed/abueats/600/400',
+    imageHint: 'nigerian food',
+    menu: [mockProducts[8], mockProducts[9], mockProducts[10]],
   },
 ];
 

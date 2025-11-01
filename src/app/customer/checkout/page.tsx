@@ -113,7 +113,7 @@ export default function CheckoutPage() {
                     </p>
                   </div>
                   <p className="font-medium">
-                    ${(product.price * quantity).toFixed(2)}
+                    ₦{(product.price * quantity).toFixed(2)}
                   </p>
                 </div>
               ))}
@@ -158,20 +158,20 @@ export default function CheckoutPage() {
             <CardContent className="space-y-4">
               <div className="flex justify-between">
                 <span>Subtotal</span>
-                <span>${cartTotal.toFixed(2)}</span>
+                <span>₦{cartTotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
                 <span>Shipping</span>
-                <span>$0.00</span>
+                <span>₦0.00</span>
               </div>
               <div className="flex justify-between">
                 <span>Taxes</span>
-                <span>$0.00</span>
+                <span>₦0.00</span>
               </div>
               <Separator />
               <div className="flex justify-between text-lg font-bold">
                 <span>Order Total</span>
-                <span>${cartTotal.toFixed(2)}</span>
+                <span>₦{cartTotal.toFixed(2)}</span>
               </div>
             </CardContent>
             <CardFooter>

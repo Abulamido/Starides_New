@@ -54,7 +54,7 @@ export function CartSheet() {
                     <div className="flex-1">
                       <h4 className="font-semibold">{product.name}</h4>
                       <p className="text-sm text-muted-foreground">
-                        ${product.price.toFixed(2)}
+                        ₦{product.price.toFixed(2)}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
@@ -92,7 +92,7 @@ export function CartSheet() {
               <div className="w-full space-y-4">
                 <div className="flex justify-between font-semibold">
                   <span>Subtotal</span>
-                  <span>${cartTotal.toFixed(2)}</span>
+                  <span>₦{cartTotal.toFixed(2)}</span>
                 </div>
                 <Button className="w-full" size="lg" asChild>
                     <Link href="/customer/checkout">

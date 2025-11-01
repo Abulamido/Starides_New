@@ -65,7 +65,7 @@ export async function fetchRecommendations(): Promise<{
 export async function placeOrder(order: {items: any[], total: number, customer: string}) {
     console.log("--- New Order Placed ---");
     console.log("Customer:", order.customer);
-    console.log("Total: $", order.total.toFixed(2));
+    console.log("Total: ₦", order.total.toFixed(2));
     console.log("Items:", order.items.map(i => `${i.id} (x${i.quantity})`).join(', '));
     console.log("------------------------");
     

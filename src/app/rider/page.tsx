@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -38,7 +39,7 @@ import { Label } from '@/components/ui/label';
     },
     {
       title: 'Earnings',
-      value: '$10.00',
+      value: '₦10.00',
       icon: DollarSign,
     },
   ];
@@ -124,7 +125,7 @@ import { Label } from '@/components/ui/label';
                       <TableCell>
                         <div className="font-medium">Delivery {delivery.deliveryId}</div>
                         <div className="text-sm text-muted-foreground">
-                          ${delivery.fee.toFixed(2)} fee
+                          ₦{delivery.fee.toFixed(2)} fee
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
