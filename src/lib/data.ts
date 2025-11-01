@@ -9,6 +9,17 @@ export type Product = {
   imageHint: string;
 };
 
+export type Vendor = {
+  id: string;
+  name: string;
+  description: string;
+  rating: number;
+  reviewCount: number;
+  category: 'Grocery' | 'Electronics' | 'Restaurant' | 'Fashion' | 'Pharmacy';
+  image: string;
+  imageHint: string;
+}
+
 const getImageUrl = (id: string) =>
   placeholderImages.find((img) => img.id === id)?.imageUrl ||
   'https://placehold.co/400x400';
@@ -82,3 +93,67 @@ export const mockProducts: Product[] = [
     imageHint: getImageHint('product-8'),
   },
 ];
+
+
+export const mockVendors: Vendor[] = [
+  {
+    id: 'vendor-001',
+    name: 'Fresh Market Grocery',
+    description: 'Your daily fresh produce and groceries delivered fast',
+    rating: 4.5,
+    reviewCount: 189,
+    category: 'Grocery',
+    image: getImageUrl('vendor-grocery'),
+    imageHint: getImageHint('vendor-grocery'),
+  },
+  {
+    id: 'vendor-002',
+    name: 'TechHub Electronics',
+    description: 'Latest gadgets and electronics at competitive prices',
+    rating: 4.8,
+    reviewCount: 312,
+    category: 'Electronics',
+    image: getImageUrl('vendor-electronics'),
+    imageHint: getImageHint('vendor-electronics'),
+  },
+  {
+    id: 'vendor-003',
+    name: 'Golden Spoon Restaurant',
+    description: 'Premium fine dining experience with international cuisine',
+    rating: 4.7,
+    reviewCount: 234,
+    category: 'Restaurant',
+    image: getImageUrl('vendor-restaurant'),
+    imageHint: getImageHint('vendor-restaurant'),
+  },
+    {
+    id: 'vendor-004',
+    name: 'GreenLeaf Pharmacy',
+    description: 'All your health and wellness needs, delivered to you.',
+    rating: 4.9,
+    reviewCount: 450,
+    category: 'Pharmacy',
+    image: getImageUrl('vendor-pharmacy'),
+    imageHint: getImageHint('vendor-pharmacy'),
+  },
+  {
+    id: 'vendor-005',
+    name: 'Vogue Threads',
+    description: 'The latest trends in fashion and apparel.',
+    rating: 4.6,
+    reviewCount: 288,
+    category: 'Fashion',
+    image: getImageUrl('vendor-fashion'),
+    imageHint: getImageHint('vendor-fashion'),
+  },
+  {
+    id: 'vendor-006',
+    name: 'The Noodle House',
+    description: 'Authentic asian cuisine and noodle dishes.',
+    rating: 4.7,
+    reviewCount: 512,
+    category: 'Restaurant',
+    image: getImageUrl('vendor-restaurant-2'),
+    imageHint: getImageHint('vendor-restaurant-2'),
+  },
+]
