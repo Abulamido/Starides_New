@@ -1,162 +1,143 @@
+'use client';
 
 import {
     Card,
     CardContent,
     CardHeader,
     CardTitle,
-    CardDescription,
-  } from '@/components/ui/card';
-  import { Button } from '@/components/ui/button';
-  import {
+} from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableRow,
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import {
     Bike,
+    Package,
     DollarSign,
-    Star,
-    Clock,
-    MapPin,
     ArrowRight,
-  } from 'lucide-react';
+} from 'lucide-react';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+
   
   const stats = [
     {
-      title: 'Total Earnings',
-      value: '$2,150.50',
-      change: '+$120.00 this week',
-      icon: DollarSign,
+      title: 'Active',
+      value: '0',
+      icon: Package,
     },
     {
-      title: 'Completed Deliveries',
-      value: '142',
-      change: '+15 this week',
+      title: 'Completed',
+      value: '2',
       icon: Bike,
     },
     {
-      title: 'Your Rating',
-      value: '4.9',
-      change: 'Based on 88 reviews',
-      icon: Star,
+      title: 'Earnings',
+      value: '$10.00',
+      icon: DollarSign,
+    },
+  ];
+    
+  const recentDeliveries = [
+    {
+      deliveryId: '#68fdd589',
+      fee: 5.00,
+      status: 'delivered',
     },
     {
-      title: 'Active Time',
-      value: '32h 15m',
-      change: 'this week',
-      icon: Clock,
+      deliveryId: '#68fc9b23',
+      fee: 5.00,
+      status: 'delivered',
     },
   ];
   
-  const availableDeliveries = [
-    {
-      id: 'DEL001',
-      pickup: '123 Main St, Downtown',
-      dropoff: '456 Oak Ave, Suburbia',
-      payout: 15.5,
-      distance: 5.2,
-    },
-    {
-      id: 'DEL002',
-      pickup: '789 Pine Ln, City Center',
-      dropoff: '101 Maple Dr, Uptown',
-      payout: 12.0,
-      distance: 3.1,
-    },
-  ];
-  
-  const ongoingDelivery = {
-    id: 'DEL003',
-    status: 'En route to customer',
-    pickup: '234 Elm St, Industrial Park',
-    dropoff: '567 Birch Rd, Lakeside',
-    eta: '12 minutes',
+  const getStatusBadgeColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'delivered':
+        return 'bg-green-100 text-green-800';
+      case 'en route':
+        return 'bg-blue-100 text-blue-800';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'canceled':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
   };
+  
   
   export default function RiderDashboard() {
     return (
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Rider Dashboard</h1>
-          <p className="text-muted-foreground">
-            Accept new deliveries and track your progress.
-          </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">Rider Dashboard</h1>
+            <p className="text-muted-foreground">Abu</p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Switch id="online-status" />
+            <Label htmlFor="online-status" className="text-green-600 font-medium">Online</Label>
+          </div>
         </div>
   
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {stats.map((stat) => (
             <Card key={stat.title}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-                <stat.icon className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-sm font-medium text-muted-foreground">{stat.title}</CardTitle>
+                <stat.icon className="h-5 w-5 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
-                <p className="text-xs text-muted-foreground">{stat.change}</p>
+                <div className="text-3xl font-bold">{stat.value}</div>
               </CardContent>
             </Card>
           ))}
         </div>
-  
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <Card className="lg:col-span-2">
+
+        <Card>
             <CardHeader>
-              <CardTitle>Available Deliveries</CardTitle>
-              <CardDescription>
-                New delivery jobs available for you to accept.
-              </CardDescription>
+                <CardTitle>View Deliveries</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {availableDeliveries.map((delivery) => (
-                <div
-                  key={delivery.id}
-                  className="flex flex-col items-start gap-4 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between"
-                >
-                  <div className="flex-1 space-y-1">
-                    <p className="font-semibold">
-                      {delivery.pickup} <ArrowRight className="mx-2 inline h-4 w-4" /> {delivery.dropoff}
-                    </p>
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <MapPin className="mr-1 h-3 w-3" /> {delivery.distance} miles
-                      <DollarSign className="ml-4 mr-1 h-3 w-3" /> Payout: ${delivery.payout.toFixed(2)}
-                    </div>
-                  </div>
-                  <Button>Accept</Button>
-                </div>
-              ))}
+            <CardContent>
+              <Link href="/rider/deliveries" className="flex items-center justify-between text-sm text-muted-foreground hover:text-primary">
+                <span>0 active deliveries waiting</span>
+                <ArrowRight className="h-4 w-4" />
+              </Link>
             </CardContent>
           </Card>
-  
-          <Card>
+
+         <Card>
             <CardHeader>
-              <CardTitle>Ongoing Delivery</CardTitle>
-              <CardDescription>Your current active job.</CardDescription>
+              <CardTitle>Recent Deliveries</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-1">
-                <p className="text-sm font-medium leading-none">
-                  {ongoingDelivery.status}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  ETA: {ongoingDelivery.eta}
-                </p>
-              </div>
-              <div className="space-y-2">
-                 <div className="flex items-start gap-2">
-                    <MapPin className="h-4 w-4 text-primary mt-1" />
-                    <div>
-                        <p className="text-xs text-muted-foreground">From</p>
-                        <p className="font-medium">{ongoingDelivery.pickup}</p>
-                    </div>
-                 </div>
-                 <div className="flex items-start gap-2">
-                    <MapPin className="h-4 w-4 text-green-400 mt-1" />
-                    <div>
-                        <p className="text-xs text-muted-foreground">To</p>
-                        <p className="font-medium">{ongoingDelivery.dropoff}</p>
-                    </div>
-                 </div>
-              </div>
-              <Button className="w-full">View Details on Map</Button>
+            <CardContent>
+              <Table>
+                <TableBody>
+                  {recentDeliveries.map((delivery) => (
+                    <TableRow key={delivery.deliveryId} className='border-b-border/20'>
+                      <TableCell>
+                        <div className="font-medium">Delivery {delivery.deliveryId}</div>
+                        <div className="text-sm text-muted-foreground">
+                          ${delivery.fee.toFixed(2)} fee
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Badge variant="outline" className={`border-none capitalize ${getStatusBadgeColor(delivery.status)}`}>
+                          {delivery.status}
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </CardContent>
           </Card>
-        </div>
       </div>
     );
   }
-  

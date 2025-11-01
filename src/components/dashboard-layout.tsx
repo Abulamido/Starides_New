@@ -43,10 +43,10 @@ function NavLinks({ navItems, isMobile = false }: { navItems: NavItem[], isMobil
         <Button
             key={item.href}
             asChild
-            variant="ghost"
+            variant={item.active ? "secondary": "ghost"}
             className={cn(
               'w-full justify-start gap-3 rounded-md px-3 py-2 text-muted-foreground transition-all hover:text-primary',
-              item.active && 'neumorphic-pressed bg-secondary font-semibold text-primary',
+              item.active && 'font-semibold text-primary',
               isMobile ? 'text-base' : 'text-sm'
             )}
           >
@@ -137,16 +137,7 @@ export function DashboardLayout({
               </Sheet>
 
              <div className="w-full flex-1">
-                <form>
-                  <div className="relative">
-                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      type="search"
-                      placeholder="Search..."
-                      className="w-full appearance-none bg-background pl-8 shadow-none md:w-2/3 lg:w-1/3"
-                    />
-                  </div>
-                </form>
+                {/* Optional: Add a search bar or other header content here */}
             </div>
              <ThemeToggle />
              <UserNav />
@@ -159,6 +150,7 @@ export function DashboardLayout({
     );
   }
 
+  // Fallback for non-vendor layouts (customer, etc.)
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
       <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-4 border-b bg-background px-4 md:px-6">
