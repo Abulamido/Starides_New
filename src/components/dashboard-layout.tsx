@@ -114,34 +114,34 @@ export function DashboardLayout({
 
   if (isVendor) {
     return (
-       <div className="grid h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+      <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
         <div className="hidden border-r bg-background md:block">
-           <SidebarContent navItems={navItems} userName={userName} userEmail={userEmail} />
+          <SidebarContent navItems={navItems} userName={userName} userEmail={userEmail} />
         </div>
         <div className="flex flex-col">
-           <header className="flex h-14 items-center gap-4 border-b bg-background px-4 lg:h-[60px] lg:px-6">
-             <Sheet open={open} onOpenChange={setOpen}>
-                <SheetTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="shrink-0 md:hidden"
-                    >
-                      <Menu className="h-5 w-5" />
-                      <span className="sr-only">Toggle navigation menu</span>
-                    </Button>
-                </SheetTrigger>
-                <SheetContent side="left" className="flex flex-col p-0">
-                  <SidebarContent navItems={navItems} userName={userName} userEmail={userEmail} />
-                </SheetContent>
-              </Sheet>
+          <header className="flex h-14 items-center gap-4 border-b bg-background px-4 lg:h-[60px] lg:px-6">
+            <Sheet open={open} onOpenChange={setOpen}>
+              <SheetTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="shrink-0 md:hidden"
+                >
+                  <Menu className="h-5 w-5" />
+                  <span className="sr-only">Toggle navigation menu</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="flex flex-col p-0">
+                <SidebarContent navItems={navItems} userName={userName} userEmail={userEmail} />
+              </SheetContent>
+            </Sheet>
 
-             <div className="w-full flex-1">
-                {/* Optional: Add a search bar or other header content here */}
+            <div className="w-full flex-1">
+              {/* Optional: Add a search bar or other header content here */}
             </div>
-             <ThemeToggle />
-             <UserNav />
-           </header>
+            <ThemeToggle />
+            <UserNav />
+          </header>
           <main className="flex flex-1 flex-col gap-4 overflow-auto p-4 lg:gap-6 lg:p-6 bg-secondary/40">
             {children}
           </main>
