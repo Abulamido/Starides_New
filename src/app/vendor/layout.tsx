@@ -11,6 +11,7 @@ import {
   Star,
   Store,
 } from 'lucide-react';
+import { useUser } from '@/firebase';
 
 export default function VendorDashboardLayout({
   children,
@@ -18,6 +19,7 @@ export default function VendorDashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const { user } = useUser();
 
   const navItems: NavItem[] = [
     { href: '/vendor', label: 'Dashboard', icon: Home },
@@ -32,8 +34,8 @@ export default function VendorDashboardLayout({
   return (
     <DashboardLayout
       navItems={navItems}
-      userName="Abubakar Lamido"
-      userEmail="lamido665@gmail.com"
+      userName={user?.displayName || 'Vendor'}
+      userEmail={user?.email || ''}
       userRole="Vendor"
       isVendor
     >

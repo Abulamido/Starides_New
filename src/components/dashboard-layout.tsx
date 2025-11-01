@@ -15,6 +15,9 @@ import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from './theme-toggle';
 import { Avatar, AvatarFallback } from './ui/avatar';
+import { useUser, useAuth } from '@/firebase';
+import { signOut } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
 
 
 export type NavItem = {
@@ -61,7 +64,16 @@ function NavLinks({ navItems, isMobile = false }: { navItems: NavItem[], isMobil
   );
 }
 
-function SidebarContent({ navItems, userName, userEmail }: { navItems: NavItem[], userName: string, userEmail?: string }) {
+function SidebarContent({ navItems }: { navItems: NavItem[] }) {
+  const { user } = useUser();
+  const auth = useAuth();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    router.push('/auth');
+  };
+
   return (
     <div className="flex h-full flex-col gap-2">
       <div className="flex h-16 shrink-0 items-center border-b px-4 lg:h-[60px] lg:px-6">
@@ -78,11 +90,11 @@ function SidebarContent({ navItems, userName, userEmail }: { navItems: NavItem[]
        <div className="mt-auto border-t p-4">
           <div className="flex items-center gap-3">
               <Avatar className="h-10 w-10 border">
-                 <AvatarFallback>{userName.charAt(0)}</AvatarFallback>
+                 <AvatarFallback>{user?.displayName?.charAt(0) || 'U'}</AvatarFallback>
               </Avatar>
               <div>
-                  <p className="text-sm font-semibold">{userName}</p>
-                  <p className="text-xs text-muted-foreground">{userEmail}</p>
+                  <p className="text-sm font-semibold">{user?.displayName || 'User'}</p>
+                  <p className="text-xs text-muted-foreground">{user?.email}</p>
               </div>
           </div>
           <div className="mt-4 flex items-center justify-between">
@@ -90,11 +102,9 @@ function SidebarContent({ navItems, userName, userEmail }: { navItems: NavItem[]
                   <Dot className="h-6 w-6 animate-pulse" />
                   Live
               </div>
-              <Button variant="ghost" size="sm" asChild>
-                  <Link href="/auth" className="flex items-center gap-2 text-muted-foreground">
-                      <LogOut className="h-4 w-4" />
-                      Logout
-                  </Link>
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="flex items-center gap-2 text-muted-foreground">
+                  <LogOut className="h-4 w-4" />
+                  Logout
               </Button>
           </div>
       </div>
@@ -112,12 +122,25 @@ export function DashboardLayout({
   isVendor = false,
 }: DashboardLayoutProps) {
   const [open, setOpen] = React.useState(false);
+  const { user, isUserLoading } = useUser();
+  const router = useRouter();
+
+  React.useEffect(() => {
+    if (!isUserLoading && !user) {
+      router.push('/auth');
+    }
+  }, [user, isUserLoading, router]);
+
+  if (isUserLoading || !user) {
+      // You can return a loading spinner here
+      return <div className="flex h-screen items-center justify-center">Loading...</div>;
+  }
 
   if (isVendor) {
     return (
       <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
         <div className="hidden border-r bg-background md:block">
-          <SidebarContent navItems={navItems} userName={userName} userEmail={userEmail} />
+          <SidebarContent navItems={navItems} />
         </div>
         <div className="flex flex-col max-h-screen overflow-hidden">
           <header className="flex h-14 items-center gap-4 border-b bg-background px-4 lg:h-[60px] lg:px-6 shrink-0">
@@ -133,7 +156,7 @@ export function DashboardLayout({
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="flex flex-col p-0">
-                <SidebarContent navItems={navItems} userName={userName} userEmail={userEmail} />
+                <SidebarContent navItems={navItems} />
               </SheetContent>
             </Sheet>
 

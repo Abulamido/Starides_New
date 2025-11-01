@@ -13,6 +13,7 @@ import {
   Bike,
   FileText,
 } from 'lucide-react';
+import { useUser } from '@/firebase';
 
 export default function AdminDashboardLayout({
   children,
@@ -20,6 +21,7 @@ export default function AdminDashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const { user } = useUser();
 
   const navItems: NavItem[] = [
     { href: '/admin', label: 'Dashboard', icon: LayoutGrid },
@@ -36,8 +38,8 @@ export default function AdminDashboardLayout({
   return (
     <DashboardLayout
       navItems={navItems}
-      userName="Abubakar Lamido"
-      userEmail="lamido665@gmail.com"
+      userName={user?.displayName || 'Admin'}
+      userEmail={user?.email || ''}
       userRole="Administrator"
       isVendor
     >

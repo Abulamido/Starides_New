@@ -21,6 +21,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Separator } from './ui/separator';
+import { useAuth, useFirestore } from '@/firebase';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { useToast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { Loader2 } from 'lucide-react';
 
 const formSchema = z.object({
   fullName: z.string().min(1, { message: 'Full name is required.' }),
@@ -34,6 +41,12 @@ const formSchema = z.object({
 });
 
 export function SignupForm() {
+  const auth = useAuth();
+  const firestore = useFirestore();
+  const { toast } = useToast();
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -43,9 +56,56 @@ export function SignupForm() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    // Here you would handle form submission, e.g., call a registration API.
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsLoading(true);
+    try {
+      // 1. Create user in Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+      const user = userCredential.user;
+
+      // 2. Update user's profile in Firebase Auth
+      await updateProfile(user, {
+        displayName: values.fullName,
+      });
+
+      // 3. Create user document in Firestore
+      const userDocRef = doc(firestore, 'users', user.uid);
+      await setDoc(userDocRef, {
+        id: user.uid,
+        email: values.email,
+        firstName: values.fullName.split(' ')[0],
+        lastName: values.fullName.split(' ').slice(1).join(' '),
+        role: values.role,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+      
+      // 4. Create role-specific document
+      const roleCollection = values.role + 's'; // e.g., 'customers'
+      const roleDocRef = doc(firestore, roleCollection, user.uid);
+      await setDoc(roleDocRef, {
+          userId: user.uid,
+          id: user.uid,
+          // Add role-specific fields here if needed in the future
+      });
+
+      toast({
+        title: 'Account Created!',
+        description: 'Welcome to Starides.',
+      });
+
+      // 5. Redirect to the correct dashboard
+      router.push(`/${values.role}`);
+
+    } catch (error: any) {
+      console.error('Signup Error:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Signup Failed',
+        description: error.message || 'Could not create your account.',
+      });
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -58,7 +118,7 @@ export function SignupForm() {
             <FormItem>
               <FormLabel>Full Name</FormLabel>
               <FormControl>
-                <Input placeholder="John Doe" {...field} />
+                <Input placeholder="John Doe" {...field} disabled={isLoading} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -71,7 +131,7 @@ export function SignupForm() {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input placeholder="you@example.com" {...field} />
+                <Input placeholder="you@example.com" {...field} disabled={isLoading} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -84,7 +144,7 @@ export function SignupForm() {
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="••••••••" {...field} />
+                <Input type="password" placeholder="••••••••" {...field} disabled={isLoading} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -96,7 +156,7 @@ export function SignupForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel>I am a...</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoading}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select your role" />
@@ -112,7 +172,8 @@ export function SignupForm() {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full">
+        <Button type="submit" className="w-full" disabled={isLoading}>
+          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Create Account
         </Button>
 
@@ -124,10 +185,10 @@ export function SignupForm() {
         </div>
 
         <div className="space-y-2">
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" disabled={isLoading}>
                 Sign up with Google
             </Button>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" disabled={isLoading}>
                 Sign up with Facebook
             </Button>
         </div>

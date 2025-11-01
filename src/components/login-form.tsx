@@ -15,6 +15,12 @@ import {
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import Link from 'next/link';
+import { useAuth } from '@/firebase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { useToast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { Loader2 } from 'lucide-react';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email.' }),
@@ -22,6 +28,11 @@ const formSchema = z.object({
 });
 
 export function LoginForm() {
+  const auth = useAuth();
+  const { toast } = useToast();
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -30,9 +41,25 @@ export function LoginForm() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    // Here you would handle form submission, e.g., call a login API.
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsLoading(true);
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
+      const user = userCredential.user;
+      
+      // A simple redirect to the customer dashboard.
+      // A more robust solution would check the user's role from Firestore.
+      router.push('/customer');
+
+    } catch (error: any) {
+      console.error("Login Error:", error);
+      toast({
+        variant: 'destructive',
+        title: 'Login Failed',
+        description: error.message || 'Invalid email or password.',
+      });
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -45,7 +72,7 @@ export function LoginForm() {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input placeholder="you@example.com" {...field} />
+                <Input placeholder="you@example.com" {...field} disabled={isLoading} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -66,13 +93,14 @@ export function LoginForm() {
                 </Link>
               </div>
               <FormControl>
-                <Input type="password" placeholder="••••••••" {...field} />
+                <Input type="password" placeholder="••••••••" {...field} disabled={isLoading} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full">
+        <Button type="submit" className="w-full" disabled={isLoading}>
+          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Login
         </Button>
 
@@ -84,10 +112,10 @@ export function LoginForm() {
         </div>
 
         <div className="space-y-2">
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" disabled={isLoading}>
                 Login with Google
             </Button>
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full" disabled={isLoading}>
                 Login with Facebook
             </Button>
         </div>

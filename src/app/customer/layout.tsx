@@ -1,4 +1,3 @@
-
 'use client';
 
 import { usePathname } from 'next/navigation';
@@ -10,6 +9,7 @@ import {
   Settings,
   Star,
 } from 'lucide-react';
+import { useUser } from '@/firebase';
 
 export default function CustomerDashboardLayout({
   children,
@@ -17,6 +17,7 @@ export default function CustomerDashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const { user } = useUser();
 
   const navItems: NavItem[] = [
     { href: '/customer', label: 'Browse', icon: LayoutGrid },
@@ -33,7 +34,8 @@ export default function CustomerDashboardLayout({
   return (
     <DashboardLayout
       navItems={navItems}
-      userName="John Doe"
+      userName={user?.displayName || 'Customer'}
+      userEmail={user?.email || ''}
       userRole="Customer"
     >
       {children}
