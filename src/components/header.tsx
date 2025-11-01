@@ -7,6 +7,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu, Search } from 'lucide-react';
 import { StaridesLogo } from './starides-logo';
 import { CartSheet } from './cart-sheet';
+import { ThemeToggle } from './theme-toggle';
 
 export function Header() {
   return (
@@ -58,6 +59,7 @@ export function Header() {
             </form>
           </div>
           <nav className="flex items-center gap-2">
+             <ThemeToggle />
              <Button asChild variant="ghost">
                 <Link href="/auth">Login</Link>
             </Button>

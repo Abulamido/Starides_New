@@ -30,9 +30,9 @@ export function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <Card className="group flex h-full flex-col overflow-hidden border-border/20 transition-all hover:border-primary/60 hover:shadow-lg hover:shadow-primary/10">
+    <Card className="group flex h-full flex-col overflow-hidden transition-all hover:shadow-[8px_8px_16px_#c1c8d0,-8px_-8px_16px_#ffffff] dark:hover:shadow-[8px_8px_16px_#11131a,-8px_-8px_16px_#232734]">
        <CardHeader className="relative p-0">
-        <div className="relative aspect-square w-full">
+        <div className="relative aspect-square w-full overflow-hidden rounded-t-lg">
           <Image
             src={product.image}
             alt={product.name}
@@ -44,6 +44,7 @@ export function ProductCard({ product }: ProductCardProps) {
         </div>
          <Button
           size="icon"
+          variant="secondary"
           className="absolute top-3 right-3 z-10 h-8 w-8 rounded-full bg-background/50 text-foreground backdrop-blur-sm transition-all hover:bg-primary hover:text-primary-foreground group-hover:opacity-100 md:opacity-0"
           onClick={handleAddToCart}
         >

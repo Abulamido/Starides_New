@@ -194,7 +194,7 @@ import {
                 </TableHeader>
                 <TableBody>
                   {recentOrders.map((order) => (
-                    <TableRow key={order.orderId}>
+                    <TableRow key={order.orderId} className='border-b-border/20'>
                       <TableCell className="font-medium">{order.orderId}</TableCell>
                       <TableCell>{order.customer}</TableCell>
                       <TableCell className="text-right">${order.amount.toFixed(2)}</TableCell>

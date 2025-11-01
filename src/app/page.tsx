@@ -16,7 +16,7 @@ export default function Home() {
       <Header />
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative h-[60vh] w-full text-white md:h-[70vh]">
+        <section className="relative h-[60vh] w-full md:h-[70vh]">
           {heroImage && (
             <Image
               src={heroImage.imageUrl}
@@ -27,9 +27,9 @@ export default function Home() {
               data-ai-hint={heroImage.imageHint}
             />
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/50 to-transparent" />
           <div className="relative z-10 flex h-full flex-col items-center justify-center text-center">
-            <h1 className="text-4xl font-bold tracking-tighter md:text-6xl lg:text-7xl">
+            <h1 className="text-4xl font-bold tracking-tighter text-foreground md:text-6xl lg:text-7xl">
               Starides Unified Marketplace
             </h1>
             <p className="mt-4 max-w-2xl text-lg text-foreground/80 md:text-xl">
@@ -50,9 +50,9 @@ export default function Home() {
               A Platform for Everyone
             </h2>
             <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-              <Card className="transform border-border/30 bg-secondary/30 text-center transition-transform hover:scale-105 hover:bg-secondary/50 hover:shadow-xl">
+              <Card className="transform text-center transition-transform hover:scale-105 hover:shadow-[8px_8px_16px_#c1c8d0,-8px_-8px_16px_#ffffff] dark:hover:shadow-[8px_8px_16px_#11131a,-8px_-8px_16px_#232734]">
                 <CardHeader>
-                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full neumorphic-pressed text-primary">
                     <StaridesLogo className="h-8 w-8 text-primary" />
                   </div>
                   <CardTitle className="mt-4 text-2xl font-semibold">
@@ -66,9 +66,9 @@ export default function Home() {
                   </p>
                 </CardContent>
               </Card>
-              <Card className="transform border-border/30 bg-secondary/30 text-center transition-transform hover:scale-105 hover:bg-secondary/50 hover:shadow-xl">
+              <Card className="transform text-center transition-transform hover:scale-105 hover:shadow-[8px_8px_16px_#c1c8d0,-8px_-8px_16px_#ffffff] dark:hover:shadow-[8px_8px_16px_#11131a,-8px_-8px_16px_#232734]">
                 <CardHeader>
-                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full neumorphic-pressed text-primary">
                     <Store className="h-8 w-8" />
                   </div>
                   <CardTitle className="mt-4 text-2xl font-semibold">
@@ -82,9 +82,9 @@ export default function Home() {
                   </p>
                 </CardContent>
               </Card>
-              <Card className="transform border-border/30 bg-secondary/30 text-center transition-transform hover:scale-105 hover:bg-secondary/50 hover:shadow-xl">
+              <Card className="transform text-center transition-transform hover:scale-105 hover:shadow-[8px_8px_16px_#c1c8d0,-8px_-8px_16px_#ffffff] dark:hover:shadow-[8px_8px_16px_#11131a,-8px_-8px_16px_#232734]">
                 <CardHeader>
-                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full neumorphic-pressed text-primary">
                     <Bike className="h-8 w-8" />
                   </div>
                   <CardTitle className="mt-4 text-2xl font-semibold">
@@ -111,7 +111,7 @@ export default function Home() {
             <div className="relative flex flex-col items-center justify-between gap-8 md:flex-row">
               <div className="absolute top-8 left-0 hidden h-1 w-full -translate-y-1/2 bg-border/20 md:block"></div>
               <div className="relative z-10 flex flex-col items-center text-center">
-                <div className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-primary bg-background text-2xl font-bold text-primary">
+                <div className="neumorphic-flat flex h-16 w-16 items-center justify-center rounded-full border-2 border-primary bg-background text-2xl font-bold text-primary">
                   1
                 </div>
                 <h3 className="mt-4 text-xl font-semibold">
@@ -122,7 +122,7 @@ export default function Home() {
                 </p>
               </div>
               <div className="relative z-10 flex flex-col items-center text-center">
-                <div className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-primary bg-background text-2xl font-bold text-primary">
+                <div className="neumorphic-flat flex h-16 w-16 items-center justify-center rounded-full border-2 border-primary bg-background text-2xl font-bold text-primary">
                   2
                 </div>
                 <h3 className="mt-4 text-xl font-semibold">
@@ -133,7 +133,7 @@ export default function Home() {
                 </p>
               </div>
               <div className="relative z-10 flex flex-col items-center text-center">
-                <div className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-primary bg-background text-2xl font-bold text-primary">
+                <div className="neumorphic-flat flex h-16 w-16 items-center justify-center rounded-full border-2 border-primary bg-background text-2xl font-bold text-primary">
                   3
                 </div>
                 <h3 className="mt-4 text-xl font-semibold">

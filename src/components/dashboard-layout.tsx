@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/sheet';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
+import { ThemeToggle } from './theme-toggle';
 
 
 export type NavItem = {
@@ -33,24 +34,26 @@ function NavLinks({ navItems, isMobile = false }: { navItems: NavItem[], isMobil
   return (
     <nav
       className={cn(
-        'flex items-center gap-4 text-sm font-medium',
+        'flex items-center gap-1 text-sm font-medium',
         isMobile && 'flex-col items-start gap-2'
       )}
     >
       {navItems.map((item) => (
-        <Link
-          key={item.href}
-          href={item.href}
-          className={cn(
-            'transition-colors hover:text-primary',
-            item.active ? 'text-primary' : 'text-muted-foreground',
-            isMobile && 'flex items-center gap-2 rounded-md p-2 text-base w-full',
-            isMobile && item.active && 'bg-accent text-accent-foreground'
-          )}
-        >
-          <item.icon className={cn('h-5 w-5', !isMobile && "hidden")} />
-          {item.label}
-        </Link>
+        <Button
+            key={item.href}
+            asChild
+            variant="ghost"
+            className={cn(
+              'transition-colors hover:text-primary justify-start',
+              item.active ? 'neumorphic-active' : 'text-muted-foreground',
+              isMobile && 'flex items-center gap-2 rounded-md p-2 text-base w-full',
+            )}
+          >
+          <Link href={item.href}>
+            <item.icon className={cn('h-5 w-5')} />
+            {item.label}
+          </Link>
+        </Button>
       ))}
     </nav>
   );
@@ -64,8 +67,8 @@ export function DashboardLayout({
 }: DashboardLayoutProps) {
   const [open, setOpen] = React.useState(false);
   return (
-    <div className="flex min-h-screen w-full flex-col">
-      <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
+    <div className="flex min-h-screen w-full flex-col bg-background">
+      <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-4 border-b bg-background px-4 md:px-6">
         <div className="flex items-center gap-2">
             <Link href="/" className="flex items-center gap-2 font-semibold">
                 <StaridesLogo className="h-6 w-6 text-primary" />
@@ -77,7 +80,7 @@ export function DashboardLayout({
             <NavLinks navItems={navItems} />
         </div>
 
-        <div className="ml-auto flex items-center gap-4">
+        <div className="ml-auto flex items-center gap-2">
            <form className="ml-auto flex-1 sm:flex-initial">
               <div className="relative">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -89,6 +92,7 @@ export function DashboardLayout({
               </div>
             </form>
             <CartSheet />
+            <ThemeToggle />
             <UserNav />
         </div>
         

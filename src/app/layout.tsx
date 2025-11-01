@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { CartProvider } from '@/context/cart-context';
+import { ThemeProvider } from '@/components/theme-provider';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
@@ -17,16 +18,23 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} dark`} style={{colorScheme: 'dark'}}>
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true" />
       </head>
       <body className="font-body antialiased">
-        <CartProvider>
-          {children}
-          <Toaster />
-        </CartProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <CartProvider>
+            {children}
+            <Toaster />
+          </CartProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
