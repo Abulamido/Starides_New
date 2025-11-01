@@ -20,6 +20,25 @@ export type Vendor = {
   imageHint: string;
 }
 
+export type AdminVendor = {
+  id: string;
+  name: string;
+  category: string;
+  approvalStatus: 'Pending' | 'Approved';
+  activeStatus: 'Active' | 'Inactive';
+  enabled: boolean;
+}
+
+export type AdminRider = {
+  id: string;
+  name: string;
+  vehicle: 'motorcycle' | 'bike' | 'car';
+  verificationStatus: 'Verified' | 'Unverified';
+  onlineStatus: 'Online' | 'Offline';
+  enabled: boolean;
+}
+
+
 const getImageUrl = (id: string) =>
   placeholderImages.find((img) => img.id === id)?.imageUrl ||
   'https://placehold.co/400x400';
@@ -156,4 +175,22 @@ export const mockVendors: Vendor[] = [
     image: getImageUrl('vendor-restaurant-2'),
     imageHint: getImageHint('vendor-restaurant-2'),
   },
-]
+];
+
+export const mockAdminVendors: AdminVendor[] = [
+    { id: 'v001', name: 'Burger Palace', category: 'restaurant', approvalStatus: 'Pending', activeStatus: 'Active', enabled: true },
+    { id: 'v002', name: 'Fresh Market Grocery', category: 'grocery', approvalStatus: 'Approved', activeStatus: 'Active', enabled: true },
+    { id: 'v003', name: 'TechHub Electronics', category: 'electronics', approvalStatus: 'Approved', activeStatus: 'Active', enabled: true },
+    { id: 'v004', name: 'Golden Spoon Restaurant', category: 'restaurant', approvalStatus: 'Approved', activeStatus: 'Active', enabled: true },
+    { id: 'v005', name: 'Wellness Pharmacy', category: 'pharmacy', approvalStatus: 'Approved', activeStatus: 'Inactive', enabled: false },
+    { id: 'v006', name: 'ABU EATS', category: 'restaurant', approvalStatus: 'Approved', activeStatus: 'Active', enabled: true },
+];
+
+export const mockAdminRiders: AdminRider[] = [
+    { id: 'r001', name: 'Michael Johnson', vehicle: 'motorcycle', verificationStatus: 'Verified', onlineStatus: 'Online', enabled: true },
+    { id: 'r002', name: 'David Martinez', vehicle: 'car', verificationStatus: 'Verified', onlineStatus: 'Offline', enabled: false },
+    { id: 'r003', name: 'Sarah Williams', vehicle: 'bike', verificationStatus: 'Verified', onlineStatus: 'Online', enabled: true },
+    { id: 'r004', name: 'Emma Thompson', vehicle: 'motorcycle', verificationStatus: 'Verified', onlineStatus: 'Offline', enabled: false },
+    { id: 'r005', name: 'Abu', vehicle: 'bike', verificationStatus: 'Verified', onlineStatus: 'Online', enabled: true },
+    { id: 'r006', name: 'James Rodriguez', vehicle: 'motorcycle', verificationStatus: 'Verified', onlineStatus: 'Online', enabled: true },
+];

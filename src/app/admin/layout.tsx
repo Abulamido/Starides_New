@@ -6,10 +6,12 @@ import {
   Users,
   Store,
   Package,
-  CreditCard,
   BarChart,
   Shield,
-  Home,
+  LayoutGrid,
+  MapPin,
+  Bike,
+  FileText,
 } from 'lucide-react';
 
 export default function AdminDashboardLayout({
@@ -20,21 +22,22 @@ export default function AdminDashboardLayout({
   const pathname = usePathname();
 
   const navItems: NavItem[] = [
-    { href: '/admin', label: 'Dashboard', icon: Home },
-    { href: '/admin/users', label: 'Users', icon: Users },
+    { href: '/admin', label: 'Dashboard', icon: LayoutGrid },
+    { href: '/admin/map', label: 'Live Map', icon: MapPin },
     { href: '/admin/vendors', label: 'Vendors', icon: Store },
-    { href: '/admin/riders', label: 'Riders', icon: Shield },
+    { href: '/admin/riders', label: 'Riders', icon: Bike },
+    { href: '/admin/users', label: 'Users', icon: Users },
     { href: '/admin/orders', label: 'Orders', icon: Package },
-    { href: '/admin/payments', label: 'Payments', icon: CreditCard },
     { href: '/admin/analytics', label: 'Analytics', icon: BarChart },
+    { href: '/admin/reports', label: 'Reports', icon: FileText },
   ].map((item) => ({ ...item, active: pathname === item.href }));
 
 
   return (
     <DashboardLayout
       navItems={navItems}
-      userName="Admin User"
-      userEmail="admin@starides.app"
+      userName="Abubakar Lamido"
+      userEmail="lamido665@gmail.com"
       userRole="Administrator"
       isVendor
     >
