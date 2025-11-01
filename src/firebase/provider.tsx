@@ -154,16 +154,19 @@ export const useFirebaseApp = (): FirebaseApp => {
   return firebaseApp;
 };
 
-type MemoFirebase <T> = T & {__memo?: boolean};
+type MemoFirebase<T> = T & {__memo?: boolean};
 
-export function useMemoFirebase<T>(factory: () => T, deps: DependencyList): T | (MemoFirebase<T>) {
+export function useMemoFirebase<T>(factory: () => T, deps: DependencyList): T {
   const memoized = useMemo(factory, deps);
   
-  if(typeof memoized !== 'object' || memoized === null) return memoized;
-  (memoized as MemoFirebase<T>).__memo = true;
+  if (memoized && typeof memoized === 'object') {
+    // This is the critical fix: attaching the __memo property.
+    (memoized as MemoFirebase<T>).__memo = true;
+  }
   
   return memoized;
 }
+
 
 /**
  * Hook specifically for accessing the authenticated user's state.
