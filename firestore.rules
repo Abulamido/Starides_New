@@ -1,3 +1,4 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
@@ -14,12 +15,12 @@ service cloud.firestore {
       return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
     }
 
-    function isCustomer(customerId) {
-      return isOwner(customerId);
+    function isCustomer() {
+      return exists(/databases/$(database)/documents/customers/$(request.auth.uid));
     }
 
-    function isVendor(vendorId) {
-      return isOwner(vendorId);
+    function isVendor() {
+      return exists(/databases/$(database)/documents/vendors/$(request.auth.uid));
     }
 
     match /users/{userId} {
@@ -50,7 +51,12 @@ service cloud.firestore {
     match /orders/{orderId} {
       allow get: if isSignedIn();
       allow list: if isSignedIn() && (
-                    (request.query.limit <= 10 && request.query.keys.hasAny(['customerId', 'vendorId', 'riderId'])) ||
+                    (request.query.limit <= 10 && (
+                        request.query.filters.size() > 0 &&
+                        ('customerId' in request.query.filters[0].field || 
+                         'vendorId' in request.query.filters[0].field ||
+                         'riderId' in request.query.filters[0].field)
+                    )) ||
                     isAdmin()
                   );
       allow create: if isSignedIn();
