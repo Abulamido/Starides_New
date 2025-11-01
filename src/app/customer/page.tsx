@@ -66,7 +66,7 @@ export default function CustomerDashboard() {
         <Input
           type="search"
           placeholder="Search vendors..."
-          className="w-full pl-10 neumorphic-pressed"
+          className="w-full pl-10"
         />
       </div>
 
@@ -75,7 +75,7 @@ export default function CustomerDashboard() {
           <Button
             key={category.name}
             variant={index === 0 ? 'default' : 'secondary'}
-            className={index === 0 ? 'neumorphic-pressed' : ''}
+            className={index !== 0 ? 'neumorphic-flat' : ''}
           >
             <category.icon className="mr-2 h-5 w-5" />
             {category.name}
