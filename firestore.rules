@@ -161,7 +161,9 @@ service cloud.firestore {
      */
     match /orders/{orderId} {
       allow get: if isSignedIn() && (isCustomer(resource.data.customerId) || isVendor(resource.data.vendorId));
-      allow list: if isSignedIn() && (isCustomer(resource.data.customerId) || isVendor(resource.data.vendorId));
+      allow list: if isAdmin() || (isSignedIn() && (request.query.where.size() > 0 && 
+                  (request.query.where[0][0] == 'customerId' || request.query.where[0][0] == 'vendorId') &&
+                   request.query.where[0][2] == request.auth.uid));
       allow create: if isSignedIn() && (isCustomer(request.resource.data.customerId) || isVendor(request.resource.data.vendorId));
       allow update: if isSignedIn() && (isExistingCustomer(resource.data.customerId) || isExistingVendor(resource.data.vendorId));
       allow delete: if isSignedIn() && (isExistingCustomer(resource.data.customerId) || isExistingVendor(resource.data.vendorId));
@@ -225,5 +227,3 @@ service cloud.firestore {
     return isVendor(vendorId) && resource != null;
   }
 }
-
-    
