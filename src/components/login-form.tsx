@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -44,12 +45,12 @@ export function LoginForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, values.email, values.password);
-      const user = userCredential.user;
+      if (!auth) throw new Error("Auth service not available");
+      await signInWithEmailAndPassword(auth, values.email, values.password);
       
-      // A simple redirect to the customer dashboard.
-      // A more robust solution would check the user's role from Firestore.
-      router.push('/customer');
+      // Let the DashboardLayout handle the redirect based on role.
+      // This avoids trying to guess the role on the client.
+      router.push('/customer'); 
 
     } catch (error: any) {
       console.error("Login Error:", error);
@@ -58,6 +59,7 @@ export function LoginForm() {
         title: 'Login Failed',
         description: error.message || 'Invalid email or password.',
       });
+    } finally {
       setIsLoading(false);
     }
   }

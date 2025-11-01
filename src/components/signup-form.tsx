@@ -113,6 +113,7 @@ export function SignupForm() {
         title: 'Signup Failed',
         description: error.message || 'Could not create your account.',
       });
+    } finally {
       setIsLoading(false);
     }
   }

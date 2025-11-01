@@ -70,6 +70,7 @@ function SidebarContent({ navItems }: { navItems: NavItem[] }) {
   const router = useRouter();
 
   const handleLogout = async () => {
+    if (!auth) return;
     await signOut(auth);
     router.push('/auth');
   };
