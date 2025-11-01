@@ -65,7 +65,7 @@ service cloud.firestore {
     }
 
     /**
-     * @description Manages vendor-specific data, ensuring only the associated user can access it.
+     * @description Manages vendor-specific data. Allows public read but write access is restricted.
      * @path /vendors/{vendorId}
      * @allow (create) Authenticated user can create their vendor profile.
      *   Request: { "auth": { "uid": "user_abc" }, "resource": { "data": { "userId": "user_abc", ... } } }
@@ -78,8 +78,8 @@ service cloud.firestore {
      * @principle Enforces document ownership for writes.
      */
     match /vendors/{vendorId} {
-      allow get: if isSignedIn() && isVendorOwner();
-      allow list: if false;
+      allow get: if true;
+      allow list: if true;
       allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
       allow update: if isSignedIn() && isExistingVendorOwner() && request.resource.data.userId == resource.data.userId;
       allow delete: if isSignedIn() && isExistingVendorOwner();
@@ -225,3 +225,5 @@ service cloud.firestore {
     return isVendor(vendorId) && resource != null;
   }
 }
+
+    
