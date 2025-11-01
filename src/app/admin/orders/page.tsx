@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import { collection, query, orderBy } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
@@ -51,11 +51,12 @@ function OrderRowSkeleton() {
 
 export default function AdminOrdersPage() {
   const firestore = useFirestore();
+  const { user, isUserLoading } = useUser();
 
   const ordersQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
+    if (!firestore || !user) return null;
     return query(collection(firestore, 'orders'), orderBy('orderDate', 'desc'));
-  }, [firestore]);
+  }, [firestore, user]);
 
   const { data: orders, isLoading, error } = useCollection<Order>(ordersQuery);
 
@@ -65,6 +66,8 @@ export default function AdminOrdersPage() {
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
     return format(date, 'PPP');
   };
+
+  const showLoading = isLoading || isUserLoading;
   
   return (
     <div className="space-y-6">
@@ -103,7 +106,7 @@ export default function AdminOrdersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {isLoading && (
+              {showLoading && (
                 <>
                     <OrderRowSkeleton />
                     <OrderRowSkeleton />
@@ -125,7 +128,7 @@ export default function AdminOrdersPage() {
             </TableBody>
           </Table>
 
-          {!isLoading && orders?.length === 0 && (
+          {!showLoading && orders?.length === 0 && (
              <div className="text-center text-muted-foreground py-10">
                 <p>No orders have been placed yet.</p>
              </div>
