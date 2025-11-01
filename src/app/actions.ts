@@ -4,6 +4,8 @@
 import { getPersonalizedRecommendations } from '@/ai/flows/personalized-product-recommendations';
 import { mockProducts, type Product } from '@/lib/data';
 import { revalidatePath } from 'next/cache';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { initializeFirebase } from '@/firebase';
 
 // In a real app, customerId, browsingHistory, and purchaseHistory would come from your database
 const MOCK_CUSTOMER_DATA = {
@@ -60,21 +62,40 @@ export async function fetchRecommendations(): Promise<{
   }
 }
 
-// In a real app, this would write to a database.
-// For now, we'll just log it and revalidate paths to show updated UI.
-export async function placeOrder(order: {items: any[], total: number, customer: string}) {
-    console.log("--- New Order Placed ---");
-    console.log("Customer:", order.customer);
-    console.log("Total: ₦", order.total.toFixed(2));
-    console.log("Items:", order.items.map(i => `${i.id} (x${i.quantity})`).join(', '));
-    console.log("------------------------");
+
+// In a real app, you'd get the actual logged-in user ID.
+const MOCK_USER_ID = 'customer-123';
+const MOCK_VENDOR_ID = 'vendor-007'; // Assuming the order is for ABU EATS
+
+export async function placeOrder(order: {
+  items: { id: string; quantity: number; name: string, price: number }[];
+  total: number;
+}) {
+  try {
+    const { firestore } = initializeFirebase();
+
+    // This is a simplified version. A real app would handle items from multiple vendors.
+    const orderData = {
+      customerId: MOCK_USER_ID,
+      vendorId: MOCK_VENDOR_ID,
+      products: order.items,
+      totalAmount: order.total,
+      status: 'Processing',
+      orderDate: serverTimestamp(),
+      deliveryAddress: '123 Main St, Lagos, Nigeria', // Mock address
+    };
     
-    // This is a placeholder for a slow database write
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Revalidate all the paths where order/delivery data is shown
+    const ordersCollection = collection(firestore, 'orders');
+    await addDoc(ordersCollection, orderData);
+
     revalidatePath('/customer/orders');
-    revalidatePath('/admin');
-    revalidatePath('/vendor');
-    revalidatePath('/rider');
+    revalidatePath('/admin/orders');
+    revalidatePath('/vendor/orders');
+    revalidatePath('/rider/deliveries');
+
+  } catch (error) {
+    console.error("Error placing order:", error);
+    // This could be re-thrown to be caught by the client
+    throw new Error("Could not place order.");
+  }
 }

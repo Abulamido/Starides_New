@@ -10,6 +10,18 @@ export type Product = {
   imageHint: string;
 };
 
+export type Order = {
+    id: string;
+    customerId: string;
+    vendorId: string;
+    riderId?: string;
+    products: { id: string; name: string; quantity: number, price: number }[];
+    totalAmount: number;
+    status: 'Processing' | 'Shipped' | 'Delivered' | 'Canceled';
+    orderDate: any; // Using `any` for Firebase Timestamp flexibility
+    deliveryAddress: string;
+  };
+
 export type Vendor = {
   id: string;
   name: string;

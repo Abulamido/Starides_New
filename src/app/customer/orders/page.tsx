@@ -12,46 +12,15 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Eye, FileText } from 'lucide-react';
+import { Eye, FileText, Terminal, ShoppingCart } from 'lucide-react';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, query, where, orderBy } from 'firebase/firestore';
+import type { Order } from '@/lib/data';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { format } from 'date-fns';
 
-const orders = [
-    {
-      id: 'ORD001',
-      date: '2023-10-26',
-      status: 'Delivered',
-      total: 129.98,
-      items: 2,
-    },
-    {
-      id: 'ORD002',
-      date: '2023-10-24',
-      status: 'Shipped',
-      total: 85.00,
-      items: 1,
-    },
-    {
-      id: 'ORD003',
-      date: '2023-10-20',
-      status: 'Processing',
-      total: 499.00,
-      items: 1,
-    },
-    {
-      id: 'ORD004',
-      date: '2023-10-15',
-      status: 'Delivered',
-      total: 270.50,
-      items: 3,
-    },
-    {
-      id: 'ORD005',
-      date: '2023-09-30',
-      status: 'Canceled',
-      total: 99.99,
-      items: 1,
-    },
-  ];
-  
+
 type StatusVariant = 'default' | 'secondary' | 'destructive' | 'outline';
 
 
@@ -70,7 +39,41 @@ const getStatusVariant = (status: string): StatusVariant => {
     }
   };
 
+  function OrderRowSkeleton() {
+    return (
+        <TableRow>
+            <TableCell><Skeleton className="h-5 w-20" /></TableCell>
+            <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+            <TableCell><Skeleton className="h-5 w-20" /></TableCell>
+            <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+            <TableCell className="text-right"><Skeleton className="h-5 w-20" /></TableCell>
+             <TableCell className="text-right"><Skeleton className="h-8 w-20" /></TableCell>
+        </TableRow>
+    )
+}
+
 export default function MyOrdersPage() {
+  const firestore = useFirestore();
+  // In a real app, you would get the current user's ID
+  const mockUserId = 'customer-123';
+
+  const ordersQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(
+      collection(firestore, 'orders'), 
+      where('customerId', '==', mockUserId),
+      orderBy('orderDate', 'desc')
+    );
+  }, [firestore, mockUserId]);
+
+  const { data: orders, isLoading, error } = useCollection<Order>(ordersQuery);
+
+  const formatDate = (timestamp: any) => {
+    if (!timestamp) return 'N/A';
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return format(date, 'PPP');
+  };
+
   return (
     <div className="space-y-6">
         <div>
@@ -80,9 +83,18 @@ export default function MyOrdersPage() {
       <Card>
         <CardHeader>
           <CardTitle>Order History</CardTitle>
-          <CardDescription>A list of your recent orders.</CardDescription>
+          <CardDescription>A real-time list of your recent orders.</CardDescription>
         </CardHeader>
         <CardContent>
+          {error && (
+            <Alert variant="destructive">
+              <Terminal className="h-4 w-4" />
+              <AlertTitle>Error Fetching Orders</AlertTitle>
+              <AlertDescription>
+                There was a problem loading your orders. Please try again later.
+              </AlertDescription>
+            </Alert>
+          )}
           <Table>
             <TableHeader>
               <TableRow>
@@ -95,15 +107,21 @@ export default function MyOrdersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {orders.map((order) => (
+              {isLoading && (
+                  <>
+                    <OrderRowSkeleton />
+                    <OrderRowSkeleton />
+                  </>
+              )}
+              {orders && orders.map((order) => (
                 <TableRow key={order.id}>
-                  <TableCell className="font-medium">{order.id}</TableCell>
-                  <TableCell>{order.date}</TableCell>
+                  <TableCell className="font-medium truncate max-w-20">{order.id}</TableCell>
+                  <TableCell>{formatDate(order.orderDate)}</TableCell>
                   <TableCell>
                     <Badge variant={getStatusVariant(order.status)}>{order.status}</Badge>
                   </TableCell>
-                  <TableCell>{order.items}</TableCell>
-                  <TableCell className="text-right">₦{order.total.toFixed(2)}</TableCell>
+                  <TableCell>{order.products.reduce((acc, p) => acc + p.quantity, 0)}</TableCell>
+                  <TableCell className="text-right">₦{order.totalAmount.toFixed(2)}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                         <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -120,6 +138,13 @@ export default function MyOrdersPage() {
               ))}
             </TableBody>
           </Table>
+            {!isLoading && orders?.length === 0 && (
+                <div className="flex flex-col items-center justify-center gap-4 py-16 text-center text-muted-foreground">
+                    <ShoppingCart className="h-16 w-16" />
+                    <p className="font-semibold">You haven't placed any orders yet.</p>
+                    <p className="text-sm">Start shopping to see your orders here.</p>
+                </div>
+            )}
         </CardContent>
       </Card>
     </div>

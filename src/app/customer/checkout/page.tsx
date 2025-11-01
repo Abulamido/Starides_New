@@ -37,11 +37,14 @@ export default function CheckoutPage() {
   const handlePlaceOrder = async () => {
     setIsLoading(true);
     try {
-      // In a real app, you would pass order details to the action
       await placeOrder({
-        items: cartItems.map(item => ({ id: item.product.id, quantity: item.quantity })),
+        items: cartItems.map(item => ({ 
+            id: item.product.id, 
+            quantity: item.quantity,
+            name: item.product.name,
+            price: item.product.price
+        })),
         total: cartTotal,
-        customer: 'John Doe'
       });
       
       toast({
@@ -56,6 +59,7 @@ export default function CheckoutPage() {
       clearCart();
       router.push('/customer/orders');
     } catch (error) {
+        console.error(error);
       toast({
         variant: 'destructive',
         title: 'Uh oh! Something went wrong.',
