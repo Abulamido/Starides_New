@@ -2,70 +2,8 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    function isSignedIn() {
-      return request.auth != null;
-    }
-    
-    function isOwner(userId) {
-      return request.auth.uid == userId;
-    }
-
-    function isAdmin() {
-      return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
-    }
-
-    function isCustomer() {
-      return exists(/databases/$(database)/documents/customers/$(request.auth.uid));
-    }
-
-    function isVendor() {
-      return exists(/databases/$(database)/documents/vendors/$(request.auth.uid));
-    }
-
-    match /users/{userId} {
-      allow read, write: if isSignedIn() && isOwner(userId) || isAdmin();
-    }
-
-    match /customers/{customerId} {
-      allow read, write: if isSignedIn() && isOwner(customerId) || isAdmin();
-    }
-
-    match /vendors/{vendorId} {
-      allow read, write: if isSignedIn() && isOwner(vendorId) || isAdmin();
-    }
-
-    match /riders/{riderId} {
-      allow read, write: if isSignedIn() && isOwner(riderId) || isAdmin();
-    }
-
-    match /roles_admin/{userId} {
-      allow read, write: if isSignedIn() && isAdmin();
-    }
-
-    match /products/{productId} {
-      allow read: if isSignedIn();
-      allow write: if isSignedIn() && (isVendor(request.resource.data.vendorId) || isAdmin());
-    }
-
-    match /orders/{orderId} {
-      allow get: if isSignedIn();
-      allow list: if isSignedIn() && (
-                    (request.query.limit <= 10 && (
-                        request.query.filters.size() > 0 &&
-                        ('customerId' in request.query.filters[0].field || 
-                         'vendorId' in request.query.filters[0].field ||
-                         'riderId' in request.query.filters[0].field)
-                    )) ||
-                    isAdmin()
-                  );
-      allow create: if isSignedIn();
-      allow update: if isSignedIn();
-      allow delete: if false;
-    }
-
     match /{document=**} {
-      allow read, write: if false;
+      allow read, write: if true;
     }
   }
 }
