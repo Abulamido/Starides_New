@@ -4,7 +4,7 @@ import { ProductCard } from '@/components/product-card';
 import Image from 'next/image';
 import { Star, MapPin } from 'lucide-react';
 import { notFound } from 'next/navigation';
-import { useDoc, useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { useDoc, useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import { doc, collection, query, where } from 'firebase/firestore';
 import type { Vendor, Product } from '@/lib/data';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -38,18 +38,23 @@ function VendorPageSkeleton() {
 
 export default function VendorPage({ params }: { params: { id: string } }) {
   const firestore = useFirestore();
+  const { user, isUserLoading } = useUser();
   
-  const vendorRef = useMemoFirebase(() => firestore ? doc(firestore, 'vendors', params.id) : null, [firestore, params.id]);
+  const vendorRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'vendors', params.id);
+  }, [firestore, user, params.id]);
   const { data: vendor, isLoading: isLoadingVendor } = useDoc<Vendor>(vendorRef);
 
   const productsQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
+    if (!firestore || !user) return null;
     return query(collection(firestore, 'products'), where('vendorId', '==', params.id));
-  }, [firestore, params.id]);
+  }, [firestore, user, params.id]);
   const { data: menu, isLoading: isLoadingMenu } = useCollection<Product>(productsQuery);
 
+  const isLoading = isUserLoading || isLoadingVendor || isLoadingMenu;
 
-  if (isLoadingVendor || isLoadingMenu) {
+  if (isLoading) {
       return <VendorPageSkeleton />;
   }
 

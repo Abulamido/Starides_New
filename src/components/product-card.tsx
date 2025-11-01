@@ -13,6 +13,7 @@ import {
 import { Plus } from 'lucide-react';
 import { useCart } from '@/context/cart-context';
 import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from './ui/skeleton';
 
 type ProductCardProps = {
   product: Product;
@@ -29,6 +30,22 @@ export function ProductCard({ product }: ProductCardProps) {
       description: `${product.name} has been added to your cart.`,
     });
   };
+
+  if (!product) {
+    return (
+      <Card className="group flex h-full flex-col overflow-hidden">
+        <CardHeader className="relative p-0">
+          <Skeleton className="aspect-square w-full" />
+        </CardHeader>
+        <CardContent className="flex flex-1 flex-col justify-between p-4">
+          <Skeleton className="h-5 w-3/4" />
+        </CardContent>
+        <CardFooter className="flex items-center justify-between p-4 pt-0">
+          <Skeleton className="h-6 w-1/4" />
+        </CardFooter>
+      </Card>
+    )
+  }
 
   return (
     <Card className="group flex h-full flex-col overflow-hidden transition-all hover:shadow-[8px_8px_16px_#c1c8d0,-8px_-8px_16px_#ffffff] dark:hover:shadow-[8px_8px_16px_#11131a,-8px_-8px_16px_#232734]">
