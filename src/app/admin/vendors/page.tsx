@@ -3,7 +3,7 @@
 import { AdminVendorCard } from '@/components/admin-vendor-card';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import { collection } from 'firebase/firestore';
 import type { AdminVendor } from '@/lib/data';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -23,8 +23,14 @@ function VendorCardSkeleton() {
 
 export default function AdminVendorsPage() {
     const firestore = useFirestore();
-    const vendorsQuery = useMemoFirebase(() => firestore ? collection(firestore, 'vendors') : null, [firestore]);
+    const { user, isUserLoading } = useUser();
+    const vendorsQuery = useMemoFirebase(() => {
+        if (!firestore || !user) return null;
+        return collection(firestore, 'vendors');
+    }, [firestore, user]);
     const { data: vendors, isLoading: isLoadingVendors } = useCollection<AdminVendor>(vendorsQuery);
+
+    const showLoading = isLoadingVendors || isUserLoading;
 
   return (
     <div className="space-y-6">
@@ -43,12 +49,12 @@ export default function AdminVendorsPage() {
         />
       </div>
        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {isLoadingVendors && [...Array(6)].map((_, i) => <VendorCardSkeleton key={i} />)}
+          {showLoading && [...Array(6)].map((_, i) => <VendorCardSkeleton key={i} />)}
           {vendors?.map((vendor) => (
             <AdminVendorCard key={vendor.id} vendor={vendor} />
           ))}
         </div>
-        {!isLoadingVendors && vendors?.length === 0 && (
+        {!showLoading && vendors?.length === 0 && (
             <div className="text-center text-muted-foreground py-10 col-span-full">
                 <p>No vendors found.</p>
             </div>

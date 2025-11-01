@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -57,6 +58,14 @@ export function SignupForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!firestore || !auth) {
+      toast({
+        variant: 'destructive',
+        title: 'Firebase not initialized',
+        description: 'Please try again later.',
+      });
+      return;
+    }
     setIsLoading(true);
     try {
       // 1. Create user in Firebase Auth

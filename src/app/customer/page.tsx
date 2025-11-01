@@ -14,7 +14,7 @@ import {
   Shirt,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import { collection } from 'firebase/firestore';
 import type { Vendor } from '@/lib/data';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -47,8 +47,14 @@ function VendorCardSkeleton() {
 
 export default function CustomerDashboard() {
     const firestore = useFirestore();
-    const vendorsQuery = useMemoFirebase(() => firestore ? collection(firestore, 'vendors') : null, [firestore]);
+    const { user, isUserLoading } = useUser();
+    const vendorsQuery = useMemoFirebase(() => {
+        if (!firestore || !user) return null;
+        return collection(firestore, 'vendors')
+    }, [firestore, user]);
     const { data: vendors, isLoading } = useCollection<Vendor>(vendorsQuery);
+
+    const showLoading = isLoading || isUserLoading;
 
   return (
     <div className="space-y-8">
@@ -85,14 +91,14 @@ export default function CustomerDashboard() {
 
       <div>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
-          {isLoading && [...Array(6)].map((_, i) => <VendorCardSkeleton key={i} />)}
-          {!isLoading && vendors && vendors.length > 0 && vendors.map((vendor) => (
+          {showLoading && [...Array(6)].map((_, i) => <VendorCardSkeleton key={i} />)}
+          {!showLoading && vendors && vendors.length > 0 && vendors.map((vendor) => (
             <Link key={vendor.id} href={`/customer/vendor/${vendor.id}`}>
               <VendorCard vendor={vendor} />
             </Link>
           ))}
         </div>
-        {!isLoading && vendors?.length === 0 && (
+        {!showLoading && vendors?.length === 0 && (
             <div className="text-center text-muted-foreground py-10 col-span-full">
                 <p>No vendors found.</p>
             </div>

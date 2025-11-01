@@ -12,7 +12,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from "@/components/ui/badge";
-import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
+import { useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase";
 import { collection } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -22,6 +22,8 @@ type User = {
     email: string;
     role: string;
     createdAt: any;
+    firstName: string;
+    lastName: string;
 }
 
 
@@ -38,7 +40,12 @@ function UserRowSkeleton() {
 
 export default function AdminUsersPage() {
     const firestore = useFirestore();
-    const usersQuery = useMemoFirebase(() => firestore ? collection(firestore, 'users') : null, [firestore]);
+    const { user, isUserLoading } = useUser();
+
+    const usersQuery = useMemoFirebase(() => {
+        if (!firestore || !user) return null;
+        return collection(firestore, 'users');
+    }, [firestore, user]);
     const { data: users, isLoading } = useCollection<User>(usersQuery);
 
     const formatDate = (timestamp: any) => {
@@ -47,6 +54,7 @@ export default function AdminUsersPage() {
         return date.toLocaleDateString();
     };
 
+    const showLoading = isLoading || isUserLoading;
 
   return (
     <div className="space-y-6">
@@ -82,7 +90,7 @@ export default function AdminUsersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {isLoading && [...Array(5)].map((_, i) => <UserRowSkeleton key={i} />)}
+              {showLoading && [...Array(5)].map((_, i) => <UserRowSkeleton key={i} />)}
               {users?.map((user) => (
                 <TableRow key={user.id}>
                   <TableCell className="font-medium">{user.name || `${user.firstName} ${user.lastName}`}</TableCell>
@@ -91,7 +99,7 @@ export default function AdminUsersPage() {
                   <TableCell>{formatDate(user.createdAt)}</TableCell>
                 </TableRow>
               ))}
-               {!isLoading && users?.length === 0 && (
+               {!showLoading && users?.length === 0 && (
                 <TableRow>
                     <TableCell colSpan={4} className="text-center text-muted-foreground py-10">
                         No users found.

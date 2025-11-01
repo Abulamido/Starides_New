@@ -3,7 +3,7 @@
 import { AdminRiderCard } from '@/components/admin-rider-card';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import { collection } from 'firebase/firestore';
 import type { AdminRider } from '@/lib/data';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -23,8 +23,14 @@ function RiderCardSkeleton() {
 
 export default function AdminRidersPage() {
     const firestore = useFirestore();
-    const ridersQuery = useMemoFirebase(() => firestore ? collection(firestore, 'riders') : null, [firestore]);
+    const { user, isUserLoading } = useUser();
+    const ridersQuery = useMemoFirebase(() => {
+        if (!firestore || !user) return null;
+        return collection(firestore, 'riders');
+    }, [firestore, user]);
     const { data: riders, isLoading: isLoadingRiders } = useCollection<AdminRider>(ridersQuery);
+
+    const showLoading = isLoadingRiders || isUserLoading;
 
   return (
     <div className="space-y-6">
@@ -43,12 +49,12 @@ export default function AdminRidersPage() {
         />
       </div>
        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {isLoadingRiders && [...Array(6)].map((_, i) => <RiderCardSkeleton key={i} />)}
+          {showLoading && [...Array(6)].map((_, i) => <RiderCardSkeleton key={i} />)}
           {riders?.map((rider) => (
             <AdminRiderCard key={rider.id} rider={rider} />
           ))}
         </div>
-        {!isLoadingRiders && riders?.length === 0 && (
+        {!showLoading && riders?.length === 0 && (
             <div className="text-center text-muted-foreground py-10 col-span-full">
                 <p>No riders found.</p>
             </div>

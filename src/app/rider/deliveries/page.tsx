@@ -34,16 +34,16 @@ function DeliveryRowSkeleton() {
 
 export default function RiderDeliveriesPage() {
   const firestore = useFirestore();
-  const { user } = useUser();
+  const { user, isUserLoading } = useUser();
   const { toast } = useToast();
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
 
 
   // Query for orders that are ready for pickup
   const deliveriesQuery = useMemoFirebase(() => {
-    if (!firestore) return null;
+    if (!firestore || !user) return null;
     return query(collection(firestore, 'orders'), where('status', '==', 'Processing'));
-  }, [firestore]);
+  }, [firestore, user]);
 
   const { data: deliveries, isLoading, error } = useCollection<Order>(deliveriesQuery);
 
@@ -66,6 +66,8 @@ export default function RiderDeliveriesPage() {
         setLoadingStates(prev => ({...prev, [orderId]: false}));
     }
   }
+
+  const showLoading = isLoading || isUserLoading;
 
   return (
     <div className="space-y-6">
@@ -100,7 +102,7 @@ export default function RiderDeliveriesPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {isLoading && (
+              {showLoading && (
                 <>
                   <DeliveryRowSkeleton />
                   <DeliveryRowSkeleton />
@@ -122,7 +124,7 @@ export default function RiderDeliveriesPage() {
             </TableBody>
           </Table>
 
-          {!isLoading && deliveries?.length === 0 && (
+          {!showLoading && deliveries?.length === 0 && (
             <div className="flex flex-col items-center justify-center gap-4 py-16 text-center text-muted-foreground">
                 <Bike className="h-16 w-16" />
                 <p className="font-semibold">No deliveries available right now.</p>

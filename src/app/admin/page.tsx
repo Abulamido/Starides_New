@@ -6,7 +6,7 @@ import { AdminRiderCard } from '@/components/admin-rider-card';
 import Link from 'next/link';
 import { ArrowRight, Users, Store, Bike, Package, CheckCircle, DollarSign, MapPin, BarChart } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import { collection } from 'firebase/firestore';
 import type { AdminVendor, AdminRider } from '@/lib/data';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -49,13 +49,21 @@ function VendorCardSkeleton() {
 
 export default function AdminDashboard() {
     const firestore = useFirestore();
+    const { user, isUserLoading } = useUser();
 
-    const vendorsQuery = useMemoFirebase(() => firestore ? collection(firestore, 'vendors') : null, [firestore]);
+    const vendorsQuery = useMemoFirebase(() => {
+        if (!firestore || !user) return null;
+        return collection(firestore, 'vendors');
+    }, [firestore, user]);
     const { data: vendors, isLoading: isLoadingVendors } = useCollection<AdminVendor>(vendorsQuery);
 
-    const ridersQuery = useMemoFirebase(() => firestore ? collection(firestore, 'riders') : null, [firestore]);
+    const ridersQuery = useMemoFirebase(() => {
+        if (!firestore || !user) return null;
+        return collection(firestore, 'riders');
+    }, [firestore, user]);
     const { data: riders, isLoading: isLoadingRiders } = useCollection<AdminRider>(ridersQuery);
 
+    const showLoading = isLoadingVendors || isLoadingRiders || isUserLoading;
 
   return (
     <div className="space-y-8">
@@ -121,7 +129,7 @@ export default function AdminDashboard() {
           </Link>
         </div>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {isLoadingVendors && [...Array(3)].map((_, i) => <VendorCardSkeleton key={i} />)}
+          {showLoading && [...Array(3)].map((_, i) => <VendorCardSkeleton key={i} />)}
           {vendors?.map((vendor) => (
             <AdminVendorCard key={vendor.id} vendor={vendor} />
           ))}
@@ -141,7 +149,7 @@ export default function AdminDashboard() {
           </Link>
         </div>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {isLoadingRiders && [...Array(3)].map((_, i) => <RiderCardSkeleton key={i} />)}
+          {showLoading && [...Array(3)].map((_, i) => <RiderCardSkeleton key={i} />)}
           {riders?.map((rider) => (
             <AdminRiderCard key={rider.id} rider={rider} />
           ))}
