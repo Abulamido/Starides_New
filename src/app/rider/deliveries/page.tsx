@@ -10,13 +10,16 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import { collection, query, where } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { Bike, Terminal } from 'lucide-react';
+import { Bike, Terminal, Loader2 } from 'lucide-react';
 import type { Order } from '@/lib/data';
 import { Button } from '@/components/ui/button';
+import { updateOrderStatus } from '@/app/actions';
+import { useToast } from '@/hooks/use-toast';
+import { useState } from 'react';
 
 function DeliveryRowSkeleton() {
     return (
@@ -31,15 +34,38 @@ function DeliveryRowSkeleton() {
 
 export default function RiderDeliveriesPage() {
   const firestore = useFirestore();
+  const { user } = useUser();
+  const { toast } = useToast();
+  const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
+
 
   // Query for orders that are ready for pickup
   const deliveriesQuery = useMemoFirebase(() => {
     if (!firestore) return null;
-    // In a real app, you might query for 'Shipped' or a similar status
     return query(collection(firestore, 'orders'), where('status', '==', 'Processing'));
   }, [firestore]);
 
   const { data: deliveries, isLoading, error } = useCollection<Order>(deliveriesQuery);
+
+  const handleAcceptDelivery = async (orderId: string) => {
+    if (!user) return;
+    setLoadingStates(prev => ({...prev, [orderId]: true}));
+    try {
+        await updateOrderStatus(orderId, 'Shipped', user.uid);
+        toast({
+            title: "Delivery Accepted",
+            description: `You are now assigned to order #${orderId.substring(0,7)}.`,
+        });
+    } catch (e) {
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Could not accept delivery. Please try again.",
+        })
+    } finally {
+        setLoadingStates(prev => ({...prev, [orderId]: false}));
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -87,7 +113,9 @@ export default function RiderDeliveriesPage() {
                   <TableCell>ABU EATS</TableCell>
                   <TableCell>{delivery.deliveryAddress}</TableCell>
                   <TableCell className="text-right">
-                    <Button size="sm">Accept</Button>
+                    <Button size="sm" onClick={() => handleAcceptDelivery(delivery.id)} disabled={loadingStates[delivery.id]}>
+                      {loadingStates[delivery.id] ? <Loader2 className="animate-spin" /> : "Accept"}
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}

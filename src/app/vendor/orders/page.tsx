@@ -15,9 +15,13 @@ import { useCollection, useFirestore, useUser, useMemoFirebase } from '@/firebas
 import { collection, query, where, orderBy } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { Package, Terminal } from 'lucide-react';
+import { Package, Terminal, Loader2 } from 'lucide-react';
 import type { Order } from '@/lib/data';
 import { format } from 'date-fns';
+import { Button } from '@/components/ui/button';
+import { useState } from 'react';
+import { updateOrderStatus } from '@/app/actions';
+import { useToast } from '@/hooks/use-toast';
 
 type StatusVariant = 'default' | 'secondary' | 'destructive' | 'outline';
 
@@ -44,6 +48,7 @@ function OrderRowSkeleton() {
             <TableCell><Skeleton className="h-5 w-20" /></TableCell>
             <TableCell><Skeleton className="h-5 w-16" /></TableCell>
             <TableCell className="text-right"><Skeleton className="h-5 w-20" /></TableCell>
+            <TableCell className="text-right"><Skeleton className="h-8 w-24" /></TableCell>
         </TableRow>
     )
 }
@@ -51,6 +56,8 @@ function OrderRowSkeleton() {
 export default function VendorOrdersPage() {
   const firestore = useFirestore();
   const { user, isUserLoading } = useUser();
+  const { toast } = useToast();
+  const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
 
   const ordersQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null;
@@ -68,6 +75,25 @@ export default function VendorOrdersPage() {
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
     return format(date, 'PPP');
   };
+
+  const handleMarkAsShipped = async (orderId: string) => {
+    setLoadingStates(prev => ({ ...prev, [orderId]: true }));
+    try {
+        await updateOrderStatus(orderId, 'Shipped');
+        toast({
+            title: "Order Updated",
+            description: `Order #${orderId.substring(0,7)} marked as shipped.`,
+        });
+    } catch (e) {
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Could not update order status.",
+        });
+    } finally {
+        setLoadingStates(prev => ({ ...prev, [orderId]: false }));
+    }
+  }
 
   const showLoading = isLoadingOrders || isUserLoading;
   
@@ -102,6 +128,7 @@ export default function VendorOrdersPage() {
                 <TableHead>Status</TableHead>
                 <TableHead>Items</TableHead>
                 <TableHead className="text-right">Total</TableHead>
+                <TableHead className="text-right">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -120,6 +147,13 @@ export default function VendorOrdersPage() {
                   </TableCell>
                   <TableCell>{order.products.reduce((acc, p) => acc + p.quantity, 0)}</TableCell>
                   <TableCell className="text-right">₦{order.totalAmount.toFixed(2)}</TableCell>
+                  <TableCell className="text-right">
+                    {order.status === 'Processing' && (
+                        <Button size="sm" onClick={() => handleMarkAsShipped(order.id)} disabled={loadingStates[order.id]}>
+                            {loadingStates[order.id] ? <Loader2 className="animate-spin" /> : 'Mark as Shipped'}
+                        </Button>
+                    )}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

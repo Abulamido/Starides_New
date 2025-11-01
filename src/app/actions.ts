@@ -4,7 +4,7 @@
 import { getPersonalizedRecommendations } from '@/ai/flows/personalized-product-recommendations';
 import { type Product } from '@/lib/data';
 import { revalidatePath } from 'next/cache';
-import { collection, addDoc, serverTimestamp, getDocs } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { initializeFirebase } from '@/firebase';
 
 export async function fetchRecommendations(
@@ -74,4 +74,27 @@ export async function placeOrder(order: {
     // This could be re-thrown to be caught by the client
     throw new Error("Could not place order.");
   }
+}
+
+export async function updateOrderStatus(orderId: string, status: 'Processing' | 'Shipped' | 'Delivered' | 'Canceled', riderId?: string) {
+    try {
+        const { firestore } = initializeFirebase();
+        const orderRef = doc(firestore, 'orders', orderId);
+
+        const updateData: { status: string; riderId?: string } = { status };
+        if (riderId) {
+            updateData.riderId = riderId;
+        }
+
+        await updateDoc(orderRef, updateData);
+
+        revalidatePath('/customer/orders');
+        revalidatePath('/admin/orders');
+        revalidatePath('/vendor/orders');
+        revalidatePath('/rider/deliveries');
+
+    } catch (error) {
+        console.error("Error updating order status:", error);
+        throw new Error("Could not update order status.");
+    }
 }

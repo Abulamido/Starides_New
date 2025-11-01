@@ -1,3 +1,4 @@
+
 'use client';
 
 import { usePathname } from 'next/navigation';
@@ -10,6 +11,7 @@ import {
   Star,
 } from 'lucide-react';
 import { useUser } from '@/firebase';
+import { OrderStatusListener } from '@/components/order-status-listener';
 
 export default function CustomerDashboardLayout({
   children,
@@ -38,6 +40,7 @@ export default function CustomerDashboardLayout({
       userEmail={user?.email || ''}
       userRole="Customer"
     >
+      {user && <OrderStatusListener customerId={user.uid} />}
       {children}
     </DashboardLayout>
   );
