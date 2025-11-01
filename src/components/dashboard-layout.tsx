@@ -1,3 +1,4 @@
+
 import React from 'react';
 import Link from 'next/link';
 import { Input } from '@/components/ui/input';
@@ -116,7 +117,9 @@ export function DashboardLayout({
     return (
       <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
         <div className="hidden border-r bg-background md:block">
-          <SidebarContent navItems={navItems} userName={userName} userEmail={userEmail} />
+          <div className="fixed flex h-full w-[220px] flex-col lg:w-[280px]">
+            <SidebarContent navItems={navItems} userName={userName} userEmail={userEmail} />
+          </div>
         </div>
         <div className="flex flex-col">
           <header className="flex h-14 items-center gap-4 border-b bg-background px-4 lg:h-[60px] lg:px-6">
