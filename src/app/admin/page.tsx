@@ -4,11 +4,70 @@ import { AdminVendorCard } from '@/components/admin-vendor-card';
 import { AdminRiderCard } from '@/components/admin-rider-card';
 import { mockAdminVendors, mockAdminRiders } from '@/lib/data';
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Users, Store, Bike, Package, CheckCircle, DollarSign, MapPin, BarChart } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+
+const stats = [
+    { title: 'Users', value: '5', icon: Users },
+    { title: 'Active Vendors', value: '13', icon: Store },
+    { title: 'Active Riders', value: '7', icon: Bike },
+    { title: 'Total Orders', value: '11', icon: Package },
+    { title: 'Completed', value: '7', icon: CheckCircle },
+    { title: 'Revenue', value: '₦14K', icon: DollarSign },
+];
 
 export default function AdminDashboard() {
   return (
     <div className="space-y-8">
+        <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
+
+        <section>
+            <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-6">
+                {stats.map((stat) => (
+                <Card key={stat.title}>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
+                    <stat.icon className="h-5 w-5 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                    <div className="text-2xl font-bold">{stat.value}</div>
+                    </CardContent>
+                </Card>
+                ))}
+            </div>
+        </section>
+
+        <section className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <Card className="flex flex-col justify-between">
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <MapPin className="h-5 w-5" />
+                        Live Map
+                    </CardTitle>
+                    <CardDescription>Track riders and deliveries in real-time</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Link href="/admin/map" className="flex items-center text-sm font-medium text-primary hover:underline">
+                        View Live Map <ArrowRight className="ml-1 h-4 w-4" />
+                    </Link>
+                </CardContent>
+            </Card>
+            <Card className="flex flex-col justify-between">
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <BarChart className="h-5 w-5" />
+                        Analytics
+                    </CardTitle>
+                    <CardDescription>View platform insights and reports</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Link href="/admin/analytics" className="flex items-center text-sm font-medium text-primary hover:underline">
+                        View Analytics <ArrowRight className="ml-1 h-4 w-4" />
+                    </Link>
+                </CardContent>
+            </Card>
+        </section>
+
       <section>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-semibold tracking-tight">
