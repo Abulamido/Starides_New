@@ -7,9 +7,11 @@ import {
   Card,
   CardContent,
   CardHeader,
+  CardFooter
 } from '@/components/ui/card';
 import { Star, MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Skeleton } from './ui/skeleton';
 
 
 type VendorCardProps = {
@@ -17,10 +19,31 @@ type VendorCardProps = {
 };
 
 export function VendorCard({ vendor }: VendorCardProps) {
-  const getCategoryIcon = () => {
-    // In a real app, you might have a more robust way to map categories to icons
-    return <MapPin className="h-4 w-4" />;
-  };
+  if (!vendor || !vendor.image) {
+    return (
+      <Card className="group flex h-full flex-col overflow-hidden">
+        <CardHeader className="relative p-0">
+          <Skeleton className="aspect-video w-full" />
+        </CardHeader>
+        <CardContent className="flex flex-1 flex-col justify-between p-4">
+          <div className="space-y-2">
+            <Skeleton className="h-5 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
+          </div>
+        </CardContent>
+        <CardFooter className="flex items-center justify-between p-4 pt-0">
+           <div className="flex items-center gap-1">
+              <Skeleton className="h-4 w-4 rounded-full" />
+              <Skeleton className="h-4 w-10" />
+            </div>
+             <div className="flex items-center gap-1">
+                <Skeleton className="h-4 w-4 rounded-full" />
+                <Skeleton className="h-4 w-12" />
+            </div>
+        </CardFooter>
+      </Card>
+    )
+  }
 
   return (
     <Card className="group flex h-full flex-col overflow-hidden transition-all neumorphic-flat hover:shadow-[8px_8px_16px_#c1c8d0,-8px_-8px_16px_#ffffff] dark:hover:shadow-[8px_8px_16px_#11131a,-8px_-8px_16px_#232734]">
