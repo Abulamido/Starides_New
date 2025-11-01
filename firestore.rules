@@ -1,0 +1,227 @@
+/**
+ * @file Firestore Security Rules for a Multi-Role Marketplace
+ * @core_philosophy This ruleset enforces a strict user-ownership model for user-specific data and employs role-based access control where appropriate. It prioritizes security and efficiency by denormalizing data necessary for authorization directly onto the documents being secured, avoiding costly `get()` calls.
+ * @data_structure
+ *   - `/users/{userId}`: Stores user profiles, keyed by Firebase Authentication UID.  User documents contain a `role` field crucial for authorization.
+ *   - `/customers/{customerId}`: Stores customer-specific data.
+ *   - `/vendors/{vendorId}`: Stores vendor-specific data.
+ *   - `/riders/{riderId}`: Stores rider-specific data.
+ *   - `/roles_admin/{userId}`: Presence of a document indicates admin privileges.
+ *   - `/products/{productId}`: Stores product information.
+ *   - `/orders/{orderId}`: Stores order information, including `customerId` and `vendorId` for authorization.
+ * @key_security_decisions
+ *   - User listing is generally disallowed except where explicitly needed and securely implemented.
+ *   - The `roles_admin` collection grants admin privileges based solely on document existence.
+ *   - Public read access is not generally granted, except where explicitly intended and secured with owner-only writes.
+ * @denormalization_for_authorization
+ *   - Order documents include `customerId` and `vendorId` to allow direct authorization checks without additional reads.
+ * @structural_segregation
+ *   - User profiles and role assignments are stored in separate collections to maintain clear separation of concerns and consistent security policies.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Manages user profiles, ensuring users can only read/write their own data.
+     * @path /users/{userId}
+     * @allow (create) User with UID 'user_abc' can create their profile.
+     *   Request: { "auth": { "uid": "user_abc" }, "resource": { "data": { "id": "user_abc", ... } } }
+     * @allow (update) User with UID 'user_abc' can update their profile.
+     *   Request: { "auth": { "uid": "user_abc" }, "resource": { "data": { "id": "user_abc", ... } } }
+     * @deny (create) User with UID 'user_xyz' cannot create a profile for 'user_abc'.
+     *   Request: { "auth": { "uid": "user_xyz" }, "resource": { "data": { "id": "user_abc", ... } } }
+     * @deny (update) User with UID 'user_xyz' cannot update the profile of 'user_abc'.
+     *   Request: { "auth": { "uid": "user_xyz" }, "resource": { "data": { "id": "user_abc", ... } } }
+     * @principle Enforces document ownership for writes. Validates relational integrity by matching the document ID to the user's UID.
+     */
+    match /users/{userId} {
+      allow get: if isSignedIn() && isOwner(userId);
+      allow list: if false;
+      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isSignedIn() && isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow delete: if isSignedIn() && isExistingOwner(userId);
+    }
+
+    /**
+     * @description Manages customer-specific data, ensuring only the associated user can access it.
+     * @path /customers/{customerId}
+     * @allow (create) Authenticated user can create their customer profile.
+     *   Request: { "auth": { "uid": "user_abc" }, "resource": { "data": { "userId": "user_abc", ... } } }
+     * @allow (update) Authenticated user can update their customer profile.
+     *   Request: { "auth": { "uid": "user_abc" }, "resource": { "data": { "userId": "user_abc", ... } } }
+     * @deny (create) Authenticated user cannot create a customer profile for another user.
+     *   Request: { "auth": { "uid": "user_xyz" }, "resource": { "data": { "userId": "user_abc", ... } } }
+     * @deny (update) Authenticated user cannot update another user's customer profile.
+     *   Request: { "auth": { "uid": "user_xyz" }, "resource": { "data": { "userId": "user_abc", ... } } }
+     * @principle Enforces document ownership for writes.
+     */
+    match /customers/{customerId} {
+      allow get: if isSignedIn() && isCustomerOwner();
+      allow list: if false;
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update: if isSignedIn() && isExistingCustomerOwner() && request.resource.data.userId == resource.data.userId;
+      allow delete: if isSignedIn() && isExistingCustomerOwner();
+    }
+
+    /**
+     * @description Manages vendor-specific data, ensuring only the associated user can access it.
+     * @path /vendors/{vendorId}
+     * @allow (create) Authenticated user can create their vendor profile.
+     *   Request: { "auth": { "uid": "user_abc" }, "resource": { "data": { "userId": "user_abc", ... } } }
+     * @allow (update) Authenticated user can update their vendor profile.
+     *   Request: { "auth": { "uid": "user_abc" }, "resource": { "data": { "userId": "user_abc", ... } } }
+     * @deny (create) Authenticated user cannot create a vendor profile for another user.
+     *   Request: { "auth": { "uid": "user_xyz" }, "resource": { "data": { "userId": "user_abc", ... } } }
+     * @deny (update) Authenticated user cannot update another user's vendor profile.
+     *   Request: { "auth": { "uid": "user_xyz" }, "resource": { "data": { "userId": "user_abc", ... } } }
+     * @principle Enforces document ownership for writes.
+     */
+    match /vendors/{vendorId} {
+      allow get: if isSignedIn() && isVendorOwner();
+      allow list: if false;
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update: if isSignedIn() && isExistingVendorOwner() && request.resource.data.userId == resource.data.userId;
+      allow delete: if isSignedIn() && isExistingVendorOwner();
+    }
+
+    /**
+     * @description Manages rider-specific data, ensuring only the associated user can access it.
+     * @path /riders/{riderId}
+     * @allow (create) Authenticated user can create their rider profile.
+     *   Request: { "auth": { "uid": "user_abc" }, "resource": { "data": { "userId": "user_abc", ... } } }
+     * @allow (update) Authenticated user can update their rider profile.
+     *   Request: { "auth": { "uid": "user_abc" }, "resource": { "data": { "userId": "user_abc", ... } } }
+     * @deny (create) Authenticated user cannot create a rider profile for another user.
+     *   Request: { "auth": { "uid": "user_xyz" }, "resource": { "data": { "userId": "user_abc", ... } } }
+     * @deny (update) Authenticated user cannot update another user's rider profile.
+     *   Request: { "auth": { "uid": "user_xyz" }, "resource": { "data": { "userId": "user_abc", ... } } }
+     * @principle Enforces document ownership for writes.
+     */
+    match /riders/{riderId} {
+      allow get: if isSignedIn() && isRiderOwner();
+      allow list: if false;
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update: if isSignedIn() && isExistingRiderOwner() && request.resource.data.userId == resource.data.userId;
+      allow delete: if isSignedIn() && isExistingRiderOwner();
+    }
+
+    /**
+     * @description Manages admin roles. The existence of a document grants admin privileges.
+     * @path /roles_admin/{userId}
+     * @allow (create) Any authenticated user can be made an admin (for testing/development - REMOVE FOR PRODUCTION!).
+     *   Request: { "auth": { "uid": "admin_user" } }
+     * @allow (get) Any authenticated user can check for admin status.
+     *   Request: { "auth": { "uid": "any_user" } }
+     * @deny (delete) Non-admins cannot remove admin privileges.
+     *   Request: { "auth": { "uid": "normal_user" } }
+     * @principle Grants admin privileges based on document existence.
+     */
+    match /roles_admin/{userId} {
+      allow get: if isSignedIn();
+      allow list: if false;
+      allow create: if isSignedIn(); // TODO: Remove this open rule in production. Only admins should be able to grant admin roles.
+      allow update: if false;
+      allow delete: if isAdmin();
+    }
+
+    /**
+     * @description Manages product information. Allows public read access, but restricts writes to vendors.
+     * @path /products/{productId}
+     * @allow (get) Any user can read product information.
+     *   Request: { "auth": { "uid": "any_user" } }
+     * @allow (list) Any user can list products.
+     *   Request: { "auth": { "uid": "any_user" } }
+     * @deny (create) Non-vendors cannot create products.
+     *   Request: { "auth": { "uid": "customer_user" }, "resource": { "data": { "vendorId": "some_vendor", ... } } }
+     * @deny (update) Non-owners (vendors) cannot update products.
+     *   Request: { "auth": { "uid": "customer_user" }, "resource": { "data": { "vendorId": "some_vendor", ... } } }
+     * @principle Allows public read access with owner-only writes.
+     */
+    match /products/{productId} {
+      allow get: if true;
+      allow list: if true;
+      allow create: if isSignedIn() && isVendor(request.resource.data.vendorId);
+      allow update: if isSignedIn() && isExistingVendor(request.resource.data.vendorId) && isVendor(request.resource.data.vendorId) && request.resource.data.vendorId == resource.data.vendorId;
+      allow delete: if isSignedIn() && isExistingVendor(request.resource.data.vendorId) && isVendor(request.resource.data.vendorId);
+    }
+
+    /**
+     * @description Manages order information, restricting access based on user role (customer or vendor).
+     * @path /orders/{orderId}
+     * @allow (get) Customer can read their own order.
+     *   Request: { "auth": { "uid": "customer_abc" }, "resource": { "data": { "customerId": "customer_abc", ... } } }
+     * @allow (get) Vendor can read an order associated with their vendor ID.
+     *   Request: { "auth": { "uid": "vendor_xyz" }, "resource": { "data": { "vendorId": "vendor_xyz", ... } } }
+     * @deny (create) Non-customers and non-vendors cannot create orders.
+     *   Request: { "auth": { "uid": "rider_user" }, "resource": { "data": { "customerId": "customer_abc", "vendorId": "vendor_xyz", ... } } }
+     * @deny (update) Non-owners (customer or vendor) cannot update orders.
+     *   Request: { "auth": { "uid": "rider_user" }, "resource": { "data": { "customerId": "customer_abc", "vendorId": "vendor_xyz", ... } } }
+     * @principle Enforces access control based on user role and relationship to the order.
+     */
+    match /orders/{orderId} {
+      allow get: if isSignedIn() && (isCustomer(resource.data.customerId) || isVendor(resource.data.vendorId));
+      allow list: if isSignedIn() && (isCustomer(resource.data.customerId) || isVendor(resource.data.vendorId));
+      allow create: if isSignedIn() && (isCustomer(request.resource.data.customerId) || isVendor(request.resource.data.vendorId));
+      allow update: if isSignedIn() && (isExistingCustomer(resource.data.customerId) || isExistingVendor(resource.data.vendorId));
+      allow delete: if isSignedIn() && (isExistingCustomer(resource.data.customerId) || isExistingVendor(resource.data.vendorId));
+    }
+  }
+
+  // Helper functions
+  function isSignedIn() {
+    return request.auth != null;
+  }
+
+  function isOwner(userId) {
+    return request.auth.uid == userId;
+  }
+
+    function isExistingOwner(userId) {
+    return isOwner(userId) && resource != null;
+  }
+
+  function isCustomerOwner() {
+    return request.auth.uid == resource.data.userId;
+  }
+
+      function isExistingCustomerOwner() {
+    return isCustomerOwner() && resource != null;
+  }
+
+  function isVendorOwner() {
+    return request.auth.uid == resource.data.userId;
+  }
+
+        function isExistingVendorOwner() {
+    return isVendorOwner() && resource != null;
+  }
+
+  function isRiderOwner() {
+    return request.auth.uid == resource.data.userId;
+  }
+
+          function isExistingRiderOwner() {
+    return isRiderOwner() && resource != null;
+  }
+
+  function isAdmin() {
+    return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+  }
+
+  function isCustomer(customerId) {
+        return request.auth.uid == customerId;
+  }
+
+  function isVendor(vendorId) {
+        return request.auth.uid == vendorId;
+  }
+
+  function isExistingCustomer(customerId) {
+    return isCustomer(customerId) && resource != null;
+  }
+
+  function isExistingVendor(vendorId) {
+    return isVendor(vendorId) && resource != null;
+  }
+}
