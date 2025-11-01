@@ -58,7 +58,7 @@ export default function AdminOrdersPage() {
     return query(collection(firestore, 'orders'), orderBy('orderDate', 'desc'));
   }, [firestore, user]);
 
-  const { data: orders, isLoading, error } = useCollection<Order>(ordersQuery);
+  const { data: orders, isLoading: isLoadingOrders, error } = useCollection<Order>(ordersQuery);
 
   const formatDate = (timestamp: any) => {
     if (!timestamp) return 'N/A';
@@ -67,7 +67,7 @@ export default function AdminOrdersPage() {
     return format(date, 'PPP');
   };
 
-  const showLoading = isLoading || isUserLoading;
+  const showLoading = isLoadingOrders || isUserLoading;
   
   return (
     <div className="space-y-6">
