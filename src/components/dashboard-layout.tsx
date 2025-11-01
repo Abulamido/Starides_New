@@ -117,7 +117,7 @@ export function DashboardLayout({
     return (
       <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
         <div className="hidden border-r bg-background md:block">
-          <div className="fixed flex h-full w-[220px] flex-col lg:w-[280px]">
+          <div className="flex h-full max-h-screen flex-col">
             <SidebarContent navItems={navItems} userName={userName} userEmail={userEmail} />
           </div>
         </div>
