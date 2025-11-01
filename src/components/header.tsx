@@ -58,7 +58,7 @@ export function Header() {
               </div>
             </form>
           </div>
-          <nav className="flex items-center gap-2">
+          <nav className="flex items-center gap-1">
              <ThemeToggle />
              <Button asChild variant="ghost">
                 <Link href="/auth">Login</Link>
