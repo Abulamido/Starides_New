@@ -11,16 +11,16 @@ service cloud.firestore {
 
     // Rules for the 'orders' collection
     match /orders/{orderId} {
-      // 1. CREATE: Any authenticated user can create an order.
+      // CREATE: Any authenticated user can create an order.
       allow create: if request.auth != null;
 
-      // 2. READ:
+      // READ:
       // - The customer who owns the order can read it.
       // - The vendor associated with the order can read it.
       allow read: if request.auth.uid == resource.data.customerId ||
                    request.auth.uid == resource.data.vendorId;
 
-      // 3. UPDATE, DELETE:
+      // UPDATE, DELETE:
       // - Only the customer who owns the order can perform these actions.
       allow update, delete: if request.auth.uid == resource.data.customerId;
     }

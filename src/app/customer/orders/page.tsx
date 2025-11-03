@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -57,13 +56,13 @@ export default function MyOrdersPage() {
   const { user, isUserLoading } = useUser();
 
   const ordersQuery = useMemoFirebase(() => {
-    if (!firestore || !user) return null;
+    if (isUserLoading || !user) return null;
     return query(
       collection(firestore, 'orders'), 
       where('customerId', '==', user.uid),
       orderBy('orderDate', 'desc')
     );
-  }, [firestore, user]);
+  }, [firestore, user, isUserLoading]);
 
   const { data: orders, isLoading: isLoadingOrders, error } = useCollection<Order>(ordersQuery);
 
@@ -114,7 +113,7 @@ export default function MyOrdersPage() {
                     <OrderRowSkeleton />
                   </>
               )}
-              {orders && orders.map((order) => (
+              {!isUserLoading && orders && orders.map((order) => (
                 <TableRow key={order.id}>
                   <TableCell className="font-medium truncate max-w-20">{order.id}</TableCell>
                   <TableCell>{formatDate(order.orderDate)}</TableCell>
