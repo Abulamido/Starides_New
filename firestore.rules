@@ -2,14 +2,21 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Authenticated users can read any collection
+    // Admins can read any document.
+    // The `exists` function checks for a document in the `roles_admin` collection
+    // where the document ID matches the requesting user's UID.
     match /{document=**} {
-      allow read: if request.auth != null;
+      allow read: if exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+    }
+    
+    // Customers can read and write their own orders.
+    match /orders/{orderId} {
+      allow read, write: if request.auth.uid == request.resource.data.customerId;
     }
 
-    // Authenticated users can write to the 'orders' collection
+    // Authenticated users can create new orders.
     match /orders/{orderId} {
-      allow write: if request.auth != null;
+      allow create: if request.auth != null;
     }
   }
 }
