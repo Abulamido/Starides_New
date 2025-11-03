@@ -43,6 +43,7 @@ export type AdminVendor = {
   approvalStatus: 'Pending' | 'Approved';
   activeStatus: 'Active' | 'Inactive';
   enabled: boolean;
+  vendorId: string;
 }
 
 export type AdminRider = {

@@ -60,13 +60,15 @@ export default function VendorOrdersPage() {
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
 
   const ordersQuery = useMemoFirebase(() => {
-    if (!firestore || !user) return null;
+    // Critical: Do not run the query until the user is fully loaded and authenticated.
+    if (isUserLoading || !user) return null;
+    
     return query(
         collection(firestore, 'orders'), 
-        where('vendorId', '==', user.uid), // Assuming vendor's user.uid is their vendor ID
+        where('vendorId', '==', user.uid), // This assumes the vendor's user.uid is their vendor ID.
         orderBy('orderDate', 'desc')
     );
-  }, [firestore, user]);
+  }, [firestore, user, isUserLoading]);
 
   const { data: orders, isLoading: isLoadingOrders, error } = useCollection<Order>(ordersQuery);
 
@@ -95,6 +97,7 @@ export default function VendorOrdersPage() {
     }
   }
 
+  // Combined loading state to prevent premature rendering.
   const showLoading = isLoadingOrders || isUserLoading;
   
   return (
@@ -136,9 +139,10 @@ export default function VendorOrdersPage() {
                 <>
                   <OrderRowSkeleton />
                   <OrderRowSkeleton />
+                  <OrderRowSkeleton />
                 </>
               )}
-              {orders && orders.map((order) => (
+              {!isUserLoading && orders && orders.map((order) => (
                 <TableRow key={order.id}>
                   <TableCell className="font-medium truncate max-w-24">{order.id}</TableCell>
                   <TableCell>{formatDate(order.orderDate)}</TableCell>
