@@ -21,15 +21,16 @@ export function FirebaseClientProvider({ children }: FirebaseClientProviderProps
   const [firebaseServices, setFirebaseServices] = useState<FirebaseServices | null>(null);
 
   useEffect(() => {
-    // Initialize Firebase on the client side, once per component mount.
-    // This prevents issues with server-side rendering and hydration.
-    const services = initializeFirebase();
-    setFirebaseServices(services);
-  }, []); // Empty dependency array ensures this runs only once on mount
+    // Initialize Firebase only in the browser, and only if it hasn't been initialized yet.
+    if (typeof window !== 'undefined' && !firebaseServices) {
+      const services = initializeFirebase();
+      setFirebaseServices(services);
+    }
+  }, [firebaseServices]);
 
   if (!firebaseServices) {
-    // Render a loading state or null while Firebase is initializing.
-    // This prevents children from trying to access Firebase before it's ready.
+    // Return a loader or null while waiting for client-side initialization.
+    // This prevents any child components from rendering and attempting to use Firebase prematurely.
     return <div className="flex h-screen w-full items-center justify-center">Loading...</div>;
   }
 
