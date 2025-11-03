@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -53,10 +52,11 @@ export default function AdminOrdersPage() {
   const firestore = useFirestore();
   const { user, isUserLoading } = useUser();
 
+  // The query is now conditional on the user being loaded and present
   const ordersQuery = useMemoFirebase(() => {
-    if (!firestore || !user) return null;
+    if (isUserLoading || !user) return null;
     return query(collection(firestore, 'orders'), orderBy('orderDate', 'desc'));
-  }, [firestore, user]);
+  }, [firestore, user, isUserLoading]);
 
   const { data: orders, isLoading: isLoadingOrders, error } = useCollection<Order>(ordersQuery);
 
@@ -67,6 +67,7 @@ export default function AdminOrdersPage() {
     return format(date, 'PPP');
   };
 
+  // The loading state now explicitly includes the user loading check
   const showLoading = isLoadingOrders || isUserLoading;
   
   return (
@@ -113,7 +114,7 @@ export default function AdminOrdersPage() {
                     <OrderRowSkeleton />
                 </>
               )}
-              {orders && orders.map((order) => (
+              {!isUserLoading && orders && orders.map((order) => (
                 <TableRow key={order.id}>
                   <TableCell className="font-medium truncate max-w-20">{order.id}</TableCell>
                   <TableCell>{formatDate(order.orderDate)}</TableCell>
