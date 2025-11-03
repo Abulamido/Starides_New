@@ -2,40 +2,10 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // Allow admins to read any document in the database.
-    // This rule checks if a document with the user's UID exists in the `roles_admin` collection.
     match /{document=**} {
-      allow read: if exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
-    }
-
-    // Rules for the 'orders' collection
-    match /orders/{orderId} {
-      // CREATE: Any authenticated user can create an order.
-      allow create: if request.auth != null;
-
-      // READ:
-      // - The customer who owns the order can read it.
-      // - The vendor associated with the order can read it.
-      allow read: if request.auth.uid == resource.data.customerId ||
-                   request.auth.uid == resource.data.vendorId;
-
-      // UPDATE, DELETE:
-      // - Only the customer who owns the order can perform these actions.
-      allow update, delete: if request.auth.uid == resource.data.customerId;
-    }
-
-    // Rules for the 'users' collection
-    // Allow users to read and write to their own user document.
-    match /users/{userId} {
-      allow read, write: if request.auth.uid == userId;
-    }
-
-    // Rules for other collections can be added here.
-    // Example for products (adjust as needed)
-    match /products/{productId} {
-      allow read: if true; // Publicly readable
-      // Add write rules for vendors
+      // Allow all read and write operations for development.
+      // WARNING: This is insecure and should not be used in production.
+      allow read, write: if true;
     }
   }
 }
