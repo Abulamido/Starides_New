@@ -68,6 +68,9 @@ export default function AuthenticationPage() {
             <Button asChild>
               <Link href="/customer">Customer Dashboard</Link>
             </Button>
+             <Button asChild>
+              <Link href="/vendor">Vendor Dashboard</Link>
+            </Button>
             <Button asChild>
               <Link href="/rider">Rider Dashboard</Link>
             </Button>
