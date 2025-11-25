@@ -22,7 +22,7 @@ import { useRouter } from 'next/navigation';
 
 export type NavItem = {
   href: string;
-  label:string;
+  label: string;
   icon: React.ComponentType<{ className?: string }>;
   active?: boolean;
 };
@@ -45,15 +45,15 @@ function NavLinks({ navItems, isMobile = false }: { navItems: NavItem[], isMobil
     >
       {navItems.map((item) => (
         <Button
-            key={item.href}
-            asChild
-            variant={item.active ? "secondary": "ghost"}
-            className={cn(
-              'w-full justify-start gap-3 rounded-md px-3 py-2 text-muted-foreground transition-all hover:text-primary',
-              item.active && 'font-semibold text-primary',
-              isMobile ? 'text-base' : 'text-sm'
-            )}
-          >
+          key={item.href}
+          asChild
+          variant={item.active ? "secondary" : "ghost"}
+          className={cn(
+            'w-full justify-start gap-3 rounded-md px-3 py-2 text-muted-foreground transition-all hover:text-primary',
+            item.active && 'font-semibold text-primary',
+            isMobile ? 'text-base' : 'text-sm'
+          )}
+        >
           <Link href={item.href}>
             <item.icon className={cn('h-5 w-5')} />
             {item.label}
@@ -88,26 +88,26 @@ function SidebarContent({ navItems }: { navItems: NavItem[] }) {
           <NavLinks navItems={navItems} />
         </div>
       </div>
-       <div className="mt-auto border-t p-4">
-          <div className="flex items-center gap-3">
-              <Avatar className="h-10 w-10 border">
-                 <AvatarFallback>{user?.displayName?.charAt(0) || 'U'}</AvatarFallback>
-              </Avatar>
-              <div>
-                  <p className="text-sm font-semibold">{user?.displayName || 'User'}</p>
-                  <p className="text-xs text-muted-foreground">{user?.email}</p>
-              </div>
+      <div className="mt-auto border-t p-4">
+        <div className="flex items-center gap-3">
+          <Avatar className="h-10 w-10 border">
+            <AvatarFallback>{user?.displayName?.charAt(0) || 'U'}</AvatarFallback>
+          </Avatar>
+          <div>
+            <p className="text-sm font-semibold">{user?.displayName || 'User'}</p>
+            <p className="text-xs text-muted-foreground">{user?.email}</p>
           </div>
-          <div className="mt-4 flex items-center justify-between">
-              <div className="flex items-center gap-2 text-sm text-green-500">
-                  <Dot className="h-6 w-6 animate-pulse" />
-                  Live
-              </div>
-              <Button variant="ghost" size="sm" onClick={handleLogout} className="flex items-center gap-2 text-muted-foreground">
-                  <LogOut className="h-4 w-4" />
-                  Logout
-              </Button>
+        </div>
+        <div className="mt-4 flex items-center justify-between">
+          <div className="flex items-center gap-2 text-sm text-green-500">
+            <Dot className="h-6 w-6 animate-pulse" />
+            Live
           </div>
+          <Button variant="ghost" size="sm" onClick={handleLogout} className="flex items-center gap-2 text-muted-foreground">
+            <LogOut className="h-4 w-4" />
+            Logout
+          </Button>
+        </div>
       </div>
     </div>
   );
@@ -133,11 +133,12 @@ export function DashboardLayout({
   }, [user, isUserLoading, router]);
 
   if (isUserLoading || !user) {
-      // You can return a loading spinner here
-      return <div className="flex h-screen items-center justify-center">Loading...</div>;
+    // You can return a loading spinner here
+    return <div className="flex h-screen items-center justify-center">Loading...</div>;
   }
 
-  if (isVendor) {
+  // Unified Sidebar Layout for Vendor and Customer
+  if (isVendor || userRole === 'Customer') {
     return (
       <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
         <div className="hidden border-r bg-background md:block">
@@ -162,8 +163,18 @@ export function DashboardLayout({
             </Sheet>
 
             <div className="w-full flex-1">
-              {/* Optional: Add a search bar or other header content here */}
+              <form>
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="search"
+                    placeholder="Search..."
+                    className="w-full appearance-none bg-background pl-8 shadow-none md:w-2/3 lg:w-1/3"
+                  />
+                </div>
+              </form>
             </div>
+            <CartSheet />
             <ThemeToggle />
             <UserNav />
           </header>
@@ -175,55 +186,44 @@ export function DashboardLayout({
     );
   }
 
-  // Fallback for non-vendor layouts (customer, etc.)
+  // Fallback for other roles (if any) or public pages
   return (
     <div className="flex min-h-screen w-full flex-col bg-background">
       <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-4 border-b bg-background px-4 md:px-6">
         <div className="flex items-center gap-2">
-            <Link href="/" className="flex items-center gap-2 font-semibold">
-                <StaridesLogo className="h-6 w-6 text-primary" />
-                <span className="hidden md:inline-block">Starides</span>
-            </Link>
+          <Link href="/" className="flex items-center gap-2 font-semibold">
+            <StaridesLogo className="h-6 w-6 text-primary" />
+            <span className="hidden md:inline-block">Starides</span>
+          </Link>
         </div>
 
         <div className="hidden md:flex md:gap-2">
-            <NavLinks navItems={navItems} />
+          <NavLinks navItems={navItems} />
         </div>
 
         <div className="ml-auto flex items-center gap-2">
-           <form className="ml-auto flex-1 sm:flex-initial">
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="search"
-                  placeholder="Search..."
-                  className="pl-8 sm:w-[300px] md:w-[200px] lg:w-[300px]"
-                />
-              </div>
-            </form>
-            <CartSheet />
-            <ThemeToggle />
-            <UserNav />
+          <ThemeToggle />
+          <UserNav />
         </div>
-        
+
         <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="md:hidden">
-                    <Menu className="h-6 w-6" />
-                    <span className="sr-only">Toggle Menu</span>
-                </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="flex flex-col">
-               <div className="flex items-center gap-2 border-b pb-4">
-                  <Link href="/" className="flex items-center gap-2 font-semibold" onClick={() => setOpen(false)}>
-                      <StaridesLogo className="h-6 w-6 text-primary" />
-                      <span>Starides</span>
-                  </Link>
-              </div>
-              <div className='py-4'>
-                <NavLinks navItems={navItems} isMobile={true} />
-              </div>
-            </SheetContent>
+          <SheetTrigger asChild>
+            <Button variant="ghost" size="icon" className="md:hidden">
+              <Menu className="h-6 w-6" />
+              <span className="sr-only">Toggle Menu</span>
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="flex flex-col">
+            <div className="flex items-center gap-2 border-b pb-4">
+              <Link href="/" className="flex items-center gap-2 font-semibold" onClick={() => setOpen(false)}>
+                <StaridesLogo className="h-6 w-6 text-primary" />
+                <span>Starides</span>
+              </Link>
+            </div>
+            <div className='py-4'>
+              <NavLinks navItems={navItems} isMobile={true} />
+            </div>
+          </SheetContent>
         </Sheet>
       </header>
       <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">

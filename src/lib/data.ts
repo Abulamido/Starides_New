@@ -9,23 +9,27 @@ export type Product = {
   category: string;
   image: string;
   imageHint: string;
-  vendorId: string;
+  vendorId: string; // Firebase Auth user.uid of the vendor owner
 };
 
 export type Order = {
-    id: string;
-    customerId: string;
-    vendorId: string;
-    riderId?: string;
-    products: { id: string; name: string; quantity: number, price: number }[];
-    totalAmount: number;
-    status: 'Processing' | 'Shipped' | 'Delivered' | 'Canceled';
-    orderDate: any; // Using `any` for Firebase Timestamp flexibility
-    deliveryAddress: string;
-  };
+  id: string;
+  customerId: string; // Firebase Auth user.uid of the customer
+  vendorId: string;   // Firebase Auth user.uid of the vendor owner
+  riderId?: string;   // Firebase Auth user.uid of the rider (optional)
+  products: { id: string; name: string; quantity: number, price: number }[];
+  totalAmount: number;
+  status: 'Processing' | 'Accepted' | 'Shipped' | 'Out for Delivery' | 'Delivered' | 'Canceled';
+  orderDate: any; // Using `any` for Firebase Timestamp flexibility
+  deliveryAddress: string;
+  deliveryFee?: number;
+  deliveryLocation?: { lat: number; lng: number };
+  riderLocation?: { lat: number; lng: number; timestamp: any }; // Live rider location
+  eta?: number; // Estimated time of arrival in minutes
+};
 
 export type Vendor = {
-  id: string;
+  id: string;         // Firestore auto-generated document ID
   name: string;
   description: string;
   rating: number;
@@ -33,7 +37,7 @@ export type Vendor = {
   category: 'Grocery' | 'Electronics' | 'Restaurant' | 'Fashion' | 'Pharmacy';
   image: string;
   imageHint: string;
-  userId: string;
+  userId: string;     // Firebase Auth user.uid of the vendor owner
 }
 
 export type AdminVendor = {

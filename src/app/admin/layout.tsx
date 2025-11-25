@@ -14,6 +14,7 @@ import {
   FileText,
 } from 'lucide-react';
 import { useUser } from '@/firebase';
+import { RoleGuard } from '@/components/role-guard';
 
 export default function AdminDashboardLayout({
   children,
@@ -36,14 +37,16 @@ export default function AdminDashboardLayout({
 
 
   return (
-    <DashboardLayout
-      navItems={navItems}
-      userName={user?.displayName || 'Admin'}
-      userEmail={user?.email || ''}
-      userRole="Administrator"
-      isVendor
-    >
-      {children}
-    </DashboardLayout>
+    <RoleGuard allowedRole="admin">
+      <DashboardLayout
+        navItems={navItems}
+        userName={user?.displayName || 'Admin'}
+        userEmail={user?.email || ''}
+        userRole="Administrator"
+        isVendor
+      >
+        {children}
+      </DashboardLayout>
+    </RoleGuard>
   );
 }

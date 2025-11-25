@@ -38,3 +38,6 @@ next-env.d.ts
 # genkit
 .genkit/
 .genkit-cache.json
+
+# firebase service account (sensitive!)
+service-account-key.json

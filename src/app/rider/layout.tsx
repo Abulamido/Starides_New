@@ -13,6 +13,7 @@ import {
   Home,
 } from 'lucide-react';
 import { useUser } from '@/firebase';
+import { RoleGuard } from '@/components/role-guard';
 
 export default function RiderDashboardLayout({
   children,
@@ -33,14 +34,16 @@ export default function RiderDashboardLayout({
   ].map((item) => ({ ...item, active: pathname === item.href }));
 
   return (
-    <DashboardLayout
-      navItems={navItems}
-      userName={user?.displayName || 'Rider'}
-      userEmail={user?.email || ''}
-      userRole="Rider"
-      isVendor
-    >
-      {children}
-    </DashboardLayout>
+    <RoleGuard allowedRole="rider">
+      <DashboardLayout
+        navItems={navItems}
+        userName={user?.displayName || 'Rider'}
+        userEmail={user?.email || ''}
+        userRole="Rider"
+        isVendor
+      >
+        {children}
+      </DashboardLayout>
+    </RoleGuard>
   );
 }

@@ -1,84 +1,81 @@
+'use client';
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LoginForm } from '@/components/login-form';
-import { SignupForm } from '@/components/signup-form';
 import Link from 'next/link';
-import { StaridesLogo } from '@/components/starides-logo';
-import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { ShoppingBag, Store, Bike } from 'lucide-react';
+import { StaridesLogo } from '@/components/starides-logo';
 
-export default function AuthenticationPage() {
+export default function AuthPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="mb-4 flex justify-center">
-            <Link href="/" className="flex items-center space-x-2 text-foreground">
-                <StaridesLogo className="h-8 w-auto" />
-                <span className="text-2xl font-bold">Starides</span>
-            </Link>
+    <div className="container max-w-6xl py-16 px-4">
+      <div className="text-center mb-12">
+        <div className="flex justify-center items-center space-x-2 mb-4">
+          <StaridesLogo className="h-10 w-auto" />
+          <h1 className="text-4xl font-bold">Starides</h1>
         </div>
-        <Tabs defaultValue="login" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="login">Login</TabsTrigger>
-            <TabsTrigger value="signup">Sign Up</TabsTrigger>
-          </TabsList>
-          <TabsContent value="login">
-            <Card>
-              <CardHeader>
-                <CardTitle>Welcome Back</CardTitle>
-                <CardDescription>
-                  Enter your credentials to access your account.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <LoginForm />
-              </CardContent>
-            </Card>
-          </TabsContent>
-          <TabsContent value="signup">
-            <Card>
-              <CardHeader>
-                <CardTitle>Create an Account</CardTitle>
-                <CardDescription>
-                  Choose your role and start your journey with us.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <SignupForm />
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+        <p className="text-lg text-muted-foreground">
+          Choose how you want to use Starides
+        </p>
+      </div>
 
-        <Card className="mt-4">
-          <CardHeader>
-            <CardTitle>Test Dashboards</CardTitle>
-            <CardDescription>
-              For testing purposes, you can directly access the dashboards.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col space-y-2">
-            <Button asChild>
-              <Link href="/customer">Customer Dashboard</Link>
+      <div className="grid md:grid-cols-3 gap-6 mb-12">
+        {/* Customer Card */}
+        <Card className="p-6 hover:shadow-lg transition-shadow border-2 hover:border-primary">
+          <div className="flex flex-col items-center text-center">
+            <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+              <ShoppingBag className="h-8 w-8 text-primary" />
+            </div>
+            <h2 className="text-2xl font-bold mb-2">Customer</h2>
+            <p className="text-muted-foreground mb-6">
+              Order from local vendors and get items delivered to your doorstep
+            </p>
+            <Button asChild className="w-full">
+              <Link href="/auth/customer/signup">Sign Up as Customer</Link>
             </Button>
-             <Button asChild>
-              <Link href="/vendor">Vendor Dashboard</Link>
-            </Button>
-            <Button asChild>
-              <Link href="/rider">Rider Dashboard</Link>
-            </Button>
-            <Button asChild>
-              <Link href="/admin">Admin Dashboard</Link>
-            </Button>
-          </CardContent>
+          </div>
         </Card>
+
+        {/* Vendor Card */}
+        <Card className="p-6 hover:shadow-lg transition-shadow border-2 hover:border-primary">
+          <div className="flex flex-col items-center text-center">
+            <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+              <Store className="h-8 w-8 text-primary" />
+            </div>
+            <h2 className="text-2xl font-bold mb-2">Vendor</h2>
+            <p className="text-muted-foreground mb-6">
+              Sell your products and reach more customers in your area
+            </p>
+            <Button asChild className="w-full">
+              <Link href="/auth/vendor/signup">Sign Up as Vendor</Link>
+            </Button>
+          </div>
+        </Card>
+
+        {/* Rider Card */}
+        <Card className="p-6 hover:shadow-lg transition-shadow border-2 hover:border-primary">
+          <div className="flex flex-col items-center text-center">
+            <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+              <Bike className="h-8 w-8 text-primary" />
+            </div>
+            <h2 className="text-2xl font-bold mb-2">Rider</h2>
+            <p className="text-muted-foreground mb-6">
+              Earn money by delivering orders in your spare time
+            </p>
+            <Button asChild className="w-full">
+              <Link href="/auth/rider/signup">Sign Up as Rider</Link>
+            </Button>
+          </div>
+        </Card>
+      </div>
+
+      <div className="text-center">
+        <p className="text-muted-foreground">
+          Already have an account?{' '}
+          <Link href="/auth/login" className="text-primary hover:underline font-semibold">
+            Log in
+          </Link>
+        </p>
       </div>
     </div>
   );

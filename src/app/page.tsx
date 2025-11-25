@@ -1,182 +1,258 @@
-
-import Image from 'next/image';
-import { Button } from '@/components/ui/button';
-import { Header } from '@/components/header';
-import { Footer } from '@/components/footer';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  ArrowRight,
-  Shield,
-  Users,
-  BarChart,
-  ShoppingBag,
-  CheckCircle,
-  MapPin,
-  Star,
-  Rocket,
-  PlayCircle,
-} from 'lucide-react';
 import Link from 'next/link';
-import { StaridesLogo } from '@/components/starides-logo';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import {
+  ShoppingBag,
+  Store,
+  Bike,
+  Clock,
+  Shield,
+  Zap,
+  ArrowRight,
+  CheckCircle2
+} from 'lucide-react';
 
-export default function Home() {
+export default function LandingPage() {
   const features = [
     {
-      title: 'Secure Payments',
-      description:
-        'Multiple payment options with bank-level security and encryption.',
+      icon: Clock,
+      title: 'Fast Delivery',
+      description: 'Get your orders delivered within 30-45 minutes from local vendors',
+    },
+    {
       icon: Shield,
+      title: 'Secure Payments',
+      description: 'Safe and secure payment processing with multiple payment options',
     },
     {
-      title: 'Community Driven',
-      description: 'Built for and by the community with ratings and reviews.',
-      icon: Users,
-    },
-    {
-      title: 'Growth Tools',
-      description: 'Analytics and insights to help vendors grow their business.',
-      icon: BarChart,
+      icon: Zap,
+      title: 'Real-Time Tracking',
+      description: 'Track your order and rider location in real-time on the map',
     },
   ];
 
-  const howItWorksSteps = [
+  const howItWorks = [
     {
-      step: 1,
-      title: 'Browse',
-      description: 'Explore vendors and products',
-      icon: ShoppingBag,
+      step: '1',
+      title: 'Browse Vendors',
+      description: 'Discover local stores and browse their products',
     },
     {
-      step: 2,
-      title: 'Order',
-      description: 'Add to cart and checkout',
-      icon: CheckCircle,
+      step: '2',
+      title: 'Place Order',
+      description: 'Add items to cart and checkout with your delivery address',
     },
     {
-      step: 3,
-      title: 'Track',
-      description: 'Follow your delivery live',
-      icon: MapPin,
+      step: '3',
+      title: 'Track Delivery',
+      description: 'Watch your order being prepared and delivered in real-time',
     },
     {
-      step: 4,
-      title: 'Enjoy',
-      description: 'Receive and rate your order',
-      icon: Star,
+      step: '4',
+      title: 'Enjoy!',
+      description: 'Receive your order at your doorstep and enjoy',
     },
   ];
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <Header />
-      <main className="flex-1">
-        {/* Hero Section */}
-        <section className="relative w-full overflow-hidden py-20 md:py-32 lg:py-40">
-          <div className="container mx-auto grid grid-cols-1 items-center gap-12 px-4 md:grid-cols-2 lg:gap-20">
-            <div className="flex flex-col items-start text-left">
-              <div className="neumorphic-flat mb-4 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium text-primary">
-                <Rocket className="h-4 w-4" />
-                The Future of Delivery
-              </div>
-              <h1 className="text-4xl font-bold tracking-tighter text-foreground sm:text-5xl md:text-6xl lg:text-7xl">
-                Your <span className="text-primary">All-in-One</span>
-                <br />
-                Marketplace Platform
-              </h1>
-              <p className="mt-4 max-w-lg text-lg text-muted-foreground">
-                Connect customers, vendors, and riders in one seamless
-                ecosystem. Real-time tracking, secure payments, and instant
-                delivery at your fingertips.
-              </p>
-              <div className="mt-8 flex flex-wrap gap-4">
-                <Button asChild size="lg">
-                  <Link href="/auth">
-                    Get Started Now <ArrowRight className="ml-2" />
-                  </Link>
+    <div className="min-h-screen">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-primary/10 via-background to-background">
+        <div className="container mx-auto px-4 py-20 md:py-32">
+          <div className="max-w-4xl mx-auto text-center space-y-8">
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
+              Your Local Marketplace,
+              <span className="text-primary"> Delivered Fast</span>
+            </h1>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Connect with local vendors, order your favorite products, and get them delivered to your doorstep in minutes.
+            </p>
+
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Link href="/signup?role=customer">
+                <Button size="lg" className="gap-2 min-w-[200px]">
+                  <ShoppingBag className="h-5 w-5" />
+                  Order Now
+                  <ArrowRight className="h-4 w-4" />
                 </Button>
-                <Button asChild size="lg" variant="secondary">
-                  <Link href="#">
-                    <PlayCircle className="mr-2" /> Watch Demo
-                  </Link>
+              </Link>
+              <Link href="/signup?role=vendor">
+                <Button size="lg" variant="outline" className="gap-2 min-w-[200px]">
+                  <Store className="h-5 w-5" />
+                  Become a Vendor
                 </Button>
-              </div>
+              </Link>
+              <Link href="/signup?role=rider">
+                <Button size="lg" variant="outline" className="gap-2 min-w-[200px]">
+                  <Bike className="h-5 w-5" />
+                  Deliver with Us
+                </Button>
+              </Link>
             </div>
-            <div className="relative flex h-full min-h-[300px] items-center justify-center">
-              <div className="neumorphic-flat flex h-64 w-full max-w-md items-center justify-center rounded-2xl p-8 md:h-80">
-                <div className="flex items-center gap-4">
-                  <StaridesLogo className="h-24 w-auto text-primary" />
-                  <span className="text-6xl font-bold text-foreground/80">
-                    RIDES
-                  </span>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-20 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Choose Starides?</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              We make local shopping and delivery simple, fast, and reliable
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {features.map((feature, index) => (
+              <Card key={index} className="text-center">
+                <CardHeader>
+                  <div className="mx-auto h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+                    <feature.icon className="h-6 w-6 text-primary" />
+                  </div>
+                  <CardTitle>{feature.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription>{feature.description}</CardDescription>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">How It Works</h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Getting your favorite products delivered is easy
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-4 gap-8 max-w-6xl mx-auto">
+            {howItWorks.map((step, index) => (
+              <div key={index} className="text-center space-y-4">
+                <div className="mx-auto h-16 w-16 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-2xl font-bold">
+                  {step.step}
                 </div>
+                <h3 className="text-xl font-semibold">{step.title}</h3>
+                <p className="text-muted-foreground">{step.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* For Vendors */}
+      <section className="py-20 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="grid md:grid-cols-2 gap-12 items-center">
+              <div className="space-y-6">
+                <h2 className="text-3xl md:text-4xl font-bold">Grow Your Business</h2>
+                <p className="text-muted-foreground text-lg">
+                  Join hundreds of local vendors reaching more customers through our platform
+                </p>
+                <ul className="space-y-3">
+                  {[
+                    'Reach thousands of local customers',
+                    'Easy-to-use vendor dashboard',
+                    'Real-time order management',
+                    'Analytics and insights',
+                    'Fast and reliable payments',
+                  ].map((benefit, index) => (
+                    <li key={index} className="flex items-center gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0" />
+                      <span>{benefit}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/signup?role=vendor">
+                  <Button size="lg" className="gap-2">
+                    Start Selling
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
+              <div className="bg-gradient-to-br from-primary/20 to-primary/5 rounded-2xl p-8 h-[400px] flex items-center justify-center">
+                <Store className="h-32 w-32 text-primary/40" />
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Features Section */}
-        <section className="border-t border-border/40 bg-background py-12 md:py-24">
-          <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-              {features.map((feature) => (
-                <Card
-                  key={feature.title}
-                  className="transform text-center transition-transform hover:scale-105 hover:shadow-[8px_8px_16px_#c1c8d0,-8px_-8px_16px_#ffffff] dark:hover:shadow-[8px_8px_16px_#11131a,-8px_-8px_16px_#232734]"
-                >
-                  <CardHeader>
-                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full neumorphic-pressed text-primary">
-                      <feature.icon className="h-8 w-8" />
-                    </div>
-                    <CardTitle className="mt-4 text-2xl font-semibold">
-                      {feature.title}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground">
-                      {feature.description}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
+      {/* For Riders */}
+      <section className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="grid md:grid-cols-2 gap-12 items-center">
+              <div className="bg-gradient-to-br from-primary/20 to-primary/5 rounded-2xl p-8 h-[400px] flex items-center justify-center order-2 md:order-1">
+                <Bike className="h-32 w-32 text-primary/40" />
+              </div>
+              <div className="space-y-6 order-1 md:order-2">
+                <h2 className="text-3xl md:text-4xl font-bold">Earn on Your Schedule</h2>
+                <p className="text-muted-foreground text-lg">
+                  Become a delivery partner and earn money on your own time
+                </p>
+                <ul className="space-y-3">
+                  {[
+                    'Flexible working hours',
+                    'Competitive delivery fees',
+                    'Weekly payouts',
+                    'Performance bonuses',
+                    'Easy-to-use rider app',
+                  ].map((benefit, index) => (
+                    <li key={index} className="flex items-center gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0" />
+                      <span>{benefit}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/signup?role=rider">
+                  <Button size="lg" className="gap-2">
+                    Start Delivering
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* How It Works Section */}
-        <section className="border-t border-border/40 py-12 md:py-24">
-          <div className="container mx-auto px-4">
-            <div className="text-center">
-              <h2 className="text-3xl font-bold tracking-tighter text-foreground md:text-4xl">
-                How Starides Works
-              </h2>
-              <p className="mt-2 text-lg text-muted-foreground">
-                Simple, fast, and efficient
-              </p>
-            </div>
-            <div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-4">
-              {howItWorksSteps.map((item) => (
-                <Card
-                  key={item.step}
-                  className="transform text-center transition-transform hover:scale-105 hover:shadow-[8px_8px_16px_#c1c8d0,-8px_-8px_16px_#ffffff] dark:hover:shadow-[8px_8px_16px_#11131a,-8px_-8px_16px_#232734]"
-                >
-                  <CardHeader className="items-center">
-                    <div className="flex h-20 w-20 items-center justify-center rounded-full neumorphic-pressed text-primary">
-                      <item.icon className="h-10 w-10" />
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <h3 className="text-xl font-semibold">{item.title}</h3>
-                    <p className="mt-2 text-muted-foreground">
-                      {item.description}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+      {/* Final CTA */}
+      <section className="py-20 bg-primary text-primary-foreground">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Get Started?</h2>
+          <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
+            Join thousands of satisfied customers, vendors, and riders on Starides
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/signup">
+              <Button size="lg" variant="secondary" className="gap-2 min-w-[200px]">
+                Sign Up Now
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+            <Link href="/login">
+              <Button size="lg" variant="outline" className="gap-2 min-w-[200px] bg-transparent border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary">
+                Log In
+              </Button>
+            </Link>
           </div>
-        </section>
-      </main>
-      <Footer />
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-8 border-t">
+        <div className="container mx-auto px-4 text-center text-muted-foreground">
+          <p>&copy; 2025 Starides. All rights reserved.</p>
+        </div>
+      </footer>
     </div>
   );
 }

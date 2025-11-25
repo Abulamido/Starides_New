@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useUser } from '@/firebase';
 import { OrderStatusListener } from '@/components/order-status-listener';
+import { RoleGuard } from '@/components/role-guard';
 
 export default function CustomerDashboardLayout({
   children,
@@ -34,14 +35,16 @@ export default function CustomerDashboardLayout({
   }));
 
   return (
-    <DashboardLayout
-      navItems={navItems}
-      userName={user?.displayName || 'Customer'}
-      userEmail={user?.email || ''}
-      userRole="Customer"
-    >
-      {user && <OrderStatusListener customerId={user.uid} />}
-      {children}
-    </DashboardLayout>
+    <RoleGuard allowedRole="customer">
+      <DashboardLayout
+        navItems={navItems}
+        userName={user?.displayName || 'Customer'}
+        userEmail={user?.email || ''}
+        userRole="Customer"
+      >
+        {user && <OrderStatusListener customerId={user.uid} />}
+        {children}
+      </DashboardLayout>
+    </RoleGuard>
   );
 }

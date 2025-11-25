@@ -12,6 +12,7 @@ import {
   Store,
 } from 'lucide-react';
 import { useUser } from '@/firebase';
+import { RoleGuard } from '@/components/role-guard';
 
 export default function VendorDashboardLayout({
   children,
@@ -29,17 +30,19 @@ export default function VendorDashboardLayout({
     { href: '/vendor/reviews', label: 'Reviews', icon: Star },
     { href: '/vendor/earnings', label: 'Earnings', icon: DollarSign },
     { href: '/vendor/settings', label: 'Settings', icon: Settings },
-  ].map((item) => ({...item, active: pathname === item.href}));
+  ].map((item) => ({ ...item, active: pathname === item.href }));
 
   return (
-    <DashboardLayout
-      navItems={navItems}
-      userName={user?.displayName || 'Vendor'}
-      userEmail={user?.email || ''}
-      userRole="Vendor"
-      isVendor
-    >
-      {children}
-    </DashboardLayout>
+    <RoleGuard allowedRole="vendor">
+      <DashboardLayout
+        navItems={navItems}
+        userName={user?.displayName || 'Vendor'}
+        userEmail={user?.email || ''}
+        userRole="Vendor"
+        isVendor
+      >
+        {children}
+      </DashboardLayout>
+    </RoleGuard>
   );
 }
