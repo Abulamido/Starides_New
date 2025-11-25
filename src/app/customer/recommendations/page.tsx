@@ -46,18 +46,22 @@ export default function CustomerRecommendationsPage() {
     );
   }
 
-  // Analyze order history to get categories and products the user has ordered
-  const orderedCategories = new Set<string>();
+  // Analyze order history to get product IDs the user has ordered
   const orderedProductIds = new Set<string>();
 
   orders?.forEach(order => {
-    if (order.items && Array.isArray(order.items)) {
-      order.items.forEach(item => {
-        orderedProductIds.add(item.productId);
-        if (item.category) {
-          orderedCategories.add(item.category);
-        }
+    if (order.products && Array.isArray(order.products)) {
+      order.products.forEach(item => {
+        orderedProductIds.add(item.id);
       });
+    }
+  });
+
+  // Get categories from ordered products
+  const orderedCategories = new Set<string>();
+  allProducts?.forEach(product => {
+    if (orderedProductIds.has(product.id)) {
+      orderedCategories.add(product.category);
     }
   });
 

@@ -4,7 +4,7 @@
 import { getPersonalizedRecommendations } from '@/ai/flows/personalized-product-recommendations';
 import { type Product } from '@/lib/data';
 import { revalidatePath } from 'next/cache';
-import { collection, addDoc, serverTimestamp, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, getDocs, doc, updateDoc, query, where } from 'firebase/firestore';
 import { initializeFirebase } from '@/firebase';
 
 export async function fetchRecommendations(

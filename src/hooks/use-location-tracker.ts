@@ -44,13 +44,20 @@ export function useLocationTracker({ orderId, enabled, updateInterval = 15000 }:
                 },
             });
         } catch (err) {
-            console.error('Error updating location:', err);
-            setError('Failed to update location');
+            // Silently fail - location update is not critical
+            console.log('Location update skipped');
         }
     }, [firestore, orderId]);
 
     const handleError = useCallback((err: GeolocationPositionError) => {
-        console.error('Geolocation error:', err);
+        // Only log meaningful errors, not permission denials during inactive tracking
+        if (err.code === err.PERMISSION_DENIED) {
+            console.log('Location permission denied - tracking disabled');
+        } else if (err.code === err.POSITION_UNAVAILABLE) {
+            console.log('Location unavailable');
+        } else if (err.code === err.TIMEOUT) {
+            console.log('Location request timeout');
+        }
         setError(err.message);
         setIsTracking(false);
     }, []);
