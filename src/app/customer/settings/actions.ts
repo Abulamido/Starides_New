@@ -1,6 +1,6 @@
 'use server';
 
-import { initializeFirebase } from '@/firebase';
+import { initializeServerFirebase } from '@/firebase/server-sdk';
 import { doc, updateDoc, serverTimestamp, collection, addDoc, getDocs, deleteDoc, query, where } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
 
@@ -23,7 +23,7 @@ export interface DeliveryAddress {
 
 export async function updateCustomerProfile(userId: string, data: CustomerProfile) {
     try {
-        const { firestore } = initializeFirebase();
+        const { firestore } = initializeServerFirebase();
         const userRef = doc(firestore, 'users', userId);
 
         await updateDoc(userRef, {
@@ -43,7 +43,7 @@ export async function updateCustomerProfile(userId: string, data: CustomerProfil
 
 export async function addDeliveryAddress(userId: string, address: Omit<DeliveryAddress, 'id'>) {
     try {
-        const { firestore } = initializeFirebase();
+        const { firestore } = initializeServerFirebase();
 
         // If this is set as default, unset all other defaults first
         if (address.isDefault) {
@@ -72,7 +72,7 @@ export async function addDeliveryAddress(userId: string, address: Omit<DeliveryA
 
 export async function deleteDeliveryAddress(userId: string, addressId: string) {
     try {
-        const { firestore } = initializeFirebase();
+        const { firestore } = initializeServerFirebase();
         const addressRef = doc(firestore, `users/${userId}/addresses`, addressId);
 
         await deleteDoc(addressRef);
@@ -87,7 +87,7 @@ export async function deleteDeliveryAddress(userId: string, addressId: string) {
 
 export async function setDefaultAddress(userId: string, addressId: string) {
     try {
-        const { firestore } = initializeFirebase();
+        const { firestore } = initializeServerFirebase();
 
         // Unset all defaults
         const addressesRef = collection(firestore, `users/${userId}/addresses`);

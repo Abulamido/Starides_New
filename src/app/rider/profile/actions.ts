@@ -1,6 +1,6 @@
 'use server';
 
-import { initializeFirebase } from '@/firebase';
+import { initializeServerFirebase } from '@/firebase/server-sdk';
 import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
 
@@ -21,7 +21,7 @@ export interface RiderDocuments {
 
 export async function updateRiderAvailability(userId: string, availability: RiderAvailability) {
     try {
-        const { firestore } = initializeFirebase();
+        const { firestore } = initializeServerFirebase();
         const userRef = doc(firestore, 'users', userId);
 
         await updateDoc(userRef, {
@@ -45,7 +45,7 @@ export async function updateRiderProfile(userId: string, data: {
     address?: string;
 }) {
     try {
-        const { firestore } = initializeFirebase();
+        const { firestore } = initializeServerFirebase();
         const userRef = doc(firestore, 'users', userId);
 
         await updateDoc(userRef, {
@@ -63,7 +63,7 @@ export async function updateRiderProfile(userId: string, data: {
 
 export async function updateRiderVehicle(userId: string, vehicle: VehicleInfo) {
     try {
-        const { firestore } = initializeFirebase();
+        const { firestore } = initializeServerFirebase();
         const userRef = doc(firestore, 'users', userId);
 
         await updateDoc(userRef, {
@@ -81,7 +81,7 @@ export async function updateRiderVehicle(userId: string, vehicle: VehicleInfo) {
 
 export async function updateRiderDocuments(userId: string, documents: RiderDocuments) {
     try {
-        const { firestore } = initializeFirebase();
+        const { firestore } = initializeServerFirebase();
         const userRef = doc(firestore, 'users', userId);
 
         await updateDoc(userRef, {

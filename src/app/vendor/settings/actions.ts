@@ -1,6 +1,6 @@
 'use server';
 
-import { initializeFirebase } from '@/firebase';
+import { initializeServerFirebase } from '@/firebase';
 import { doc, updateDoc, serverTimestamp, getDoc } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
 
@@ -21,7 +21,7 @@ export interface VendorSettings {
 
 export async function updateVendorSettings(vendorId: string, data: VendorSettings) {
     try {
-        const { firestore } = initializeFirebase();
+        const { firestore } = initializeServerFirebase();
         const vendorRef = doc(firestore, 'vendors', vendorId);
 
         await updateDoc(vendorRef, {
@@ -47,7 +47,7 @@ export async function updateVendorSettings(vendorId: string, data: VendorSetting
 
 export async function getVendorSettings(vendorId: string) {
     try {
-        const { firestore } = initializeFirebase();
+        const { firestore } = initializeServerFirebase();
         const vendorRef = doc(firestore, 'vendors', vendorId);
         const vendorDoc = await getDoc(vendorRef);
 
