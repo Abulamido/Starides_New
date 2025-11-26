@@ -5,29 +5,61 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { useUser } from '@/firebase';
-import { Loader2, User, Bike, FileText, MapPin } from 'lucide-react';
-import { useState } from 'react';
+import { useUser, useFirestore, useMemoFirebase, useDoc } from '@/firebase';
+import { Loader2, User, Bike, FileText } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { doc } from 'firebase/firestore';
+import { updateRiderAvailability, updateRiderProfile, updateRiderVehicle, updateRiderDocuments } from './actions';
+import { useToast } from '@/hooks/use-toast';
 
 export default function RiderProfilePage() {
   const { user, isUserLoading } = useUser();
+  const firestore = useFirestore();
+  const { toast } = useToast();
   const [isSaving, setIsSaving] = useState(false);
 
-  // Mock rider data
+  // Fetch rider data from Firestore
+  const userQuery = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [firestore, user]);
+
+  const { data: userData, isLoading: isUserDataLoading } = useDoc(userQuery);
+
   const [formData, setFormData] = useState({
-    name: user?.displayName || '',
-    email: user?.email || '',
-    phone: '+234 800 000 0000',
-    vehicleType: 'Motorcycle',
-    vehiclePlate: 'ABC-123-XY',
-    licenseNumber: 'DL-12345678',
-    address: '78 Rider Street, Lagos',
+    name: '',
+    email: '',
+    phone: '',
+    vehicleType: '',
+    vehiclePlate: '',
+    licenseNumber: '',
+    address: '',
   });
 
   const [availability, setAvailability] = useState({
-    isOnline: true,
-    acceptingOrders: true,
+    isOnline: false,
+    acceptingOrders: false,
   });
+
+  // Update form when user data loads
+  useEffect(() => {
+    if (userData) {
+      setFormData({
+        name: userData.displayName || '',
+        email: userData.email || user?.email || '',
+        phone: userData.phone || '',
+        vehicleType: userData.riderProfile?.vehicle?.type || '',
+        vehiclePlate: userData.riderProfile?.vehicle?.licensePlate || '',
+        licenseNumber: userData.riderProfile?.documents?.licenseNumber || '',
+        address: userData.address || '',
+      });
+
+      setAvailability({
+        isOnline: userData.riderProfile?.isOnline || false,
+        acceptingOrders: userData.riderProfile?.acceptingOrders || false,
+      });
+    }
+  }, [userData, user]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({
@@ -36,13 +68,85 @@ export default function RiderProfilePage() {
     }));
   };
 
-  const handleSave = async () => {
-    setIsSaving(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setIsSaving(false);
+  const handleAvailabilityChange = async (field: 'isOnline' | 'acceptingOrders', value: boolean) => {
+    if (!user) return;
+
+    const newAvailability = { ...availability, [field]: value };
+    setAvailability(newAvailability);
+
+    try {
+      const result = await updateRiderAvailability(user.uid, newAvailability);
+
+      if (result.success) {
+        toast({
+          title: 'Availability updated',
+          description: `You are now ${value ? 'online' : 'offline'}.`,
+        });
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (error: any) {
+      // Revert on error
+      setAvailability(availability);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: error.message || 'Failed to update availability.',
+      });
+    }
   };
 
-  if (isUserLoading) {
+  const handleSave = async () => {
+    if (!user) return;
+
+    setIsSaving(true);
+    try {
+      // Update profile
+      const profileResult = await updateRiderProfile(user.uid, {
+        displayName: formData.name,
+        phone: formData.phone,
+        address: formData.address,
+      });
+
+      if (!profileResult.success) {
+        throw new Error(profileResult.error);
+      }
+
+      // Update vehicle info
+      const vehicleResult = await updateRiderVehicle(user.uid, {
+        type: formData.vehicleType,
+        licensePlate: formData.vehiclePlate,
+      });
+
+      if (!vehicleResult.success) {
+        throw new Error(vehicleResult.error);
+      }
+
+      // Update documents
+      const docsResult = await updateRiderDocuments(user.uid, {
+        licenseNumber: formData.licenseNumber,
+      });
+
+      if (!docsResult.success) {
+        throw new Error(docsResult.error);
+      }
+
+      toast({
+        title: 'Profile updated',
+        description: 'Your rider profile has been updated successfully.',
+      });
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: error.message || 'Failed to update profile.',
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  if (isUserLoading || isUserDataLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -74,9 +178,7 @@ export default function RiderProfilePage() {
             <Switch
               id="online-status"
               checked={availability.isOnline}
-              onCheckedChange={(checked) =>
-                setAvailability(prev => ({ ...prev, isOnline: checked }))
-              }
+              onCheckedChange={(checked) => handleAvailabilityChange('isOnline', checked)}
             />
           </div>
 
@@ -90,9 +192,7 @@ export default function RiderProfilePage() {
             <Switch
               id="accepting-orders"
               checked={availability.acceptingOrders}
-              onCheckedChange={(checked) =>
-                setAvailability(prev => ({ ...prev, acceptingOrders: checked }))
-              }
+              onCheckedChange={(checked) => handleAvailabilityChange('acceptingOrders', checked)}
             />
           </div>
         </CardContent>
@@ -220,7 +320,7 @@ export default function RiderProfilePage() {
                 Upload New
               </Button>
               <span className="text-sm text-muted-foreground">
-                Current: license.pdf
+                Document upload coming soon
               </span>
             </div>
           </div>

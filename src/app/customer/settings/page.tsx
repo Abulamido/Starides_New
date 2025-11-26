@@ -4,48 +4,59 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useUser } from '@/firebase';
+import { useUser, useFirestore, useMemoFirebase, useDoc, useCollection } from '@/firebase';
 import { Loader2, User, MapPin, Plus, Trash2 } from 'lucide-react';
-import { useState } from 'react';
-
-interface Address {
-  id: string;
-  label: string;
-  address: string;
-  city: string;
-  state: string;
-  isDefault: boolean;
-}
+import { useState, useEffect } from 'react';
+import { doc, collection } from 'firebase/firestore';
+import { updateCustomerProfile, addDeliveryAddress, deleteDeliveryAddress, setDefaultAddress, type DeliveryAddress } from './actions';
+import { useToast } from '@/hooks/use-toast';
 
 export default function CustomerSettingsPage() {
   const { user, isUserLoading } = useUser();
+  const firestore = useFirestore();
+  const { toast } = useToast();
   const [isSaving, setIsSaving] = useState(false);
+  const [showAddressForm, setShowAddressForm] = useState(false);
 
-  // Mock customer data
+  // Fetch user data from Firestore
+  const userQuery = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [firestore, user]);
+
+  const { data: userData, isLoading: isUserDataLoading } = useDoc(userQuery);
+
+  // Fetch addresses from Firestore
+  const addressesQuery = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return collection(firestore, `users/${user.uid}/addresses`);
+  }, [firestore, user]);
+
+  const { data: addressesData, isLoading: isAddressesLoading } = useCollection<DeliveryAddress>(addressesQuery);
+
   const [formData, setFormData] = useState({
-    name: user?.displayName || '',
-    email: user?.email || '',
-    phone: '+234 800 000 0000',
+    name: '',
+    email: '',
+    phone: '',
   });
 
-  const [addresses, setAddresses] = useState<Address[]>([
-    {
-      id: '1',
-      label: 'Home',
-      address: '45 Residential Ave',
-      city: 'Lagos',
-      state: 'Lagos State',
-      isDefault: true,
-    },
-    {
-      id: '2',
-      label: 'Work',
-      address: '12 Business District',
-      city: 'Lagos',
-      state: 'Lagos State',
-      isDefault: false,
-    },
-  ]);
+  const [newAddress, setNewAddress] = useState({
+    label: '',
+    address: '',
+    city: '',
+    state: '',
+  });
+
+  // Update form when user data loads
+  useEffect(() => {
+    if (userData) {
+      setFormData({
+        name: userData.displayName || '',
+        email: userData.email || user?.email || '',
+        phone: userData.phone || '',
+      });
+    }
+  }, [userData, user]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({
@@ -54,24 +65,126 @@ export default function CustomerSettingsPage() {
     }));
   };
 
+  const handleAddressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewAddress(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
   const handleSave = async () => {
+    if (!user) return;
+
     setIsSaving(true);
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setIsSaving(false);
+    try {
+      const result = await updateCustomerProfile(user.uid, {
+        displayName: formData.name,
+        phone: formData.phone,
+        email: formData.email,
+      });
+
+      if (result.success) {
+        toast({
+          title: 'Profile updated',
+          description: 'Your profile has been updated successfully.',
+        });
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: error.message || 'Failed to update profile.',
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handleDeleteAddress = (id: string) => {
-    setAddresses(prev => prev.filter(addr => addr.id !== id));
+  const handleAddAddress = async () => {
+    if (!user) return;
+    if (!newAddress.label || !newAddress.address || !newAddress.city || !newAddress.state) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Please fill in all address fields.',
+      });
+      return;
+    }
+
+    try {
+      const result = await addDeliveryAddress(user.uid, {
+        ...newAddress,
+        isDefault: !addressesData || addressesData.length === 0,
+      });
+
+      if (result.success) {
+        toast({
+          title: 'Address added',
+          description: 'Your delivery address has been added successfully.',
+        });
+        setNewAddress({ label: '', address: '', city: '', state: '' });
+        setShowAddressForm(false);
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: error.message || 'Failed to add address.',
+      });
+    }
   };
 
-  const handleSetDefault = (id: string) => {
-    setAddresses(prev => prev.map(addr => ({
-      ...addr,
-      isDefault: addr.id === id,
-    })));
+  const handleDeleteAddress = async (addressId: string) => {
+    if (!user) return;
+
+    try {
+      const result = await deleteDeliveryAddress(user.uid, addressId);
+
+      if (result.success) {
+        toast({
+          title: 'Address deleted',
+          description: 'Your delivery address has been removed.',
+        });
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: error.message || 'Failed to delete address.',
+      });
+    }
   };
 
-  if (isUserLoading) {
+  const handleSetDefault = async (addressId: string) => {
+    if (!user) return;
+
+    try {
+      const result = await setDefaultAddress(user.uid, addressId);
+
+      if (result.success) {
+        toast({
+          title: 'Default address updated',
+          description: 'Your default delivery address has been changed.',
+        });
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: error.message || 'Failed to set default address.',
+      });
+    }
+  };
+
+  if (isUserLoading || isUserDataLoading || isAddressesLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -146,52 +259,118 @@ export default function CustomerSettingsPage() {
               </div>
               <CardDescription>Manage your saved delivery locations</CardDescription>
             </div>
-            <Button size="sm" variant="outline">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => setShowAddressForm(!showAddressForm)}
+            >
               <Plus className="h-4 w-4 mr-2" />
-              Add New
+              {showAddressForm ? 'Cancel' : 'Add New'}
             </Button>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          {addresses.map((address) => (
-            <div
-              key={address.id}
-              className="flex items-start justify-between p-4 border rounded-lg"
-            >
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <h4 className="font-medium">{address.label}</h4>
-                  {address.isDefault && (
-                    <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-                      Default
-                    </span>
-                  )}
+          {/* Add New Address Form */}
+          {showAddressForm && (
+            <div className="border rounded-lg p-4 space-y-3 bg-muted/30">
+              <h4 className="font-medium">New Address</h4>
+              <div className="grid gap-3 md:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="newLabel">Label</Label>
+                  <Input
+                    id="newLabel"
+                    name="label"
+                    value={newAddress.label}
+                    onChange={handleAddressChange}
+                    placeholder="e.g., Home, Work"
+                  />
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  {address.address}, {address.city}, {address.state}
-                </p>
-                <div className="flex gap-2 mt-2">
-                  {!address.isDefault && (
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleSetDefault(address.id)}
-                    >
-                      Set as Default
-                    </Button>
-                  )}
+                <div className="space-y-2">
+                  <Label htmlFor="newAddress">Address</Label>
+                  <Input
+                    id="newAddress"
+                    name="address"
+                    value={newAddress.address}
+                    onChange={handleAddressChange}
+                    placeholder="Street address"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="newCity">City</Label>
+                  <Input
+                    id="newCity"
+                    name="city"
+                    value={newAddress.city}
+                    onChange={handleAddressChange}
+                    placeholder="City"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="newState">State</Label>
+                  <Input
+                    id="newState"
+                    name="state"
+                    value={newAddress.state}
+                    onChange={handleAddressChange}
+                    placeholder="State"
+                  />
                 </div>
               </div>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => handleDeleteAddress(address.id)}
-                disabled={address.isDefault}
-              >
-                <Trash2 className="h-4 w-4 text-destructive" />
+              <Button onClick={handleAddAddress} size="sm">
+                <Plus className="h-4 w-4 mr-2" />
+                Add Address
               </Button>
             </div>
-          ))}
+          )}
+
+          {/* Existing Addresses */}
+          {addressesData && addressesData.length > 0 ? (
+            <div className="space-y-3">
+              {addressesData.map((address) => (
+                <div
+                  key={address.id}
+                  className="flex items-start justify-between p-4 border rounded-lg"
+                >
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="font-medium">{address.label}</h4>
+                      {address.isDefault && (
+                        <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                          Default
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {address.address}, {address.city}, {address.state}
+                    </p>
+                    <div className="flex gap-2 mt-2">
+                      {!address.isDefault && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleSetDefault(address.id!)}
+                        >
+                          Set as Default
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => handleDeleteAddress(address.id!)}
+                    disabled={address.isDefault}
+                  >
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground text-center py-4">
+              No delivery addresses yet. Click "Add New" to create one.
+            </p>
+          )}
         </CardContent>
       </Card>
 
