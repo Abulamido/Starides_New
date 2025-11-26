@@ -70,20 +70,20 @@ export default function LandingPage() {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Link href="/signup?role=customer">
+              <Link href="/auth/customer/signup">
                 <Button size="lg" className="gap-2 min-w-[200px]">
                   <ShoppingBag className="h-5 w-5" />
                   Order Now
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
-              <Link href="/signup?role=vendor">
+              <Link href="/auth/vendor/signup">
                 <Button size="lg" variant="outline" className="gap-2 min-w-[200px]">
                   <Store className="h-5 w-5" />
                   Become a Vendor
                 </Button>
               </Link>
-              <Link href="/signup?role=rider">
+              <Link href="/auth/rider/signup">
                 <Button size="lg" variant="outline" className="gap-2 min-w-[200px]">
                   <Bike className="h-5 w-5" />
                   Deliver with Us
@@ -170,7 +170,7 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                <Link href="/signup?role=vendor">
+                <Link href="/auth/vendor/signup">
                   <Button size="lg" className="gap-2">
                     Start Selling
                     <ArrowRight className="h-4 w-4" />
@@ -212,7 +212,7 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                <Link href="/signup?role=rider">
+                <Link href="/auth/rider/signup">
                   <Button size="lg" className="gap-2">
                     Start Delivering
                     <ArrowRight className="h-4 w-4" />
@@ -232,13 +232,13 @@ export default function LandingPage() {
             Join thousands of satisfied customers, vendors, and riders on Starides
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/signup">
+            <Link href="/auth">
               <Button size="lg" variant="secondary" className="gap-2 min-w-[200px]">
                 Sign Up Now
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
-            <Link href="/login">
+            <Link href="/auth/login">
               <Button size="lg" variant="outline" className="gap-2 min-w-[200px] bg-transparent border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary">
                 Log In
               </Button>
