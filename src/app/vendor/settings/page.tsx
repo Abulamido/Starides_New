@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useUser, useFirestore, useMemoFirebase, useDocument } from '@/firebase';
+import { useUser, useFirestore, useMemoFirebase, useDoc } from '@/firebase';
 import { Loader2, Store, MapPin, Clock, Phone, Mail } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { doc } from 'firebase/firestore';
@@ -24,7 +24,7 @@ export default function VendorSettingsPage() {
     return doc(firestore, 'vendors', user.uid);
   }, [firestore, user]);
 
-  const { data: vendorData, isLoading: isVendorLoading } = useDocument(vendorQuery);
+  const { data: vendorData, isLoading: isVendorLoading } = useDoc(vendorQuery);
 
   const [formData, setFormData] = useState({
     businessName: '',
