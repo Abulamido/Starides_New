@@ -5,27 +5,57 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useUser } from '@/firebase';
+import { useUser, useFirestore, useMemoFirebase, useDocument } from '@/firebase';
 import { Loader2, Store, MapPin, Clock, Phone, Mail } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { doc } from 'firebase/firestore';
+import { updateVendorSettings } from './actions';
+import { useToast } from '@/hooks/use-toast';
 
 export default function VendorSettingsPage() {
   const { user, isUserLoading } = useUser();
+  const firestore = useFirestore();
+  const { toast } = useToast();
   const [isSaving, setIsSaving] = useState(false);
 
-  // Mock vendor data (in real app, fetch from Firestore)
+  // Fetch vendor data from Firestore
+  const vendorQuery = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'vendors', user.uid);
+  }, [firestore, user]);
+
+  const { data: vendorData, isLoading: isVendorLoading } = useDocument(vendorQuery);
+
   const [formData, setFormData] = useState({
-    businessName: 'My Store',
-    description: 'Quality products delivered fresh',
-    phone: '+234 800 000 0000',
-    email: user?.email || '',
-    address: '123 Market Street, Lagos',
-    city: 'Lagos',
-    state: 'Lagos State',
+    businessName: '',
+    description: '',
+    phone: '',
+    email: '',
+    address: '',
+    city: '',
+    state: '',
     openTime: '08:00',
     closeTime: '20:00',
     deliveryRadius: '10',
   });
+
+  // Update form when vendor data loads
+  useEffect(() => {
+    if (vendorData) {
+      setFormData({
+        businessName: vendorData.businessName || '',
+        description: vendorData.description || '',
+        phone: vendorData.phone || '',
+        email: vendorData.email || user?.email || '',
+        address: vendorData.address || '',
+        city: vendorData.city || '',
+        state: vendorData.state || '',
+        openTime: vendorData.operatingHours?.opening || '08:00',
+        closeTime: vendorData.operatingHours?.closing || '20:00',
+        deliveryRadius: vendorData.deliveryRadius?.toString() || '10',
+      });
+    }
+  }, [vendorData, user]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData(prev => ({
@@ -35,14 +65,45 @@ export default function VendorSettingsPage() {
   };
 
   const handleSave = async () => {
+    if (!user) return;
+
     setIsSaving(true);
-    // Simulate save
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setIsSaving(false);
-    // In real app, save to Firestore
+    try {
+      const result = await updateVendorSettings(user.uid, {
+        businessName: formData.businessName,
+        description: formData.description,
+        phone: formData.phone,
+        email: formData.email,
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        deliveryRadius: parseFloat(formData.deliveryRadius),
+        operatingHours: {
+          opening: formData.openTime,
+          closing: formData.closeTime,
+        },
+      });
+
+      if (result.success) {
+        toast({
+          title: 'Settings saved',
+          description: 'Your store settings have been updated successfully.',
+        });
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: error.message || 'Failed to save settings.',
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  if (isUserLoading) {
+  if (isUserLoading || isVendorLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />

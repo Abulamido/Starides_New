@@ -2,7 +2,16 @@
 'use client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
+import { Search, MoreHorizontal } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   Table,
   TableBody,
@@ -17,44 +26,44 @@ import { collection } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type User = {
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-    createdAt: any;
-    firstName: string;
-    lastName: string;
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  createdAt: any;
+  firstName: string;
+  lastName: string;
 }
 
 
 function UserRowSkeleton() {
-    return (
-        <TableRow>
-            <TableCell><Skeleton className="h-5 w-32" /></TableCell>
-            <TableCell><Skeleton className="h-5 w-48" /></TableCell>
-            <TableCell><Skeleton className="h-5 w-20" /></TableCell>
-            <TableCell><Skeleton className="h-5 w-24" /></TableCell>
-        </TableRow>
-    )
+  return (
+    <TableRow>
+      <TableCell><Skeleton className="h-5 w-32" /></TableCell>
+      <TableCell><Skeleton className="h-5 w-48" /></TableCell>
+      <TableCell><Skeleton className="h-5 w-20" /></TableCell>
+      <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+    </TableRow>
+  )
 }
 
 export default function AdminUsersPage() {
-    const firestore = useFirestore();
-    const { user, isUserLoading } = useUser();
+  const firestore = useFirestore();
+  const { user, isUserLoading } = useUser();
 
-    const usersQuery = useMemoFirebase(() => {
-        if (!firestore || !user) return null;
-        return collection(firestore, 'users');
-    }, [firestore, user]);
-    const { data: users, isLoading } = useCollection<User>(usersQuery);
+  const usersQuery = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return collection(firestore, 'users');
+  }, [firestore, user]);
+  const { data: users, isLoading } = useCollection<User>(usersQuery);
 
-    const formatDate = (timestamp: any) => {
-        if (!timestamp) return 'N/A';
-        const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-        return date.toLocaleDateString();
-    };
+  const formatDate = (timestamp: any) => {
+    if (!timestamp) return 'N/A';
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return date.toLocaleDateString();
+  };
 
-    const showLoading = isLoading || isUserLoading;
+  const showLoading = isLoading || isUserLoading;
 
   return (
     <div className="space-y-6">
@@ -74,7 +83,7 @@ export default function AdminUsersPage() {
         />
       </div>
 
-       <Card>
+      <Card>
         <CardHeader>
           <CardTitle>All Users</CardTitle>
           <CardDescription>A list of all users on the platform.</CardDescription>
@@ -87,6 +96,7 @@ export default function AdminUsersPage() {
                 <TableHead>Email</TableHead>
                 <TableHead>Role</TableHead>
                 <TableHead>Date Joined</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -97,15 +107,34 @@ export default function AdminUsersPage() {
                   <TableCell>{user.email}</TableCell>
                   <TableCell><Badge variant="outline">{user.role}</Badge></TableCell>
                   <TableCell>{formatDate(user.createdAt)}</TableCell>
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <span className="sr-only">Open menu</span>
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuItem onClick={() => navigator.clipboard.writeText(user.id)}>
+                          Copy User ID
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem>View Details</DropdownMenuItem>
+                        <DropdownMenuItem className="text-destructive">Block User</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
                 </TableRow>
               ))}
-               {!showLoading && users?.length === 0 && (
+              {!showLoading && users?.length === 0 && (
                 <TableRow>
-                    <TableCell colSpan={4} className="text-center text-muted-foreground py-10">
-                        No users found.
-                    </TableCell>
+                  <TableCell colSpan={5} className="text-center text-muted-foreground py-10">
+                    No users found.
+                  </TableCell>
                 </TableRow>
-               )}
+              )}
             </TableBody>
           </Table>
         </CardContent>

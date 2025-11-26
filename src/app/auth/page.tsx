@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { ShoppingBag, Store, Bike } from 'lucide-react';
+import { ShoppingBag, Store, Bike, Shield } from 'lucide-react';
 import { StaridesLogo } from '@/components/starides-logo';
 
 export default function AuthPage() {
@@ -19,7 +19,7 @@ export default function AuthPage() {
         </p>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-6 mb-12">
+      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
         {/* Customer Card */}
         <Card className="p-6 hover:shadow-lg transition-shadow border-2 hover:border-primary">
           <div className="flex flex-col items-center text-center">
@@ -64,6 +64,22 @@ export default function AuthPage() {
             </p>
             <Button asChild className="w-full">
               <Link href="/auth/rider/signup">Sign Up as Rider</Link>
+            </Button>
+          </div>
+        </Card>
+
+        {/* Admin Card */}
+        <Card className="p-6 hover:shadow-lg transition-shadow border-2 hover:border-primary bg-gradient-to-br from-primary/5 to-primary/10">
+          <div className="flex flex-col items-center text-center">
+            <div className="h-16 w-16 rounded-full bg-primary/20 flex items-center justify-center mb-4">
+              <Shield className="h-8 w-8 text-primary" />
+            </div>
+            <h2 className="text-2xl font-bold mb-2">Admin</h2>
+            <p className="text-muted-foreground mb-6">
+              Manage the platform, vendors, riders, and oversee operations
+            </p>
+            <Button asChild className="w-full">
+              <Link href="/auth/admin/signup">Sign Up as Admin</Link>
             </Button>
           </div>
         </Card>

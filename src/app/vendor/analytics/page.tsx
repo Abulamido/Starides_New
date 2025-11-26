@@ -73,10 +73,10 @@ export default function VendorAnalyticsPage() {
   const productSales = new Map<string, { name: string; quantity: number; revenue: number }>();
 
   orders?.forEach(order => {
-    if (order.status === 'Delivered' && order.items && Array.isArray(order.items)) {
-      order.items.forEach(item => {
-        const existing = productSales.get(item.productId) || { name: item.name, quantity: 0, revenue: 0 };
-        productSales.set(item.productId, {
+    if (order.status === 'Delivered' && order.products && Array.isArray(order.products)) {
+      order.products.forEach(item => {
+        const existing = productSales.get(item.id) || { name: item.name, quantity: 0, revenue: 0 };
+        productSales.set(item.id, {
           name: item.name,
           quantity: existing.quantity + item.quantity,
           revenue: existing.revenue + (item.price * item.quantity),

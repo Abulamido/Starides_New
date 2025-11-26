@@ -11,7 +11,17 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
-import { collection, query, orderBy } from 'firebase/firestore';
+import { collection, query, orderBy, limit } from 'firebase/firestore';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Terminal } from 'lucide-react';
@@ -21,41 +31,42 @@ import { format } from 'date-fns';
 type StatusVariant = 'default' | 'secondary' | 'destructive' | 'outline';
 
 const getStatusVariant = (status: string): StatusVariant => {
-    switch (status.toLowerCase()) {
-      case 'delivered':
-        return 'default';
-      case 'shipped':
-        return 'outline';
-      case 'processing':
-        return 'secondary';
-      case 'canceled':
-        return 'destructive';
-      default:
-        return 'secondary';
-    }
-  };
+  switch (status.toLowerCase()) {
+    case 'delivered':
+      return 'default';
+    case 'shipped':
+      return 'outline';
+    case 'processing':
+      return 'secondary';
+    case 'canceled':
+      return 'destructive';
+    default:
+      return 'secondary';
+  }
+};
 
 function OrderRowSkeleton() {
-    return (
-        <TableRow>
-            <TableCell><Skeleton className="h-5 w-20" /></TableCell>
-            <TableCell><Skeleton className="h-5 w-24" /></TableCell>
-            <TableCell><Skeleton className="h-5 w-32" /></TableCell>
-            <TableCell><Skeleton className="h-5 w-20" /></TableCell>
-            <TableCell><Skeleton className="h-5 w-16" /></TableCell>
-            <TableCell className="text-right"><Skeleton className="h-5 w-20" /></TableCell>
-        </TableRow>
-    )
+  return (
+    <TableRow>
+      <TableCell><Skeleton className="h-5 w-20" /></TableCell>
+      <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+      <TableCell><Skeleton className="h-5 w-32" /></TableCell>
+      <TableCell><Skeleton className="h-5 w-20" /></TableCell>
+      <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+      <TableCell className="text-right"><Skeleton className="h-5 w-20" /></TableCell>
+    </TableRow>
+  )
 }
 
 export default function AdminOrdersPage() {
   const firestore = useFirestore();
   const { user, isUserLoading } = useUser();
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   // The query is now conditional on the user being loaded and present
   const ordersQuery = useMemoFirebase(() => {
     if (isUserLoading || !user) return null;
-    return query(collection(firestore, 'orders'), orderBy('orderDate', 'desc'));
+    return query(collection(firestore, 'orders'), orderBy('orderDate', 'desc'), limit(20));
   }, [firestore, user, isUserLoading]);
 
   const { data: orders, isLoading: isLoadingOrders, error } = useCollection<Order>(ordersQuery);
@@ -69,20 +80,20 @@ export default function AdminOrdersPage() {
 
   // The loading state now explicitly includes the user loading check
   const showLoading = isLoadingOrders || isUserLoading;
-  
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Manage Orders</h1>
         <p className="text-muted-foreground">
-          View and manage all orders on the platform.
+          View and manage recent orders on the platform.
         </p>
       </div>
 
-       <Card>
+      <Card>
         <CardHeader>
-          <CardTitle>All Orders</CardTitle>
-          <CardDescription>A real-time list of all orders placed on the platform.</CardDescription>
+          <CardTitle>Recent Orders</CardTitle>
+          <CardDescription>A real-time list of the last 20 orders placed on the platform.</CardDescription>
         </CardHeader>
         <CardContent>
           {error && (
@@ -104,14 +115,15 @@ export default function AdminOrdersPage() {
                 <TableHead>Status</TableHead>
                 <TableHead>Items</TableHead>
                 <TableHead className="text-right">Total</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {showLoading && (
                 <>
-                    <OrderRowSkeleton />
-                    <OrderRowSkeleton />
-                    <OrderRowSkeleton />
+                  <OrderRowSkeleton />
+                  <OrderRowSkeleton />
+                  <OrderRowSkeleton />
                 </>
               )}
               {!isUserLoading && orders && orders.map((order) => (
@@ -124,15 +136,51 @@ export default function AdminOrdersPage() {
                   </TableCell>
                   <TableCell>{order.products.reduce((acc, p) => acc + p.quantity, 0)}</TableCell>
                   <TableCell className="text-right">₦{order.totalAmount.toFixed(2)}</TableCell>
+                  <TableCell className="text-right">
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="ghost" size="sm" onClick={() => setSelectedOrder(order)}>
+                          View
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Order Details</DialogTitle>
+                          <DialogDescription>Order ID: {order.id}</DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <div>
+                            <h4 className="font-semibold mb-2">Products</h4>
+                            <ul className="space-y-2">
+                              {order.products.map((p, i) => (
+                                <li key={i} className="flex justify-between text-sm">
+                                  <span>{p.quantity}x {p.name}</span>
+                                  <span>₦{p.price * p.quantity}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                          <div className="flex justify-between font-bold pt-2 border-t">
+                            <span>Total</span>
+                            <span>₦{order.totalAmount.toFixed(2)}</span>
+                          </div>
+                          <div>
+                            <h4 className="font-semibold mb-1">Delivery Address</h4>
+                            <p className="text-sm text-muted-foreground">{order.deliveryAddress}</p>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
 
           {!showLoading && orders?.length === 0 && (
-             <div className="text-center text-muted-foreground py-10">
-                <p>No orders have been placed yet.</p>
-             </div>
+            <div className="text-center text-muted-foreground py-10">
+              <p>No orders have been placed yet.</p>
+            </div>
           )}
         </CardContent>
       </Card>

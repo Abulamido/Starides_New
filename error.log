@@ -1,0 +1,16 @@
+src/app/customer/recommendations/page.tsx(127,70): error TS2339: Property 'description' does not exist on type 'WithId<Product>'.
+src/app/customer/recommendations/page.tsx(183,70): error TS2339: Property 'description' does not exist on type 'WithId<Product>'.
+src/app/layout.tsx(26,65): error TS2322: Type '"true"' is not assignable to type 'CrossOrigin'.
+src/app/vendor/analytics/page.tsx(76,47): error TS2339: Property 'items' does not exist on type 'WithId<Order>'.
+src/app/vendor/analytics/page.tsx(76,76): error TS2339: Property 'items' does not exist on type 'WithId<Order>'.
+src/app/vendor/analytics/page.tsx(77,13): error TS2339: Property 'items' does not exist on type 'WithId<Order>'.
+src/app/vendor/analytics/page.tsx(77,27): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/app/vendor/products/page.tsx(48,13): error TS2339: Property 'description' does not exist on type 'WithId<Product>'.
+src/app/vendor/products/product-form-dialog.tsx(74,38): error TS2339: Property 'description' does not exist on type 'Product'.
+src/app/vendor/products/product-form-dialog.tsx(78,36): error TS2339: Property 'available' does not exist on type 'Product'.
+src/app/vendor/products/vendor-product-card.tsx(72,37): error TS2339: Property 'available' does not exist on type 'Product'.
+src/app/vendor/products/vendor-product-card.tsx(75,32): error TS2339: Property 'available' does not exist on type 'Product'.
+src/app/vendor/products/vendor-product-card.tsx(76,38): error TS2339: Property 'available' does not exist on type 'Product'.
+src/app/vendor/products/vendor-product-card.tsx(102,31): error TS2339: Property 'available' does not exist on type 'Product'.
+src/app/vendor/products/vendor-product-card.tsx(113,42): error TS2339: Property 'description' does not exist on type 'Product'.
+src/app/vendor/products/vendor-product-card.tsx(131,46): error TS2339: Property 'available' does not exist on type 'Product'.

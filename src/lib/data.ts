@@ -5,11 +5,13 @@ import { placeholderImages } from './placeholder-images';
 export type Product = {
   id: string;
   name: string;
+  description?: string;
   price: number;
   category: string;
   image: string;
   imageHint: string;
   vendorId: string; // Firebase Auth user.uid of the vendor owner
+  available?: boolean;
 };
 
 export type Order = {

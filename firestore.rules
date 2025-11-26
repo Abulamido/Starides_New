@@ -12,24 +12,29 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
     
+    function isAdmin() {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
     function isRider() {
       return isAuthenticated();
     }
     
-    // Vendors collection - public read, owner write
+    // Vendors collection - public read, owner write, admin full access
     match /vendors/{vendorId} {
       allow read: if true;
       allow create: if isAuthenticated();
-      allow update, delete: if isAuthenticated() && 
-        resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin() || (isAuthenticated() && 
+        resource.data.userId == request.auth.uid);
     }
     
-    // Products collection - public read, vendor owner write
+    // Products collection - public read, vendor owner write, admin full access
     match /products/{productId} {
       allow read: if true;
       allow create: if isAuthenticated();
-      allow update, delete: if isAuthenticated() && 
-        resource.data.vendorId == request.auth.uid;
+      allow update, delete: if isAdmin() || (isAuthenticated() && 
+        resource.data.vendorId == request.auth.uid);
     }
     
     // Orders collection
@@ -40,7 +45,7 @@ service cloud.firestore {
       
       allow create: if isAuthenticated();
       
-      allow update: if isAuthenticated() && (
+      allow update: if isAdmin() || (isAuthenticated() && (
         resource.data.customerId == request.auth.uid ||
         resource.data.vendorId == request.auth.uid ||
         resource.data.riderId == request.auth.uid ||
@@ -52,24 +57,27 @@ service cloud.firestore {
         (resource.data.riderId == request.auth.uid && 
          resource.data.status == 'Out for Delivery' &&
          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['riderLocation', 'eta', 'updatedAt']))
-      );
+      ));
       
-      allow delete: if false;
+      allow delete: if isAdmin();
     }
     
-    // Users collection
+    // Users collection - admins can read all users
     match /users/{userId} {
-      allow read, write: if isOwner(userId);
+      allow read: if isAdmin() || isOwner(userId);
+      allow write: if isAdmin() || isOwner(userId);
     }
     
-    // Customers collection
+    // Customers collection - admins can read all
     match /customers/{customerId} {
-      allow read, write: if isOwner(customerId);
+      allow read: if isAdmin() || isOwner(customerId);
+      allow write: if isAdmin() || isOwner(customerId);
     }
     
-    // Riders collection  
+    // Riders collection - admins can read all
     match /riders/{riderId} {
-      allow read, write: if isOwner(riderId);
+      allow read: if isAdmin() || isOwner(riderId);
+      allow write: if isAdmin() || isOwner(riderId);
     }
   }
 }
