@@ -49,10 +49,14 @@ export function useNotifications() {
         try {
             const messaging = getMessaging();
 
-            // Get FCM token (Firebase SDK will handle service worker registration)
+            // Register service worker first
+            const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+            await navigator.serviceWorker.ready;
+
+            // Get FCM token
             const token = await getToken(messaging, {
                 vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
-                serviceWorkerRegistration: await navigator.serviceWorker.register('/firebase-messaging-sw.js'),
+                serviceWorkerRegistration: registration,
             });
 
             if (token) {
