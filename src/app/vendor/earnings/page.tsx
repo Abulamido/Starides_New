@@ -1,3 +1,5 @@
+'use client';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCollection, useFirestore, useUser, useMemoFirebase } from '@/firebase';
 import { collection, query, where, orderBy } from 'firebase/firestore';
@@ -155,8 +157,8 @@ export default function VendorEarningsPage() {
                     <div className="flex items-center gap-2">
                       <p className="font-medium">Payout Request</p>
                       <span className={`text-xs px-2 py-0.5 rounded-full capitalize ${payout.status === 'processed' ? 'bg-green-100 text-green-800' :
-                          payout.status === 'rejected' ? 'bg-red-100 text-red-800' :
-                            'bg-yellow-100 text-yellow-800'
+                        payout.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                          'bg-yellow-100 text-yellow-800'
                         }`}>
                         {payout.status}
                       </span>
