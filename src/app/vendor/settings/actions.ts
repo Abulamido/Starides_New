@@ -1,6 +1,6 @@
 'use server';
 
-import { initializeServerFirebase } from '@/firebase';
+import { initializeServerFirebase } from '@/firebase/server-sdk';
 import { doc, updateDoc, serverTimestamp, getDoc } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
 
