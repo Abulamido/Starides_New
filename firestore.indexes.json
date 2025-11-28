@@ -27,25 +27,67 @@
           "order": "ASCENDING"
         },
         {
-          "fieldPath": "orderDate",
-          "order": "DESCENDING"
+          "indexes": [
+            {
+              "collectionGroup": "orders",
+              "queryScope": "COLLECTION",
+              "fields": [
+                {
+                  "fieldPath": "status",
+                  "order": "ASCENDING"
+                },
+                {
+                  "fieldPath": "orderDate",
+                  "order": "DESCENDING"
+                }
+              ]
+            },
+            {
+              "collectionGroup": "orders",
+              "queryScope": "COLLECTION",
+              "fields": [
+                {
+                  "fieldPath": "riderId",
+                  "order": "ASCENDING"
+                },
+                {
+                  "fieldPath": "status",
+                  "order": "ASCENDING"
+                },
+                {
+                  "fieldPath": "orderDate",
+                  "order": "DESCENDING"
+                }
+              ]
+            },
+            {
+              "collectionGroup": "orders",
+              "queryScope": "COLLECTION",
+              "fields": [
+                {
+                  "fieldPath": "riderId",
+                  "order": "ASCENDING"
+                },
+                {
+                  "fieldPath": "orderDate",
+                  "order": "DESCENDING"
+                }
+              ]
+            },
+            {
+              "collectionGroup": "payouts",
+              "queryScope": "COLLECTION",
+              "fields": [
+                {
+                  "fieldPath": "userId",
+                  "order": "ASCENDING"
+                },
+                {
+                  "fieldPath": "requestedAt",
+                  "order": "DESCENDING"
+                }
+              ]
+            }
+          ],
+          "fieldOverrides": []
         }
-      ]
-    },
-    {
-      "collectionGroup": "orders",
-      "queryScope": "COLLECTION",
-      "fields": [
-        {
-          "fieldPath": "riderId",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "orderDate",
-          "order": "DESCENDING"
-        }
-      ]
-    }
-  ],
-  "fieldOverrides": []
-}
