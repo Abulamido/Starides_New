@@ -1,6 +1,6 @@
 'use server';
 
-import { initializeFirebase } from '@/firebase';
+import { initializeServerFirebase } from '@/firebase/server-sdk';
 import { collection, addDoc, query, where, getDocs, orderBy, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
 
@@ -27,7 +27,7 @@ export async function requestPayout(
     bankDetails: PayoutRequest['bankDetails']
 ) {
     try {
-        const { firestore } = initializeFirebase();
+        const { firestore } = initializeServerFirebase();
 
         // Basic validation
         if (amount <= 0) {
@@ -59,7 +59,7 @@ export async function requestPayout(
 
 export async function getPayoutHistory(userId: string) {
     try {
-        const { firestore } = initializeFirebase();
+        const { firestore } = initializeServerFirebase();
         const payoutsRef = collection(firestore, 'payouts');
         const q = query(
             payoutsRef,
