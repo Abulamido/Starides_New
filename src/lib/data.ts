@@ -21,7 +21,7 @@ export type Order = {
   riderId?: string;   // Firebase Auth user.uid of the rider (optional)
   products: { id: string; name: string; quantity: number, price: number }[];
   totalAmount: number;
-  status: 'Processing' | 'Accepted' | 'Shipped' | 'Out for Delivery' | 'Delivered' | 'Canceled';
+  status: 'New Order' | 'Pending Acceptance' | 'Preparing' | 'Ready for Pickup' | 'In Transit' | 'Delivered' | 'Canceled';
   orderDate: any; // Using `any` for Firebase Timestamp flexibility
   deliveryAddress: string;
   deliveryFee?: number;
@@ -61,3 +61,21 @@ export type AdminRider = {
   enabled: boolean;
   userId: string;
 }
+
+export type Wallet = {
+  userId: string;
+  balance: number;
+  updatedAt: any; // Firestore Timestamp
+};
+
+export type Transaction = {
+  id: string;
+  userId: string;
+  type: 'credit' | 'debit';
+  amount: number;
+  description: string;
+  reference?: string; // Paystack reference
+  status: 'pending' | 'success' | 'failed';
+  createdAt: any; // Firestore Timestamp
+  metadata?: any;
+};

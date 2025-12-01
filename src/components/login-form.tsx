@@ -47,17 +47,35 @@ export function LoginForm() {
     try {
       if (!auth) throw new Error("Auth service not available");
       await signInWithEmailAndPassword(auth, values.email, values.password);
-      
+
       // Let the DashboardLayout handle the redirect based on role.
       // This avoids trying to guess the role on the client.
-      router.push('/customer'); 
+      router.push('/customer');
 
     } catch (error: any) {
       console.error("Login Error:", error);
+
+      // Provide specific error messages based on error code
+      let errorTitle = 'Login Failed';
+      let errorDescription = error.message || 'Invalid email or password.';
+
+      if (error.code === 'auth/network-request-failed') {
+        errorTitle = 'Network Error';
+        errorDescription = 'Cannot connect to Firebase servers. Please check:\n• Browser extensions (disable ad blockers)\n• Network connectivity\n• Try incognito mode\n• Clear browser cache';
+      } else if (error.code === 'auth/invalid-credential') {
+        errorDescription = 'Invalid email or password. Please check your credentials or sign up for a new account.';
+      } else if (error.code === 'auth/user-not-found') {
+        errorDescription = 'No account found with this email. Please sign up first.';
+      } else if (error.code === 'auth/wrong-password') {
+        errorDescription = 'Incorrect password. Please try again.';
+      } else if (error.code === 'auth/too-many-requests') {
+        errorDescription = 'Too many failed login attempts. Please try again later or reset your password.';
+      }
+
       toast({
         variant: 'destructive',
-        title: 'Login Failed',
-        description: error.message || 'Invalid email or password.',
+        title: errorTitle,
+        description: errorDescription,
       });
     } finally {
       setIsLoading(false);
@@ -114,12 +132,12 @@ export function LoginForm() {
         </div>
 
         <div className="space-y-2">
-            <Button variant="outline" className="w-full" disabled={isLoading}>
-                Login with Google
-            </Button>
-            <Button variant="outline" className="w-full" disabled={isLoading}>
-                Login with Facebook
-            </Button>
+          <Button variant="outline" className="w-full" disabled={isLoading}>
+            Login with Google
+          </Button>
+          <Button variant="outline" className="w-full" disabled={isLoading}>
+            Login with Facebook
+          </Button>
         </div>
       </form>
     </Form>

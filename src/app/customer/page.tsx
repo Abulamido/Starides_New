@@ -61,11 +61,11 @@ export default function CustomerDashboard() {
     <div className="space-y-8 pb-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight lg:text-5xl bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
             Discover Vendors
           </h1>
-          <p className="mt-2 text-lg text-muted-foreground">
-            Find your favorite stores and products near you.
+          <p className="mt-2 text-base md:text-lg text-muted-foreground">
+            Find your favorite restaurants and products near you.
           </p>
         </div>
       </div>
@@ -76,17 +76,17 @@ export default function CustomerDashboard() {
           <Input
             type="search"
             placeholder="Search for restaurants, groceries, and more..."
-            className="w-full pl-12 h-12 text-lg shadow-sm transition-shadow focus-visible:shadow-md rounded-full bg-background/50 backdrop-blur-sm border-muted/40"
+            className="w-full pl-12 h-12 text-base md:text-lg shadow-sm transition-shadow focus-visible:shadow-md rounded-full bg-background/50 backdrop-blur-sm border-muted/40"
           />
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex overflow-x-auto pb-4 md:pb-0 md:flex-wrap items-center gap-3 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
           {categories.map((category, index) => (
             <Button
               key={category.name}
               variant={(index === 0 ? 'default' : 'outline') as "default" | "outline"}
               className={cn(
-                "h-10 px-6 rounded-full transition-all duration-300",
+                "h-10 px-6 rounded-full transition-all duration-300 shrink-0",
                 index === 0
                   ? "shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5"
                   : "hover:bg-secondary hover:text-secondary-foreground hover:border-secondary-foreground/10 hover:-translate-y-0.5 bg-background/50 backdrop-blur-sm"
@@ -101,7 +101,7 @@ export default function CustomerDashboard() {
 
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-semibold tracking-tight">Featured Stores</h2>
+          <h2 className="text-2xl font-semibold tracking-tight">Featured Restaurants</h2>
           <Button variant="link" className="text-primary">View all</Button>
         </div>
 

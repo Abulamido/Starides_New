@@ -35,7 +35,7 @@ export default function LandingPage() {
     {
       step: '1',
       title: 'Browse Vendors',
-      description: 'Discover local stores and browse their products',
+      description: 'Discover local restaurants and browse their products',
     },
     {
       step: '2',

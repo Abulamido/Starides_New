@@ -26,7 +26,7 @@ service cloud.firestore {
       allow read: if true;
       allow create: if isAuthenticated();
       allow update, delete: if isAdmin() || (isAuthenticated() && 
-        resource.data.userId == request.auth.uid);
+        vendorId == request.auth.uid);
     }
     
     // Products collection - public read, vendor owner write, admin full access
@@ -49,13 +49,22 @@ service cloud.firestore {
         resource.data.customerId == request.auth.uid ||
         resource.data.vendorId == request.auth.uid ||
         resource.data.riderId == request.auth.uid ||
-        // Allow riders to claim orders (update riderId)
+        // Allow riders to claim orders (update riderId) - OLD status values
         (resource.data.status == 'Shipped' && request.resource.data.riderId == request.auth.uid) ||
         (resource.data.status == 'Accepted' && request.resource.data.riderId == request.auth.uid) ||
         (resource.data.status == 'Processing' && request.resource.data.riderId == request.auth.uid) ||
-        // Allow riders to update location on active deliveries
+        // Allow riders to claim orders (update riderId) - NEW status values
+        (resource.data.status == 'Ready for Pickup' && request.resource.data.riderId == request.auth.uid) ||
+        (resource.data.status == 'Preparing' && request.resource.data.riderId == request.auth.uid) ||
+        (resource.data.status == 'New Order' && request.resource.data.riderId == request.auth.uid) ||
+        (resource.data.status == 'Pending Acceptance' && request.resource.data.riderId == request.auth.uid) ||
+        // Allow riders to update location on active deliveries - OLD status
         (resource.data.riderId == request.auth.uid && 
          resource.data.status == 'Out for Delivery' &&
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['riderLocation', 'eta', 'updatedAt'])) ||
+        // Allow riders to update location on active deliveries - NEW status
+        (resource.data.riderId == request.auth.uid && 
+         resource.data.status == 'In Transit' &&
          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['riderLocation', 'eta', 'updatedAt']))
       ));
       
@@ -66,6 +75,11 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if isAdmin() || isOwner(userId);
       allow write: if isAdmin() || isOwner(userId);
+      
+      match /savedCards/{cardId} {
+        allow read: if isOwner(userId);
+        allow write: if false; // Only server can write
+      }
     }
     
     // Customers collection - admins can read all
@@ -78,6 +92,18 @@ service cloud.firestore {
     match /riders/{riderId} {
       allow read: if isAdmin() || isOwner(riderId);
       allow write: if isAdmin() || isOwner(riderId);
+    }
+
+    // Wallets collection - users can only read their own wallet, only server can write
+    match /wallets/{userId} {
+      allow read: if isOwner(userId);
+      allow write: if false; // Only server-side functions can write
+    }
+
+    // Transactions collection - users can only read their own transactions, only server can write
+    match /transactions/{transactionId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow write: if false; // Only server-side functions can write
     }
 
     // Payouts collection

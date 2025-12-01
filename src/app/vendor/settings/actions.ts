@@ -1,7 +1,6 @@
 'use server';
 
-import { initializeServerFirebase } from '@/firebase/server-sdk';
-import { doc, updateDoc, serverTimestamp, getDoc } from 'firebase/firestore';
+import { adminDb } from '@/firebase/admin';
 import { revalidatePath } from 'next/cache';
 
 export interface VendorSettings {
@@ -13,6 +12,10 @@ export interface VendorSettings {
     city: string;
     state: string;
     deliveryRadius: number;
+    location?: {
+        lat: number;
+        lng: number;
+    };
     operatingHours: {
         opening: string;
         closing: string;
@@ -21,10 +24,9 @@ export interface VendorSettings {
 
 export async function updateVendorSettings(vendorId: string, data: VendorSettings) {
     try {
-        const { firestore } = initializeServerFirebase();
-        const vendorRef = doc(firestore, 'vendors', vendorId);
+        const vendorRef = adminDb.collection('vendors').doc(vendorId);
 
-        await updateDoc(vendorRef, {
+        const updateData: any = {
             businessName: data.businessName,
             description: data.description,
             phone: data.phone,
@@ -34,8 +36,15 @@ export async function updateVendorSettings(vendorId: string, data: VendorSetting
             state: data.state,
             deliveryRadius: data.deliveryRadius,
             operatingHours: data.operatingHours,
-            updatedAt: serverTimestamp(),
-        });
+            updatedAt: new Date(), // Admin SDK uses native Date or Timestamp
+        };
+
+        // Add location if provided
+        if (data.location) {
+            updateData.location = data.location;
+        }
+
+        await vendorRef.set(updateData, { merge: true });
 
         revalidatePath('/vendor/settings');
         return { success: true };
@@ -47,11 +56,10 @@ export async function updateVendorSettings(vendorId: string, data: VendorSetting
 
 export async function getVendorSettings(vendorId: string) {
     try {
-        const { firestore } = initializeServerFirebase();
-        const vendorRef = doc(firestore, 'vendors', vendorId);
-        const vendorDoc = await getDoc(vendorRef);
+        const vendorRef = adminDb.collection('vendors').doc(vendorId);
+        const vendorDoc = await vendorRef.get();
 
-        if (!vendorDoc.exists()) {
+        if (!vendorDoc.exists) {
             return { success: false, error: 'Vendor not found' };
         }
 

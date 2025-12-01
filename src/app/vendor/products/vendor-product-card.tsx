@@ -48,7 +48,7 @@ export function VendorProductCard({ product, onEdit }: VendorProductCardProps) {
             await deleteDoc(doc(firestore, 'products', product.id));
             toast({
                 title: 'Product deleted',
-                description: 'The product has been removed from your store.',
+                description: 'The product has been removed from your restaurant.',
             });
             setShowDeleteDialog(false);
         } catch (error: any) {

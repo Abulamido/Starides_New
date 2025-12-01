@@ -23,6 +23,7 @@ import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { StaridesLogo } from '@/components/starides-logo';
+import { FirebaseConnectivityCheck } from '@/components/firebase-connectivity-check';
 
 const formSchema = z.object({
     email: z.string().email({ message: 'Please enter a valid email.' }),
@@ -85,10 +86,28 @@ export default function LoginPage() {
 
         } catch (error: any) {
             console.error('Login Error:', error);
+
+            // Provide specific error messages based on error code
+            let errorTitle = 'Login Failed';
+            let errorDescription = error.message || 'Invalid credentials.';
+
+            if (error.code === 'auth/network-request-failed') {
+                errorTitle = 'Network Error';
+                errorDescription = 'Cannot connect to Firebase servers. Please check your network connection and try the diagnostics below.';
+            } else if (error.code === 'auth/invalid-credential') {
+                errorDescription = 'Invalid email or password. Please check your credentials or sign up for a new account.';
+            } else if (error.code === 'auth/user-not-found') {
+                errorDescription = 'No account found with this email. Please sign up first.';
+            } else if (error.code === 'auth/wrong-password') {
+                errorDescription = 'Incorrect password. Please try again.';
+            } else if (error.code === 'auth/too-many-requests') {
+                errorDescription = 'Too many failed login attempts. Please try again later or reset your password.';
+            }
+
             toast({
                 variant: 'destructive',
-                title: 'Login Failed',
-                description: error.message || 'Invalid credentials.',
+                title: errorTitle,
+                description: errorDescription,
             });
         } finally {
             setIsLoading(false);
@@ -156,6 +175,8 @@ export default function LoginPage() {
                                 </Link>
                             </p>
                         </div>
+
+                        <FirebaseConnectivityCheck />
                     </CardContent>
                 </Card>
             </div>

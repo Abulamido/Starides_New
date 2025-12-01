@@ -31,14 +31,17 @@ import { format } from 'date-fns';
 type StatusVariant = 'default' | 'secondary' | 'destructive' | 'outline';
 
 const getStatusVariant = (status: string): StatusVariant => {
-  switch (status.toLowerCase()) {
-    case 'delivered':
+  switch (status) {
+    case 'Delivered':
       return 'default';
-    case 'shipped':
+    case 'Ready for Pickup':
+    case 'In Transit':
       return 'outline';
-    case 'processing':
+    case 'New Order':
+    case 'Pending Acceptance':
+    case 'Preparing':
       return 'secondary';
-    case 'canceled':
+    case 'Canceled':
       return 'destructive';
     default:
       return 'secondary';

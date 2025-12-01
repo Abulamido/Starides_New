@@ -24,15 +24,17 @@ import { OrderDetailDialog } from './order-detail-dialog';
 type StatusVariant = 'default' | 'secondary' | 'destructive' | 'outline';
 
 const getStatusVariant = (status: string): StatusVariant => {
-  switch (status.toLowerCase()) {
-    case 'delivered':
+  switch (status) {
+    case 'Delivered':
       return 'default';
-    case 'shipped':
-    case 'out for delivery':
+    case 'Ready for Pickup':
+    case 'In Transit':
       return 'outline';
-    case 'processing':
+    case 'New Order':
+    case 'Pending Acceptance':
+    case 'Preparing':
       return 'secondary';
-    case 'canceled':
+    case 'Canceled':
       return 'destructive';
     default:
       return 'secondary';
@@ -80,15 +82,20 @@ export default function MyOrdersPage() {
   // Filter orders by status
   const filteredOrders = orders?.filter(order => {
     if (statusFilter === 'all') return true;
-    return order.status.toLowerCase() === statusFilter.toLowerCase();
+    if (statusFilter === 'active') {
+      return ['New Order', 'Pending Acceptance', 'Preparing', 'Ready for Pickup', 'In Transit'].includes(order.status);
+    }
+    if (statusFilter === 'completed') {
+      return ['Delivered', 'Canceled'].includes(order.status);
+    }
+    return true;
   });
 
   // Count orders by status
   const statusCounts = {
     all: orders?.length || 0,
-    processing: orders?.filter(o => o.status.toLowerCase() === 'processing').length || 0,
-    shipped: orders?.filter(o => o.status.toLowerCase() === 'shipped' || o.status.toLowerCase() === 'out for delivery').length || 0,
-    delivered: orders?.filter(o => o.status.toLowerCase() === 'delivered').length || 0,
+    active: orders?.filter(o => ['New Order', 'Pending Acceptance', 'Preparing', 'Ready for Pickup', 'In Transit'].includes(o.status)).length || 0,
+    completed: orders?.filter(o => ['Delivered', 'Canceled'].includes(o.status)).length || 0,
   };
 
   return (
@@ -101,9 +108,8 @@ export default function MyOrdersPage() {
       <Tabs value={statusFilter} onValueChange={setStatusFilter}>
         <TabsList>
           <TabsTrigger value="all">All ({statusCounts.all})</TabsTrigger>
-          <TabsTrigger value="processing">Processing ({statusCounts.processing})</TabsTrigger>
-          <TabsTrigger value="shipped">Shipped ({statusCounts.shipped})</TabsTrigger>
-          <TabsTrigger value="delivered">Delivered ({statusCounts.delivered})</TabsTrigger>
+          <TabsTrigger value="active">Active ({statusCounts.active})</TabsTrigger>
+          <TabsTrigger value="completed">Completed ({statusCounts.completed})</TabsTrigger>
         </TabsList>
 
         <TabsContent value={statusFilter} className="mt-6">
@@ -113,56 +119,93 @@ export default function MyOrdersPage() {
               <CardDescription>View and manage your orders</CardDescription>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[100px]">Order ID</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Items</TableHead>
-                    <TableHead className="text-right">Total</TableHead>
-                    <TableHead className="w-[100px] text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {showLoading && (
-                    <>
-                      <OrderRowSkeleton />
-                      <OrderRowSkeleton />
-                    </>
-                  )}
-                  {!showLoading && filteredOrders && filteredOrders.map((order) => (
-                    <TableRow key={order.id}>
-                      <TableCell className="font-medium truncate max-w-20">
-                        {order.id.slice(0, 8)}...
-                      </TableCell>
-                      <TableCell>{formatDate(order.orderDate)}</TableCell>
-                      <TableCell>
-                        <Badge variant={getStatusVariant(order.status)}>
-                          {order.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {order.products.reduce((acc, p) => acc + p.quantity, 0)}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        ₦{order.totalAmount.toFixed(2)}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => setSelectedOrder(order)}
-                        >
-                          <Eye className="h-4 w-4" />
-                          <span className="sr-only">View Details</span>
-                        </Button>
-                      </TableCell>
+              {/* Desktop Table View */}
+              <div className="hidden md:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[100px]">Order ID</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Items</TableHead>
+                      <TableHead className="text-right">Total</TableHead>
+                      <TableHead className="w-[100px] text-right">Actions</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {showLoading && (
+                      <>
+                        <OrderRowSkeleton />
+                        <OrderRowSkeleton />
+                      </>
+                    )}
+                    {!showLoading && filteredOrders && filteredOrders.map((order) => (
+                      <TableRow key={order.id}>
+                        <TableCell className="font-medium truncate max-w-20">
+                          {order.id.slice(0, 8)}...
+                        </TableCell>
+                        <TableCell>{formatDate(order.orderDate)}</TableCell>
+                        <TableCell>
+                          <Badge variant={getStatusVariant(order.status)}>
+                            {order.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {order.products.reduce((acc, p) => acc + p.quantity, 0)}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          ₦{order.totalAmount.toFixed(2)}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => setSelectedOrder(order)}
+                          >
+                            <Eye className="h-4 w-4" />
+                            <span className="sr-only">View Details</span>
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Mobile Card View */}
+              <div className="space-y-4 md:hidden">
+                {showLoading && (
+                  <>
+                    <Skeleton className="h-32 w-full rounded-lg" />
+                    <Skeleton className="h-32 w-full rounded-lg" />
+                  </>
+                )}
+                {!showLoading && filteredOrders && filteredOrders.map((order) => (
+                  <div key={order.id} className="flex flex-col gap-3 rounded-lg border p-4 shadow-sm bg-card text-card-foreground">
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold">#{order.id.slice(0, 8)}</span>
+                      <Badge variant={getStatusVariant(order.status)}>
+                        {order.status}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between text-sm text-muted-foreground">
+                      <span>{formatDate(order.orderDate)}</span>
+                      <span>{order.products.reduce((acc, p) => acc + p.quantity, 0)} Items</span>
+                    </div>
+                    <div className="flex items-center justify-between pt-2 border-t mt-1">
+                      <span className="font-bold text-lg">₦{order.totalAmount.toFixed(2)}</span>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setSelectedOrder(order)}
+                      >
+                        View Details
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
               {!showLoading && filteredOrders?.length === 0 && (
                 <div className="flex flex-col items-center justify-center gap-4 py-16 text-center text-muted-foreground">
                   <ShoppingCart className="h-16 w-16" />

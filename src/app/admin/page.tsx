@@ -14,7 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 const stats = [
   { title: 'Users', value: '0', icon: Users },
-  { title: 'Active Vendors', value: '0', icon: Store },
+  { title: 'Active Restaurants', value: '0', icon: Store },
   { title: 'Active Riders', value: '0', icon: Bike },
   { title: 'Total Orders', value: '0', icon: Package },
   { title: 'Completed', value: '0', icon: CheckCircle },
@@ -139,7 +139,7 @@ export default function AdminDashboard() {
 
   const stats = [
     { title: 'Users', value: statsData.users.toString(), icon: Users },
-    { title: 'Active Vendors', value: statsData.activeVendors.toString(), icon: Store },
+    { title: 'Active Restaurants', value: statsData.activeVendors.toString(), icon: Store },
     { title: 'Active Riders', value: statsData.activeRiders.toString(), icon: Bike },
     { title: 'Total Orders', value: statsData.totalOrders.toString(), icon: Package },
     { title: 'Completed', value: statsData.completedOrders.toString(), icon: CheckCircle },

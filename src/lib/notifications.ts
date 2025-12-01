@@ -67,10 +67,16 @@ export const NotificationTemplates = {
         data: { orderId, type: 'order_placed' },
     }),
 
-    orderShipped: (orderId: string) => ({
-        title: 'Order Shipped! 📦',
+    orderAccepted: (orderId: string) => ({
+        title: 'Order Accepted! 🍳',
         body: `Your order #${orderId.slice(0, 8)} is being prepared`,
-        data: { orderId, type: 'order_shipped' },
+        data: { orderId, type: 'order_accepted' },
+    }),
+
+    orderReady: (orderId: string) => ({
+        title: 'Order Ready! 🛍️',
+        body: `Your order #${orderId.slice(0, 8)} is ready for pickup`,
+        data: { orderId, type: 'order_ready' },
     }),
 
     riderAssigned: (orderId: string, riderName: string) => ({
@@ -79,10 +85,10 @@ export const NotificationTemplates = {
         data: { orderId, type: 'rider_assigned' },
     }),
 
-    outForDelivery: (orderId: string, eta: number) => ({
-        title: 'On the Way! 🚀',
+    orderInTransit: (orderId: string, eta: number) => ({
+        title: 'In Transit! 🚀',
         body: `Your order will arrive in ~${eta} minutes`,
-        data: { orderId, type: 'out_for_delivery' },
+        data: { orderId, type: 'order_in_transit' },
     }),
 
     orderDelivered: (orderId: string) => ({

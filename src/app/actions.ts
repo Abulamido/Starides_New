@@ -127,7 +127,7 @@ export async function placeOrder(order: {
   }
 }
 
-export async function updateOrderStatus(orderId: string, status: 'Processing' | 'Shipped' | 'Delivered' | 'Canceled', riderId?: string) {
+export async function updateOrderStatus(orderId: string, status: 'New Order' | 'Pending Acceptance' | 'Preparing' | 'Ready for Pickup' | 'In Transit' | 'Delivered' | 'Canceled', riderId?: string) {
   try {
     const { firestore } = initializeFirebase();
     const orderRef = doc(firestore, 'orders', orderId);

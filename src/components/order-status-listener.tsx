@@ -15,7 +15,7 @@ type OrderStatusListenerProps = {
 export function OrderStatusListener({ customerId }: OrderStatusListenerProps) {
   const firestore = useFirestore();
   const { toast } = useToast();
-  
+
   // Ref to store the previous state of orders
   const previousOrdersRef = useRef<Order[]>([]);
 
@@ -29,26 +29,32 @@ export function OrderStatusListener({ customerId }: OrderStatusListenerProps) {
   useEffect(() => {
     if (orders) {
       const previousOrders = previousOrdersRef.current;
-      
+
       // Compare current orders with previous orders to find changes
       orders.forEach(currentOrder => {
         const previousOrder = previousOrders.find(o => o.id === currentOrder.id);
-        
+
         // Check if the order is new or if the status has changed
         if (previousOrder && previousOrder.status !== currentOrder.status) {
-            if (currentOrder.status === 'Shipped') {
-                toast({
-                    title: 'Your order is on the way!',
-                    description: `Order #${currentOrder.id.substring(0, 7)} has been shipped.`,
-                    action: <Truck className="h-5 w-5 text-blue-500" />
-                });
-            } else if (currentOrder.status === 'Delivered') {
-                toast({
-                    title: 'Your order has arrived!',
-                    description: `Order #${currentOrder.id.substring(0, 7)} has been delivered.`,
-                     action: <PackageCheck className="h-5 w-5 text-green-500" />
-                });
-            }
+          if (currentOrder.status === 'Ready for Pickup') {
+            toast({
+              title: 'Your order is ready!',
+              description: `Order #${currentOrder.id.substring(0, 7)} is ready for pickup.`,
+              action: <PackageCheck className="h-5 w-5 text-blue-500" />
+            });
+          } else if (currentOrder.status === 'In Transit') {
+            toast({
+              title: 'Your order is on the way!',
+              description: `Order #${currentOrder.id.substring(0, 7)} is being delivered.`,
+              action: <Truck className="h-5 w-5 text-blue-500" />
+            });
+          } else if (currentOrder.status === 'Delivered') {
+            toast({
+              title: 'Your order has arrived!',
+              description: `Order #${currentOrder.id.substring(0, 7)} has been delivered.`,
+              action: <PackageCheck className="h-5 w-5 text-green-500" />
+            });
+          }
         }
       });
 

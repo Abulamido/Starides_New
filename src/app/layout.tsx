@@ -10,8 +10,8 @@ import { NotificationsInitializer } from '@/components/notifications-initializer
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export const metadata: Metadata = {
-  title: 'Starides Unified Marketplace',
-  description: 'One-stop solution for customers, vendors, and riders.',
+  title: 'Starides',
+  description: 'The unified marketplace for all your needs',
 };
 
 export default function RootLayout({
@@ -25,7 +25,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
-      <body className="font-body antialiased">
+      <body className="font-body antialiased" suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

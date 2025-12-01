@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useCart } from '@/context/cart-context';
@@ -18,27 +17,29 @@ import {
   Loader2,
   ShoppingCart,
   CheckCircle,
+  Wallet,
 } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { useUser, useFirestore } from '@/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
+import { collection, addDoc, serverTimestamp, doc, getDoc } from 'firebase/firestore';
 
 import { MapsProvider } from '@/components/maps/maps-provider';
 import { AddressAutocomplete } from '@/components/maps/address-autocomplete';
-import { doc, getDoc } from 'firebase/firestore';
-import { useEffect } from 'react';
+import { processWalletPayment, verifyTopUp } from '@/app/actions/wallet';
+import { PaystackButton } from 'react-paystack';
+import type { Wallet as WalletType } from '@/lib/data';
 
 export default function CheckoutPage() {
   const { cartItems, cartTotal, clearCart } = useCart();
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState('cash');
+  const [paymentMethod, setPaymentMethod] = useState('wallet');
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [deliveryLat, setDeliveryLat] = useState<number | null>(null);
   const [deliveryLng, setDeliveryLng] = useState<number | null>(null);
@@ -47,33 +48,29 @@ export default function CheckoutPage() {
   const { user } = useUser();
   const firestore = useFirestore();
 
+  // Fetch Wallet Balance
+  const walletRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'wallets', user.uid);
+  }, [firestore, user]);
+
+  const { data: wallet, isLoading: isWalletLoading } = useDoc<WalletType>(walletRef);
+  const walletBalance = wallet?.balance || 0;
+
   // Calculate delivery fee when address changes
   useEffect(() => {
     const calculateFee = async () => {
       if (!deliveryLat || !deliveryLng || !cartItems.length || !firestore) return;
 
       try {
-        // Get vendor location
         const vendorId = cartItems[0].product.vendorId;
-        // Note: In a real app, we should query the vendor document by ID, not by user.uid if they differ.
-        // Assuming vendorId in product matches the document ID in 'vendors' collection.
-        // If vendorId is the auth UID, and document ID is also auth UID, then this is correct.
-        // Let's verify data.ts: vendorId in Product is "Firebase Auth user.uid".
-        // And in VendorSettings, we write to doc(firestore, 'vendors', user.uid).
-        // So yes, vendorId is the document ID.
-
         const vendorDoc = await getDoc(doc(firestore, 'vendors', vendorId));
+
         if (vendorDoc.exists()) {
           const vendorData = vendorDoc.data();
           if (vendorData.location) {
             const vendorLat = vendorData.location.lat;
             const vendorLng = vendorData.location.lng;
-
-            // Calculate distance using Google Maps Geometry Library
-            // We need to access the google namespace. Since we are inside MapsProvider, it should be available if loaded.
-            // However, accessing 'google' directly might be tricky if types aren't set up.
-            // We can use a simple Haversine formula as a fallback or if the library isn't ready,
-            // but since we are using Maps JS API, let's try to use it if available.
 
             if (window.google && window.google.maps && window.google.maps.geometry) {
               const from = new window.google.maps.LatLng(vendorLat, vendorLng);
@@ -81,13 +78,12 @@ export default function CheckoutPage() {
               const distanceInMeters = window.google.maps.geometry.spherical.computeDistanceBetween(from, to);
               const distanceInKm = distanceInMeters / 1000;
 
-              // Pricing logic: Base 500 + 100 per km
               const calculatedFee = 500 + (Math.round(distanceInKm) * 100);
               setDeliveryFee(calculatedFee);
               setDistance(`${distanceInKm.toFixed(1)} km`);
             } else {
               // Fallback Haversine
-              const R = 6371; // Radius of the earth in km
+              const R = 6371;
               const dLat = deg2rad(deliveryLat - vendorLat);
               const dLon = deg2rad(deliveryLng - vendorLng);
               const a =
@@ -95,7 +91,7 @@ export default function CheckoutPage() {
                 Math.cos(deg2rad(vendorLat)) * Math.cos(deg2rad(deliveryLat)) *
                 Math.sin(dLon / 2) * Math.sin(dLon / 2);
               const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-              const d = R * c; // Distance in km
+              const d = R * c;
 
               const calculatedFee = 500 + (Math.round(d) * 100);
               setDeliveryFee(calculatedFee);
@@ -115,71 +111,123 @@ export default function CheckoutPage() {
     return deg * (Math.PI / 180)
   }
 
+  const createOrder = async (status: 'Processing' | 'Pending Payment' = 'Processing') => {
+    if (!user || !firestore) return;
+
+    const vendorId = cartItems[0].product.vendorId;
+
+    const orderData = {
+      customerId: user.uid,
+      vendorId: vendorId,
+      products: cartItems.map(item => ({
+        id: item.product.id,
+        name: item.product.name,
+        price: item.product.price,
+        quantity: item.quantity,
+      })),
+      totalAmount: cartTotal,
+      deliveryFee: deliveryFee,
+      deliveryAddress: deliveryAddress,
+      deliveryLocation: deliveryLat && deliveryLng ? { lat: deliveryLat, lng: deliveryLng } : null,
+      status: status,
+      orderDate: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      paymentMethod: paymentMethod,
+    };
+
+    const docRef = await addDoc(collection(firestore, 'orders'), orderData);
+    return docRef.id;
+  };
+
   const handlePlaceOrder = async () => {
     if (!user || !firestore) {
-      toast({
-        variant: 'destructive',
-        title: 'Authentication Error',
-        description: 'You must be logged in to place an order.',
-      });
+      toast({ variant: 'destructive', title: 'Authentication Error', description: 'You must be logged in.' });
       return;
     }
     if (cartItems.length === 0) return;
     if (!deliveryAddress) {
-      toast({
-        variant: 'destructive',
-        title: 'Missing Address',
-        description: 'Please provide a delivery address.',
-      });
+      toast({ variant: 'destructive', title: 'Missing Address', description: 'Please provide a delivery address.' });
       return;
     }
 
     setIsLoading(true);
     try {
-      // Assuming all items in cart are from the same vendor for this example
-      const vendorId = cartItems[0].product.vendorId;
+      const totalAmount = cartTotal + deliveryFee;
 
-      // Create order document in Firestore
-      const orderData = {
-        customerId: user.uid,
-        vendorId: vendorId,
-        products: cartItems.map(item => ({
-          id: item.product.id,
-          name: item.product.name,
-          price: item.product.price,
-          quantity: item.quantity,
-        })),
-        totalAmount: cartTotal,
-        deliveryFee: deliveryFee,
-        deliveryAddress: deliveryAddress,
-        deliveryLocation: deliveryLat && deliveryLng ? { lat: deliveryLat, lng: deliveryLng } : null,
-        status: 'Processing',
-        orderDate: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      };
+      if (paymentMethod === 'wallet') {
+        if (walletBalance < totalAmount) {
+          toast({ variant: 'destructive', title: 'Insufficient Balance', description: 'Please top up your wallet or choose another payment method.' });
+          setIsLoading(false);
+          return;
+        }
 
-      await addDoc(collection(firestore, 'orders'), orderData);
+        const orderId = await createOrder('Processing');
+        if (!orderId) throw new Error('Failed to create order');
 
-      toast({
-        title: 'Order Placed!',
-        description: 'Your order has been successfully placed.',
-        action: (
-          <div className="p-1 rounded-full bg-green-500">
-            <CheckCircle className="h-5 w-5 text-white" />
-          </div>
-        )
-      });
-      clearCart();
-      router.push('/customer/orders');
-    } catch (error) {
+        const result = await processWalletPayment(user.uid, totalAmount, orderId);
+
+        if (!result.success) {
+          throw new Error(result.message);
+        }
+
+        toast({
+          title: 'Order Placed!',
+          description: 'Paid successfully with wallet.',
+          action: <div className="p-1 rounded-full bg-green-500"><CheckCircle className="h-5 w-5 text-white" /></div>
+        });
+        clearCart();
+        router.push('/customer/orders');
+
+      } else if (paymentMethod === 'cash') {
+        await createOrder('Processing');
+        toast({
+          title: 'Order Placed!',
+          description: 'Order placed successfully (Cash on Delivery).',
+          action: <div className="p-1 rounded-full bg-green-500"><CheckCircle className="h-5 w-5 text-white" /></div>
+        });
+        clearCart();
+        router.push('/customer/orders');
+      }
+
+    } catch (error: any) {
       console.error(error);
       toast({
         variant: 'destructive',
         title: 'Uh oh! Something went wrong.',
-        description: 'There was a problem placing your order.',
+        description: error.message || 'There was a problem placing your order.',
       });
+    } finally {
       setIsLoading(false);
     }
+  };
+
+  const handlePaystackSuccess = async (reference: any) => {
+    setIsLoading(true);
+    try {
+      const orderId = await createOrder('Processing');
+
+      toast({
+        title: 'Order Placed!',
+        description: 'Payment successful.',
+        action: <div className="p-1 rounded-full bg-green-500"><CheckCircle className="h-5 w-5 text-white" /></div>
+      });
+      clearCart();
+      router.push('/customer/orders');
+
+    } catch (error) {
+      console.error(error);
+      toast({ variant: 'destructive', title: 'Error', description: 'Payment verification failed.' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const paystackConfig = {
+    reference: (new Date()).getTime().toString(),
+    email: user?.email || '',
+    amount: (cartTotal + deliveryFee) * 100,
+    publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || '',
+    channels: ['card'], // Force only card channel to be active
   };
 
   if (cartItems.length === 0 && !isLoading) {
@@ -187,24 +235,20 @@ export default function CheckoutPage() {
       <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
         <ShoppingCart className="h-20 w-20 text-muted-foreground/30" />
         <h3 className="text-xl font-semibold">Your cart is empty</h3>
-        <p className="text-muted-foreground">
-          There's nothing to check out. Add some products first!
-        </p>
-        <Button onClick={() => router.push('/customer')}>
-          Continue Shopping
-        </Button>
+        <p className="text-muted-foreground">There's nothing to check out. Add some products first!</p>
+        <Button onClick={() => router.push('/customer')}>Continue Shopping</Button>
       </div>
     );
   }
+
+  const totalAmount = cartTotal + deliveryFee;
 
   return (
     <MapsProvider>
       <div className="mx-auto max-w-4xl space-y-8">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Checkout</h1>
-          <p className="text-muted-foreground">
-            Confirm your order and complete the payment.
-          </p>
+          <p className="text-muted-foreground">Confirm your order and complete the payment.</p>
         </div>
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
@@ -212,9 +256,7 @@ export default function CheckoutPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Delivery Details</CardTitle>
-                <CardDescription>
-                  Where should we send your order?
-                </CardDescription>
+                <CardDescription>Where should we send your order?</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -239,57 +281,63 @@ export default function CheckoutPage() {
                 {cartItems.map(({ product, quantity }) => (
                   <div key={product.id} className="flex items-center gap-4">
                     <div className="relative h-16 w-16 overflow-hidden rounded-md border">
-                      <Image
-                        src={product.image}
-                        alt={product.name}
-                        fill
-                        className="object-cover"
-                      />
+                      <Image src={product.image} alt={product.name} fill className="object-cover" />
                     </div>
                     <div className="flex-1">
                       <h4 className="font-semibold">{product.name}</h4>
-                      <p className="text-sm text-muted-foreground">
-                        Quantity: {quantity}
-                      </p>
+                      <p className="text-sm text-muted-foreground">Quantity: {quantity}</p>
                     </div>
-                    <p className="font-medium">
-                      ₦{(product.price * quantity).toFixed(2)}
-                    </p>
+                    <p className="font-medium">₦{(product.price * quantity).toFixed(2)}</p>
                   </div>
                 ))}
               </CardContent>
             </Card>
+
             <Card>
               <CardHeader>
                 <CardTitle>Payment Method</CardTitle>
-                <CardDescription>
-                  Choose how you'd like to pay.
-                </CardDescription>
+                <CardDescription>Choose how you'd like to pay.</CardDescription>
               </CardHeader>
               <CardContent>
-                <RadioGroup
-                  defaultValue="cash"
-                  className="grid grid-cols-1 gap-4 md:grid-cols-2"
-                  onValueChange={setPaymentMethod}
-                >
-                  <Label htmlFor="cash" className="flex items-center gap-4 rounded-md border p-4 hover:bg-accent has-[:checked]:border-primary">
-                    <RadioGroupItem value="cash" id="cash" />
-                    <div className='flex items-center gap-2'>
-                      <Banknote className="h-6 w-6" />
-                      <span className="font-medium">Cash on Delivery</span>
+                <RadioGroup defaultValue="wallet" className="grid grid-cols-1 gap-4 md:grid-cols-3" onValueChange={setPaymentMethod}>
+
+                  {/* Wallet Option */}
+                  <Label htmlFor="wallet" className={`flex flex-row md:flex-col items-center justify-between gap-4 rounded-md border p-4 hover:bg-accent has-[:checked]:border-primary ${walletBalance < totalAmount ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                    <RadioGroupItem value="wallet" id="wallet" disabled={walletBalance < totalAmount} className="sr-only" />
+                    <div className="flex items-center gap-2 md:flex-col">
+                      <Wallet className="h-6 w-6 md:mb-2" />
+                      <span className="font-medium">Wallet</span>
+                    </div>
+                    <div className="flex flex-col items-end md:items-center">
+                      <span className="text-xs text-muted-foreground">Bal: ₦{walletBalance.toLocaleString()}</span>
+                      {walletBalance < totalAmount && <span className="text-xs text-red-500 font-bold">Insufficient</span>}
                     </div>
                   </Label>
-                  <Label htmlFor="card" className="flex items-center gap-4 rounded-md border p-4 text-muted-foreground hover:bg-accent has-[:checked]:border-primary has-[:checked]:text-foreground">
-                    <RadioGroupItem value="card" id="card" disabled />
-                    <div className='flex items-center gap-2'>
-                      <CreditCard className="h-6 w-6" />
-                      <span className="font-medium">Credit Card (Coming Soon)</span>
+
+                  {/* Cash Option */}
+                  <Label htmlFor="cash" className="flex flex-row md:flex-col items-center justify-between gap-4 rounded-md border p-4 hover:bg-accent has-[:checked]:border-primary">
+                    <RadioGroupItem value="cash" id="cash" className="sr-only" />
+                    <div className="flex items-center gap-2 md:flex-col">
+                      <Banknote className="h-6 w-6 md:mb-2" />
+                      <span className="font-medium">Cash</span>
                     </div>
+                    <span className="text-xs text-muted-foreground">Pay on Delivery</span>
+                  </Label>
+
+                  {/* Card Option */}
+                  <Label htmlFor="card" className="flex flex-row md:flex-col items-center justify-between gap-4 rounded-md border p-4 hover:bg-accent has-[:checked]:border-primary">
+                    <RadioGroupItem value="card" id="card" className="sr-only" />
+                    <div className="flex items-center gap-2 md:flex-col">
+                      <CreditCard className="h-6 w-6 md:mb-2" />
+                      <span className="font-medium">Card</span>
+                    </div>
+                    <span className="text-xs text-muted-foreground">Paystack</span>
                   </Label>
                 </RadioGroup>
               </CardContent>
             </Card>
           </div>
+
           <div className="lg:col-span-1">
             <Card className="sticky top-20">
               <CardHeader>
@@ -304,28 +352,33 @@ export default function CheckoutPage() {
                   <span>Shipping {distance && <span className="text-xs text-muted-foreground">({distance})</span>}</span>
                   <span>₦{deliveryFee.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span>Taxes</span>
-                  <span>₦0.00</span>
-                </div>
                 <Separator />
                 <div className="flex justify-between text-lg font-bold">
                   <span>Order Total</span>
-                  <span>₦{(cartTotal + deliveryFee).toFixed(2)}</span>
+                  <span>₦{totalAmount.toFixed(2)}</span>
                 </div>
               </CardContent>
               <CardFooter>
-                <Button
-                  className="w-full"
-                  size="lg"
-                  onClick={handlePlaceOrder}
-                  disabled={isLoading || !user}
-                >
-                  {isLoading ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : null}
-                  Place Order
-                </Button>
+                {paymentMethod === 'card' ? (
+                  <PaystackButton
+                    {...paystackConfig}
+                    text={isLoading ? "Processing..." : "Pay Now"}
+                    onSuccess={handlePaystackSuccess}
+                    onClose={() => console.log("Closed")}
+                    className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md font-medium disabled:opacity-50"
+                    disabled={isLoading || !user || !deliveryAddress}
+                  />
+                ) : (
+                  <Button
+                    className="w-full"
+                    size="lg"
+                    onClick={handlePlaceOrder}
+                    disabled={isLoading || !user}
+                  >
+                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                    Place Order
+                  </Button>
+                )}
               </CardFooter>
             </Card>
           </div>

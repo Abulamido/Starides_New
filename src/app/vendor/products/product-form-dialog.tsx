@@ -142,7 +142,7 @@ export function ProductFormDialog({
                     <DialogDescription>
                         {product
                             ? 'Update your product information.'
-                            : 'Add a new product to your store.'}
+                            : 'Add a new product to your restaurant.'}
                     </DialogDescription>
                 </DialogHeader>
 

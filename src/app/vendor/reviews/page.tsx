@@ -8,11 +8,11 @@ export default function VendorReviewsPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Reviews</h1>
         <p className="text-muted-foreground">
-          See what customers are saying about your store.
+          See what customers are saying about your restaurant.
         </p>
       </div>
 
-       <Card>
+      <Card>
         <CardHeader>
           <CardTitle>Customer Feedback</CardTitle>
           <CardDescription>

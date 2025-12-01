@@ -38,12 +38,12 @@ export default function RiderDeliveriesPage() {
     enabled: !!activeDeliveryId,
   });
 
-  // Available deliveries (Processing, Accepted, or Shipped, no rider assigned)
+  // Available deliveries (New Order, Pending Acceptance, Preparing, Ready for Pickup, no rider assigned)
   const availableQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null;
     return query(
       collection(firestore, 'orders'),
-      where('status', 'in', ['Processing', 'Accepted', 'Shipped'])
+      where('status', 'in', ['New Order', 'Pending Acceptance', 'Preparing', 'Ready for Pickup'])
     );
   }, [firestore, user]);
 
@@ -53,7 +53,7 @@ export default function RiderDeliveriesPage() {
     return query(
       collection(firestore, 'orders'),
       where('riderId', '==', user.uid),
-      where('status', 'in', ['Shipped', 'Out for Delivery'])
+      where('status', 'in', ['Preparing', 'Ready for Pickup', 'In Transit'])
     );
   }, [firestore, user]);
 
@@ -85,7 +85,8 @@ export default function RiderDeliveriesPage() {
     try {
       await updateDoc(doc(firestore, 'orders', orderId), {
         riderId: user.uid,
-        status: 'Shipped',
+        // Don't change status here, just assign rider. 
+        // Status flow is controlled by vendor (Preparing -> Ready) or rider (Ready -> In Transit)
         updatedAt: serverTimestamp(),
       });
       toast({
@@ -113,8 +114,8 @@ export default function RiderDeliveriesPage() {
         updatedAt: serverTimestamp(),
       });
 
-      // Start location tracking when marking as "Out for Delivery"
-      if (status === 'Out for Delivery') {
+      // Start location tracking when marking as "In Transit"
+      if (status === 'In Transit') {
         setActiveDeliveryId(orderId);
       }
 
@@ -222,16 +223,16 @@ export default function RiderDeliveriesPage() {
               <MapPin className="mr-2 h-4 w-4" />
               Navigate to Customer
             </Button>
-            {order.status === 'Shipped' && (
+            {order.status === 'Ready for Pickup' && (
               <Button
                 className="w-full"
-                onClick={() => handleUpdateStatus(order.id, 'Out for Delivery')}
+                onClick={() => handleUpdateStatus(order.id, 'In Transit')}
                 disabled={loadingStates[order.id]}
               >
-                Mark as Out for Delivery
+                Mark as In Transit
               </Button>
             )}
-            {order.status === 'Out for Delivery' && (
+            {order.status === 'In Transit' && (
               <Button
                 className="w-full"
                 onClick={() => handleCompleteDelivery(order.id)}
