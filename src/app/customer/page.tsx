@@ -24,10 +24,11 @@ import { cn } from '@/lib/utils';
 const categories = [
   { name: 'All', icon: Store },
   { name: 'Restaurants', icon: Utensils },
-  { name: 'Groceries', icon: Carrot },
-  { name: 'Pharmacy', icon: Pill },
-  { name: 'Electronics', icon: Laptop },
-  { name: 'Fashion', icon: Shirt },
+  // Future categories - will be enabled after pilot phase
+  // { name: 'Groceries', icon: Carrot },
+  // { name: 'Pharmacy', icon: Pill },
+  // { name: 'Electronics', icon: Laptop },
+  // { name: 'Fashion', icon: Shirt },
 ];
 
 function VendorCardSkeleton() {
@@ -75,7 +76,7 @@ export default function CustomerDashboard() {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
             type="search"
-            placeholder="Search for restaurants, groceries, and more..."
+            placeholder="Search for restaurants and food..."
             className="w-full pl-12 h-12 text-base md:text-lg shadow-sm transition-shadow focus-visible:shadow-md rounded-full bg-background/50 backdrop-blur-sm border-muted/40"
           />
         </div>
@@ -105,7 +106,7 @@ export default function CustomerDashboard() {
           <Button variant="link" className="text-primary">View all</Button>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 md:gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {showLoading && [...Array(8)].map((_, i) => <VendorCardSkeleton key={i} />)}
           {!showLoading && vendors && vendors.length > 0 && vendors.map((vendor) => (
             <Link key={vendor.id} href={`/customer/vendor/${vendor.id}`} className="block h-full">

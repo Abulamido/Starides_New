@@ -26,15 +26,21 @@ interface OrderDetailDialogProps {
 }
 
 const getStatusVariant = (status: string) => {
-    switch (status.toLowerCase()) {
-        case 'delivered':
+    switch (status) {
+        case 'Delivered':
             return 'default';
-        case 'shipped':
-        case 'out for delivery':
+        case 'Ready for Pickup':
+        case 'In Transit':
+        case 'Shipped':
+        case 'Out for Delivery':
             return 'outline';
-        case 'processing':
+        case 'New Order':
+        case 'Pending Acceptance':
+        case 'Preparing':
+        case 'Processing':
+        case 'Accepted':
             return 'secondary';
-        case 'canceled':
+        case 'Canceled':
             return 'destructive';
         default:
             return 'secondary';
@@ -56,7 +62,6 @@ export function OrderDetailDialog({ order, open, onOpenChange }: OrderDetailDial
 
     const handleReorder = () => {
         setIsReordering(true);
-        // Add items back to cart
         toast({
             title: 'Items added to cart',
             description: 'Your previous order items have been added to your cart.',
@@ -73,7 +78,6 @@ export function OrderDetailDialog({ order, open, onOpenChange }: OrderDetailDial
                 </DialogHeader>
 
                 <div className="space-y-6">
-                    {/* Status and Date */}
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -86,7 +90,6 @@ export function OrderDetailDialog({ order, open, onOpenChange }: OrderDetailDial
 
                     <Separator />
 
-                    {/* Delivery Address */}
                     <div>
                         <div className="flex items-center gap-2 mb-2">
                             <MapPin className="h-4 w-4" />
@@ -97,8 +100,7 @@ export function OrderDetailDialog({ order, open, onOpenChange }: OrderDetailDial
                         </p>
                     </div>
 
-                    {/* Live Tracking Map - Show for Out for Delivery status */}
-                    {order.status === 'Out for Delivery' && order.deliveryLocation && (
+                    {order.status === 'In Transit' && order.deliveryLocation && (
                         <>
                             <Separator />
                             <MapsProvider>
@@ -109,7 +111,6 @@ export function OrderDetailDialog({ order, open, onOpenChange }: OrderDetailDial
 
                     <Separator />
 
-                    {/* Order Items */}
                     <div>
                         <div className="flex items-center gap-2 mb-4">
                             <Package className="h-4 w-4" />
@@ -134,7 +135,6 @@ export function OrderDetailDialog({ order, open, onOpenChange }: OrderDetailDial
 
                     <Separator />
 
-                    {/* Order Summary */}
                     <div className="space-y-2">
                         <div className="flex justify-between text-sm">
                             <span className="text-muted-foreground">Subtotal</span>
@@ -151,7 +151,6 @@ export function OrderDetailDialog({ order, open, onOpenChange }: OrderDetailDial
                         </div>
                     </div>
 
-                    {/* Actions */}
                     <div className="flex gap-2">
                         <Button
                             variant="outline"
@@ -162,7 +161,7 @@ export function OrderDetailDialog({ order, open, onOpenChange }: OrderDetailDial
                             <ShoppingCart className="mr-2 h-4 w-4" />
                             Reorder
                         </Button>
-                        {order.status === 'Processing' && (
+                        {(order.status === 'New Order' || order.status === 'Pending Acceptance') && (
                             <Button variant="destructive" className="flex-1">
                                 Cancel Order
                             </Button>

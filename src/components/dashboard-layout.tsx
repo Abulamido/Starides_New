@@ -36,7 +36,7 @@ type DashboardLayoutProps = {
   isVendor?: boolean;
 };
 
-function NavLinks({ navItems, isMobile = false }: { navItems: NavItem[], isMobile?: boolean }) {
+function NavLinks({ navItems, isMobile = false, onNavigate }: { navItems: NavItem[], isMobile?: boolean, onNavigate?: () => void }) {
   return (
     <nav
       className={cn(
@@ -54,7 +54,7 @@ function NavLinks({ navItems, isMobile = false }: { navItems: NavItem[], isMobil
             isMobile ? 'text-base' : 'text-sm'
           )}
         >
-          <Link href={item.href}>
+          <Link href={item.href} onClick={onNavigate}>
             <item.icon className={cn('h-5 w-5')} />
             {item.label}
           </Link>
@@ -64,7 +64,7 @@ function NavLinks({ navItems, isMobile = false }: { navItems: NavItem[], isMobil
   );
 }
 
-function SidebarContent({ navItems }: { navItems: NavItem[] }) {
+function SidebarContent({ navItems, onNavigate }: { navItems: NavItem[], onNavigate?: () => void }) {
   const { user } = useUser();
   const auth = useAuth();
   const router = useRouter();
@@ -78,14 +78,14 @@ function SidebarContent({ navItems }: { navItems: NavItem[] }) {
   return (
     <div className="flex h-full flex-col gap-2">
       <div className="flex h-16 shrink-0 items-center border-b px-4 lg:h-[60px] lg:px-6">
-        <Link href="/" className="flex items-center gap-2 font-semibold text-foreground">
+        <Link href="/" className="flex items-center gap-2 font-semibold text-foreground" onClick={onNavigate}>
           <StaridesLogo className="h-8 w-auto text-primary" />
           <span className="text-xl font-bold">Starides</span>
         </Link>
       </div>
       <div className="flex-1 overflow-auto py-2">
         <div className="px-4">
-          <NavLinks navItems={navItems} />
+          <NavLinks navItems={navItems} onNavigate={onNavigate} />
         </div>
       </div>
       <div className="mt-auto border-t p-4">
@@ -158,7 +158,7 @@ export function DashboardLayout({
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="flex flex-col p-0">
-                <SidebarContent navItems={navItems} />
+                <SidebarContent navItems={navItems} onNavigate={() => setOpen(false)} />
               </SheetContent>
             </Sheet>
 
@@ -221,7 +221,7 @@ export function DashboardLayout({
               </Link>
             </div>
             <div className='py-4'>
-              <NavLinks navItems={navItems} isMobile={true} />
+              <NavLinks navItems={navItems} isMobile={true} onNavigate={() => setOpen(false)} />
             </div>
           </SheetContent>
         </Sheet>

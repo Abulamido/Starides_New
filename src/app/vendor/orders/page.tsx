@@ -155,175 +155,162 @@ export default function VendorOrdersPage() {
       setLoadingStates(prev => ({ ...prev, [orderId]: false }));
     }
   };
-
-  const showLoading = isLoadingOrders || isUserLoading;
-
-  // Helper function to determine which buttons to show
-  const canAccept = (status: string) => ['New Order', 'Pending Acceptance', 'Processing'].includes(status);
-  const canMarkReady = (status: string) => ['Preparing', 'Accepted'].includes(status);
-  const isCompleted = (status: string) => ['Ready for Pickup', 'Shipped', 'In Transit', 'Out for Delivery', 'Delivered', 'Canceled'].includes(status);
-
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Manage Orders</h1>
-        <p className="text-muted-foreground">
           Process new orders and view your order history.
-        </p>
-      </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>Incoming Orders</CardTitle>
-          <CardDescription>A real-time list of orders for your restaurant.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {error && (
-            <Alert variant="destructive">
-              <Terminal className="h-4 w-4" />
-              <AlertTitle>Error Fetching Orders</AlertTitle>
-              <AlertDescription>
-                There was a problem loading your orders. Please try again later.
-              </AlertDescription>
-            </Alert>
-          )}
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Order ID</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Items</TableHead>
-                <TableHead className="text-right">Total</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {showLoading && (
-                <>
-                  <OrderRowSkeleton />
-                  <OrderRowSkeleton />
-                  <OrderRowSkeleton />
-                </>
-              )}
-              {!isUserLoading && orders && orders.map((order) => (
-                <TableRow key={order.id}>
-                  <TableCell className="font-medium truncate max-w-24">{order.id.substring(0, 8)}</TableCell>
-                  <TableCell>{formatDate(order.orderDate)}</TableCell>
-                  <TableCell>
-                    <Badge variant={getStatusVariant(order.status)}>{order.status}</Badge>
-                  </TableCell>
-                  <TableCell>{order.products.reduce((acc, p) => acc + p.quantity, 0)}</TableCell>
-                  <TableCell className="text-right">₦{order.totalAmount.toFixed(2)}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex gap-2 justify-end flex-wrap">
-                      {canAccept(order.status) && (
-                        <>
-                          <Button
-                            size="sm"
-                            onClick={() => handleAcceptOrder(order.id)}
-                            disabled={loadingStates[order.id]}
-                          >
-                            {loadingStates[order.id] && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Accept
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => handleCancelOrder(order.id)}
-                            disabled={loadingStates[order.id]}
-                          >
-                            Cancel
-                          </Button>
-                        </>
-                      )}
-                      {canMarkReady(order.status) && (
-                        <>
-                          <Button
-                            size="sm"
-                            onClick={() => handleMarkAsReady(order.id)}
-                            disabled={loadingStates[order.id]}
-                          >
-                            {loadingStates[order.id] && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            Ready
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => setSelectedOrder(order)}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        </>
-                      )}
-                      {isCompleted(order.status) && (
+        </p >
+      </div >
+    <Card>
+      <CardHeader>
+        <CardTitle>Incoming Orders</CardTitle>
+        <CardDescription>A real-time list of orders for your restaurant.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {error && (
+          <Alert variant="destructive">
+            <Terminal className="h-4 w-4" />
+            <AlertTitle>Error Fetching Orders</AlertTitle>
+            <AlertDescription>
+              There was a problem loading your orders. Please try again later.
+            </AlertDescription>
+          </Alert>
+        )}
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Order ID</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Items</TableHead>
+              <TableHead className="text-right">Total</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {showLoading && (
+              <>
+                <OrderRowSkeleton />
+                <OrderRowSkeleton />
+                <OrderRowSkeleton />
+              </>
+            )}
+            {!isUserLoading && orders && orders.map((order) => (
+              <TableRow key={order.id}>
+                <TableCell className="font-medium truncate max-w-24">{order.id.substring(0, 8)}</TableCell>
+                <TableCell>{formatDate(order.orderDate)}</TableCell>
+                <TableCell>
+                  <Badge variant={getStatusVariant(order.status)}>{order.status}</Badge>
+                </TableCell>
+                <TableCell>{order.products.reduce((acc, p) => acc + p.quantity, 0)}</TableCell>
+                <TableCell className="text-right">₦{order.totalAmount.toFixed(2)}</TableCell>
+                <TableCell className="text-right">
+                  <div className="flex gap-2 justify-end flex-wrap">
+                    {canAccept(order.status) && (
+                      <>
+                        <Button
+                          size="sm"
+                          onClick={() => handleAcceptOrder(order.id)}
+                          disabled={loadingStates[order.id]}
+                        >
+                          {loadingStates[order.id] && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                          Accept
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleCancelOrder(order.id)}
+                          disabled={loadingStates[order.id]}
+                        >
+                          Cancel
+                        </Button>
+                      </>
+                    )}
+                    {canMarkReady(order.status) && (
+                      <>
+                        <Button
+                          size="sm"
+                          onClick={() => handleMarkAsReady(order.id)}
+                          disabled={loadingStates[order.id]}
+                        >
+                          {loadingStates[order.id] && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                          Ready
+                        </Button>
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => setSelectedOrder(order)}
                         >
-                          <Eye className="mr-2 h-4 w-4" />
-                          Details
+                          <Eye className="h-4 w-4" />
                         </Button>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
+                      </>
+                    )}
+                    {isCompleted(order.status) && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setSelectedOrder(order)}
+                      >
+                        <Eye className="mr-2 h-4 w-4" />
+                        Details
+                      </Button>
+                    )}
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+
+        {!showLoading && orders?.length === 0 && (
+          <div className="flex flex-col items-center justify-center gap-4 py-16 text-center text-muted-foreground">
+            <Package className="h-16 w-16" />
+            <p className="font-semibold">No orders yet.</p>
+            <p className="text-sm">New orders for your restaurant will appear here.</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+
+  {/* Order Details Dialog */ }
+  <Dialog open={!!selectedOrder} onOpenChange={(open) => !open && setSelectedOrder(null)}>
+    <DialogContent className="max-w-2xl">
+      <DialogHeader>
+        <DialogTitle>Order Details</DialogTitle>
+        <DialogDescription>Order ID: {selectedOrder?.id}</DialogDescription>
+      </DialogHeader>
+      {selectedOrder && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <h4 className="font-semibold mb-1">Status</h4>
+              <Badge variant={getStatusVariant(selectedOrder.status)}>{selectedOrder.status}</Badge>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-1">Order Date</h4>
+              <p className="text-sm text-muted-foreground">{formatDate(selectedOrder.orderDate)}</p>
+            </div>
+          </div>
+          <div>
+            <h4 className="font-semibold mb-2">Products</h4>
+            <ul className="space-y-2">
+              {selectedOrder.products.map((p, i) => (
+                <li key={i} className="flex justify-between text-sm">
+                  <span>{p.quantity}x {p.name}</span>
+                  <span>₦{(p.price * p.quantity).toFixed(2)}</span>
+                </li>
               ))}
-            </TableBody>
-          </Table>
-
-          {!showLoading && orders?.length === 0 && (
-            <div className="flex flex-col items-center justify-center gap-4 py-16 text-center text-muted-foreground">
-              <Package className="h-16 w-16" />
-              <p className="font-semibold">No orders yet.</p>
-              <p className="text-sm">New orders for your restaurant will appear here.</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Order Details Dialog */}
-      <Dialog open={!!selectedOrder} onOpenChange={(open) => !open && setSelectedOrder(null)}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Order Details</DialogTitle>
-            <DialogDescription>Order ID: {selectedOrder?.id}</DialogDescription>
-          </DialogHeader>
-          {selectedOrder && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h4 className="font-semibold mb-1">Status</h4>
-                  <Badge variant={getStatusVariant(selectedOrder.status)}>{selectedOrder.status}</Badge>
-                </div>
-                <div>
-                  <h4 className="font-semibold mb-1">Order Date</h4>
-                  <p className="text-sm text-muted-foreground">{formatDate(selectedOrder.orderDate)}</p>
-                </div>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-2">Products</h4>
-                <ul className="space-y-2">
-                  {selectedOrder.products.map((p, i) => (
-                    <li key={i} className="flex justify-between text-sm">
-                      <span>{p.quantity}x {p.name}</span>
-                      <span>₦{(p.price * p.quantity).toFixed(2)}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="flex justify-between font-bold pt-2 border-t">
-                <span>Total</span>
-                <span>₦{selectedOrder.totalAmount.toFixed(2)}</span>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-1">Delivery Address</h4>
-                <p className="text-sm text-muted-foreground">{selectedOrder.deliveryAddress}</p>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-    </div>
+            </ul>
+          </div>
+          <div className="flex justify-between font-bold pt-2 border-t">
+            <span>Total</span>
+            <span>₦{selectedOrder.totalAmount.toFixed(2)}</span>
+          </div>
+          <div>
+            <h4 className="font-semibold mb-1">Delivery Address</h4>
+            <p className="text-sm text-muted-foreground">{selectedOrder.deliveryAddress}</p>
+          </div>
+        </div>
+      )}
+    </DialogContent>
+  </Dialog>
+    </div >
   );
 }

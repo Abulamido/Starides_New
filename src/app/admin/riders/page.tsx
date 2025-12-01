@@ -40,10 +40,8 @@ export default function AdminRidersPage() {
 
     const query = searchQuery.toLowerCase();
     return riders.filter(rider =>
-      rider.fullName?.toLowerCase().includes(query) ||
-      rider.email?.toLowerCase().includes(query) ||
-      rider.phone?.toLowerCase().includes(query) ||
-      rider.vehicleType?.toLowerCase().includes(query) ||
+      rider.name?.toLowerCase().includes(query) ||
+      rider.vehicle?.toLowerCase().includes(query) ||
       rider.id?.toLowerCase().includes(query)
     );
   }, [riders, searchQuery]);
@@ -62,7 +60,7 @@ export default function AdminRidersPage() {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
         <Input
           type="search"
-          placeholder="Search riders by name, email, phone, or vehicle type..."
+          placeholder="Search riders by name, vehicle type, or ID..."
           className="w-full pl-10"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}

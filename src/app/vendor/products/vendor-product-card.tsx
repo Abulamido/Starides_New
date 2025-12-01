@@ -92,7 +92,7 @@ export function VendorProductCard({ product, onEdit }: VendorProductCardProps) {
     return (
         <>
             <Card className="overflow-hidden">
-                <div className="relative aspect-square">
+                <div className="relative aspect-[3/4] md:aspect-square">
                     <Image
                         src={product.image}
                         alt={product.name}
@@ -105,18 +105,18 @@ export function VendorProductCard({ product, onEdit }: VendorProductCardProps) {
                         </div>
                     )}
                 </div>
-                <CardContent className="p-4">
+                <CardContent className="p-2 md:p-4">
                     <div className="flex items-start justify-between gap-2">
                         <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold truncate">{product.name}</h3>
-                            <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
+                            <h3 className="text-sm md:text-base font-semibold truncate">{product.name}</h3>
+                            <p className="text-xs md:text-sm text-muted-foreground line-clamp-2 mt-0.5 md:mt-1">
                                 {product.description}
                             </p>
                         </div>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-8 w-8">
-                                    <MoreVertical className="h-4 w-4" />
+                                <Button variant="ghost" size="icon" className="h-7 w-7 md:h-8 md:w-8 shrink-0">
+                                    <MoreVertical className="h-3.5 w-3.5 md:h-4 md:w-4" />
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
@@ -151,9 +151,9 @@ export function VendorProductCard({ product, onEdit }: VendorProductCardProps) {
                             </DropdownMenuContent>
                         </DropdownMenu>
                     </div>
-                    <div className="mt-3 flex items-center justify-between">
-                        <span className="text-lg font-bold">₦{product.price.toLocaleString()}</span>
-                        <Badge variant="outline">{product.category}</Badge>
+                    <div className="mt-2 md:mt-3 flex items-center justify-between">
+                        <span className="text-base md:text-lg font-bold">₦{product.price.toLocaleString()}</span>
+                        <Badge variant="outline" className="text-[10px] md:text-xs">{product.category}</Badge>
                     </div>
                 </CardContent>
             </Card>

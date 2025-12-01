@@ -40,11 +40,9 @@ export default function AdminVendorsPage() {
 
     const query = searchQuery.toLowerCase();
     return vendors.filter(vendor =>
-      vendor.businessName?.toLowerCase().includes(query) ||
+      vendor.name?.toLowerCase().includes(query) ||
       vendor.category?.toLowerCase().includes(query) ||
-      vendor.email?.toLowerCase().includes(query) ||
-      vendor.phone?.toLowerCase().includes(query) ||
-      vendor.address?.toLowerCase().includes(query)
+      vendor.id?.toLowerCase().includes(query)
     );
   }, [vendors, searchQuery]);
 
@@ -62,7 +60,7 @@ export default function AdminVendorsPage() {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
         <Input
           type="search"
-          placeholder="Search vendors by name, category, email, or phone..."
+          placeholder="Search vendors by name, category, or ID..."
           className="w-full pl-10"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}

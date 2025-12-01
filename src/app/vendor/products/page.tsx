@@ -88,7 +88,7 @@ export default function VendorProductsPage() {
 
       {/* Loading State */}
       {showLoading && (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 md:gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {[...Array(4)].map((_, i) => (
             <ProductCardSkeleton key={i} />
           ))}
@@ -97,7 +97,7 @@ export default function VendorProductsPage() {
 
       {/* Products Grid */}
       {!showLoading && filteredProducts && filteredProducts.length > 0 ? (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 md:gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filteredProducts.map((product) => (
             <VendorProductCard
               key={product.id}
