@@ -1,4 +1,3 @@
-
 'use client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from '@/components/ui/input';
@@ -24,6 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import { useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase";
 import { collection } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useState, useMemo } from 'react';
 
 type User = {
   id: string;
@@ -34,7 +34,6 @@ type User = {
   firstName: string;
   lastName: string;
 }
-
 
 function UserRowSkeleton() {
   return (
@@ -50,12 +49,29 @@ function UserRowSkeleton() {
 export default function AdminUsersPage() {
   const firestore = useFirestore();
   const { user, isUserLoading } = useUser();
+  const [searchQuery, setSearchQuery] = useState('');
 
   const usersQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null;
     return collection(firestore, 'users');
   }, [firestore, user]);
+
   const { data: users, isLoading } = useCollection<User>(usersQuery);
+
+  // Filter users based on search query
+  const filteredUsers = useMemo(() => {
+    if (!users) return [];
+    if (!searchQuery.trim()) return users;
+
+    const query = searchQuery.toLowerCase();
+    return users.filter(u =>
+      u.name?.toLowerCase().includes(query) ||
+      u.firstName?.toLowerCase().includes(query) ||
+      u.lastName?.toLowerCase().includes(query) ||
+      u.email?.toLowerCase().includes(query) ||
+      u.role?.toLowerCase().includes(query)
+    );
+  }, [users, searchQuery]);
 
   const formatDate = (timestamp: any) => {
     if (!timestamp) return 'N/A';
@@ -80,6 +96,8 @@ export default function AdminUsersPage() {
           type="search"
           placeholder="Search users by name, email or role..."
           className="w-full pl-10"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
 
@@ -101,12 +119,12 @@ export default function AdminUsersPage() {
             </TableHeader>
             <TableBody>
               {showLoading && [...Array(5)].map((_, i) => <UserRowSkeleton key={i} />)}
-              {users?.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell className="font-medium">{user.name || `${user.firstName} ${user.lastName}`}</TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell><Badge variant="outline">{user.role}</Badge></TableCell>
-                  <TableCell>{formatDate(user.createdAt)}</TableCell>
+              {!showLoading && filteredUsers.map((u) => (
+                <TableRow key={u.id}>
+                  <TableCell className="font-medium">{u.name || `${u.firstName} ${u.lastName}`}</TableCell>
+                  <TableCell>{u.email}</TableCell>
+                  <TableCell><Badge variant="outline">{u.role}</Badge></TableCell>
+                  <TableCell>{formatDate(u.createdAt)}</TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -117,7 +135,7 @@ export default function AdminUsersPage() {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => navigator.clipboard.writeText(user.id)}>
+                        <DropdownMenuItem onClick={() => navigator.clipboard.writeText(u.id)}>
                           Copy User ID
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
@@ -128,10 +146,10 @@ export default function AdminUsersPage() {
                   </TableCell>
                 </TableRow>
               ))}
-              {!showLoading && users?.length === 0 && (
+              {!showLoading && filteredUsers.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center text-muted-foreground py-10">
-                    No users found.
+                    {searchQuery ? `No users found matching "${searchQuery}"` : 'No users found.'}
                   </TableCell>
                 </TableRow>
               )}

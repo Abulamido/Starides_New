@@ -1,4 +1,3 @@
-
 'use client';
 import { AdminVendorCard } from '@/components/admin-vendor-card';
 import { Input } from '@/components/ui/input';
@@ -7,6 +6,7 @@ import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebas
 import { collection } from 'firebase/firestore';
 import type { AdminVendor } from '@/lib/data';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useState, useMemo } from 'react';
 
 function VendorCardSkeleton() {
   return (
@@ -24,11 +24,29 @@ function VendorCardSkeleton() {
 export default function AdminVendorsPage() {
   const firestore = useFirestore();
   const { user, isUserLoading } = useUser();
+  const [searchQuery, setSearchQuery] = useState('');
+
   const vendorsQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null;
     return collection(firestore, 'vendors');
   }, [firestore, user]);
+
   const { data: vendors, isLoading: isLoadingVendors } = useCollection<AdminVendor>(vendorsQuery);
+
+  // Filter vendors based on search query
+  const filteredVendors = useMemo(() => {
+    if (!vendors) return [];
+    if (!searchQuery.trim()) return vendors;
+
+    const query = searchQuery.toLowerCase();
+    return vendors.filter(vendor =>
+      vendor.businessName?.toLowerCase().includes(query) ||
+      vendor.category?.toLowerCase().includes(query) ||
+      vendor.email?.toLowerCase().includes(query) ||
+      vendor.phone?.toLowerCase().includes(query) ||
+      vendor.address?.toLowerCase().includes(query)
+    );
+  }, [vendors, searchQuery]);
 
   const showLoading = isLoadingVendors || isUserLoading;
 
@@ -44,19 +62,21 @@ export default function AdminVendorsPage() {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
         <Input
           type="search"
-          placeholder="Search vendors by name or category..."
+          placeholder="Search vendors by name, category, email, or phone..."
           className="w-full pl-10"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {showLoading && [...Array(6)].map((_, i) => <VendorCardSkeleton key={i} />)}
-        {vendors?.map((vendor) => (
+        {!showLoading && filteredVendors.map((vendor) => (
           <AdminVendorCard key={vendor.id} vendor={vendor} />
         ))}
       </div>
-      {!showLoading && vendors?.length === 0 && (
+      {!showLoading && filteredVendors.length === 0 && (
         <div className="text-center text-muted-foreground py-10 col-span-full">
-          <p>No vendors found.</p>
+          <p>{searchQuery ? `No vendors found matching "${searchQuery}"` : 'No vendors found.'}</p>
         </div>
       )}
     </div>
