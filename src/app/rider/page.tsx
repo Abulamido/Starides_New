@@ -31,9 +31,9 @@ const getStatusBadgeColor = (status: string) => {
   switch (status.toLowerCase()) {
     case 'delivered':
       return 'bg-green-100 text-green-800';
-    case 'out for delivery':
+    case 'in transit':
       return 'bg-blue-100 text-blue-800';
-    case 'shipped':
+    case 'ready for pickup':
       return 'bg-yellow-100 text-yellow-800';
     case 'canceled':
       return 'bg-red-100 text-red-800';
@@ -68,7 +68,7 @@ export default function RiderDashboard() {
 
   // Calculate stats from real data
   const activeDeliveries = orders?.filter(o =>
-    o.status === 'Out for Delivery' || o.status === 'Shipped'
+    o.status === 'In Transit' || o.status === 'Ready for Pickup'
   ).length || 0;
 
   const completedDeliveries = orders?.filter(o => o.status === 'Delivered').length || 0;
