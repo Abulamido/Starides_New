@@ -1,12 +1,14 @@
 'use client';
+
 import { AdminVendorCard } from '@/components/admin-vendor-card';
-import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
 import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
 import { collection } from 'firebase/firestore';
 import type { AdminVendor } from '@/lib/data';
+import { useState } from 'react';
+import { Input } from '@/components/ui/input';
+import { Search } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useState, useMemo } from 'react';
 
 function VendorCardSkeleton() {
   return (
@@ -23,58 +25,102 @@ function VendorCardSkeleton() {
 
 export default function AdminVendorsPage() {
   const firestore = useFirestore();
-  const { user, isUserLoading } = useUser();
+  const { user } = useUser();
   const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'All' | 'Pending' | 'Approved' | 'Rejected'>('All');
 
   const vendorsQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null;
     return collection(firestore, 'vendors');
   }, [firestore, user]);
+  const { data: vendors, isLoading } = useCollection<AdminVendor>(vendorsQuery);
 
-  const { data: vendors, isLoading: isLoadingVendors } = useCollection<AdminVendor>(vendorsQuery);
+  // Filter vendors based on search and status
+  const filteredVendors = vendors?.filter(vendor => {
+    const matchesSearch = !searchQuery ||
+      vendor.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      vendor.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      vendor.id?.toLowerCase().includes(searchQuery.toLowerCase());
 
-  // Filter vendors based on search query
-  const filteredVendors = useMemo(() => {
-    if (!vendors) return [];
-    if (!searchQuery.trim()) return vendors;
+    const matchesStatus = statusFilter === 'All' ||
+      (vendor.approvalStatus || 'Pending') === statusFilter;
 
-    const query = searchQuery.toLowerCase();
-    return vendors.filter(vendor =>
-      vendor.name?.toLowerCase().includes(query) ||
-      vendor.category?.toLowerCase().includes(query) ||
-      vendor.id?.toLowerCase().includes(query)
-    );
-  }, [vendors, searchQuery]);
+    return matchesSearch && matchesStatus;
+  }) || [];
 
-  const showLoading = isLoadingVendors || isUserLoading;
+  const pendingCount = vendors?.filter(v => (v.approvalStatus || 'Pending') === 'Pending').length || 0;
+  const approvedCount = vendors?.filter(v => v.approvalStatus === 'Approved').length || 0;
+  const rejectedCount = vendors?.filter(v => v.approvalStatus === 'Rejected').length || 0;
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Manage Vendors</h1>
-        <p className="text-muted-foreground">
-          View, manage, and approve all vendor accounts on the platform.
-        </p>
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Vendors</h1>
+          <p className="text-muted-foreground">Manage vendor accounts and approvals</p>
+        </div>
       </div>
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-        <Input
-          type="search"
-          placeholder="Search vendors by name, category, or ID..."
-          className="w-full pl-10"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
+
+      {/* Filter Tabs */}
+      <div className="flex gap-2 overflow-x-auto pb-2">
+        <Button
+          variant={statusFilter === 'All' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setStatusFilter('All')}
+          className="shrink-0"
+        >
+          All ({vendors?.length || 0})
+        </Button>
+        <Button
+          variant={statusFilter === 'Pending' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setStatusFilter('Pending')}
+          className="shrink-0"
+        >
+          Pending ({pendingCount})
+        </Button>
+        <Button
+          variant={statusFilter === 'Approved' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setStatusFilter('Approved')}
+          className="shrink-0"
+        >
+          Approved ({approvedCount})
+        </Button>
+        <Button
+          variant={statusFilter === 'Rejected' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setStatusFilter('Rejected')}
+          className="shrink-0"
+        >
+          Rejected ({rejectedCount})
+        </Button>
       </div>
+
+      {/* Search */}
+      <div className="flex items-center gap-4">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search by name, category, or ID..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+      </div>
+
+      {/* Vendors Grid */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {showLoading && [...Array(6)].map((_, i) => <VendorCardSkeleton key={i} />)}
-        {!showLoading && filteredVendors.map((vendor) => (
+        {isLoading && [...Array(6)].map((_, i) => <VendorCardSkeleton key={i} />)}
+        {!isLoading && filteredVendors.map((vendor) => (
           <AdminVendorCard key={vendor.id} vendor={vendor} />
         ))}
       </div>
-      {!showLoading && filteredVendors.length === 0 && (
-        <div className="text-center text-muted-foreground py-10 col-span-full">
-          <p>{searchQuery ? `No vendors found matching "${searchQuery}"` : 'No vendors found.'}</p>
+
+      {!isLoading && filteredVendors.length === 0 && (
+        <div className="text-center text-muted-foreground py-10">
+          <p>{searchQuery || statusFilter !== 'All' ? 'No vendors found matching your filters.' : 'No vendors found.'}</p>
         </div>
       )}
     </div>

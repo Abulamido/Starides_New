@@ -19,6 +19,22 @@ export function AdminRiderCard({ rider }: AdminRiderCardProps) {
   const firestore = useFirestore();
   const [isLoading, setIsLoading] = useState(false);
 
+  const handleStatusUpdate = async (newStatus: 'Verified' | 'Rejected') => {
+    if (!firestore) return;
+    setIsLoading(true);
+    try {
+      const riderRef = doc(firestore, 'riders', rider.id);
+      await updateDoc(riderRef, {
+        verificationStatus: newStatus,
+        enabled: newStatus === 'Verified'
+      });
+    } catch (error) {
+      console.error("Error updating rider status:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const toggleEnabled = async () => {
     if (!firestore) return;
     setIsLoading(true);
@@ -60,24 +76,48 @@ export function AdminRiderCard({ rider }: AdminRiderCardProps) {
   };
 
   return (
-    <Card className="flex items-center justify-between p-4">
-      <div className="flex flex-col gap-2">
-        <h3 className="text-base font-bold">{rider.name}</h3>
-        <p className="text-sm text-muted-foreground capitalize">{rider.vehicle}</p>
-        {rider.email && <p className="text-xs text-muted-foreground">{rider.email}</p>}
-        {rider.phoneNumber && <p className="text-xs text-muted-foreground">{rider.phoneNumber}</p>}
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className={cn(getVerificationBadgeColor(rider.verificationStatus || 'Unverified'))}>
-            {rider.verificationStatus || 'Unverified'}
-          </Badge>
-          <Badge variant="outline" className={cn(getOnlineBadgeColor(rider.onlineStatus || 'Offline'))}>
-            {rider.onlineStatus || 'Offline'}
-          </Badge>
+    <Card className="flex flex-col p-4 gap-4">
+      <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-2">
+          <h3 className="text-base font-bold">{rider.name}</h3>
+          <p className="text-sm text-muted-foreground capitalize">{rider.vehicle}</p>
+          {rider.email && <p className="text-xs text-muted-foreground">{rider.email}</p>}
+          {rider.phoneNumber && <p className="text-xs text-muted-foreground">{rider.phoneNumber}</p>}
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className={cn(getVerificationBadgeColor(rider.verificationStatus || 'Unverified'))}>
+              {rider.verificationStatus || 'Unverified'}
+            </Badge>
+            <Badge variant="outline" className={cn(getOnlineBadgeColor(rider.onlineStatus || 'Offline'))}>
+              {rider.onlineStatus || 'Offline'}
+            </Badge>
+          </div>
         </div>
+        <Button size="icon" variant={isEnabled ? 'secondary' : 'outline'} onClick={toggleEnabled} disabled={isLoading}>
+          <Power className={cn("h-5 w-5", isEnabled ? 'text-primary' : 'text-muted-foreground')} />
+        </Button>
       </div>
-      <Button size="icon" variant={isEnabled ? 'secondary' : 'outline'} onClick={toggleEnabled} disabled={isLoading}>
-        <Power className={cn("h-5 w-5", isEnabled ? 'text-primary' : 'text-muted-foreground')} />
-      </Button>
+
+      {rider.verificationStatus === 'Unverified' && (
+        <div className="flex gap-2 mt-2">
+          <Button
+            size="sm"
+            className="w-full bg-green-600 hover:bg-green-700 text-white"
+            onClick={() => handleStatusUpdate('Verified')}
+            disabled={isLoading}
+          >
+            Verify
+          </Button>
+          <Button
+            size="sm"
+            variant="destructive"
+            className="w-full"
+            onClick={() => handleStatusUpdate('Rejected')}
+            disabled={isLoading}
+          >
+            Reject
+          </Button>
+        </div>
+      )}
     </Card>
   );
 }
