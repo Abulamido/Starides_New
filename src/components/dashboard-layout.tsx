@@ -36,6 +36,7 @@ type DashboardLayoutProps = {
   userRole: string;
   userEmail?: string;
   isVendor?: boolean;
+  onSearch?: (query: string) => void;
 };
 
 function NavLinks({ navItems, isMobile = false, onNavigate }: { navItems: NavItem[], isMobile?: boolean, onNavigate?: () => void }) {
@@ -123,8 +124,10 @@ export function DashboardLayout({
   userRole,
   userEmail,
   isVendor = false,
+  onSearch,
 }: DashboardLayoutProps) {
   const [open, setOpen] = React.useState(false);
+  const [searchValue, setSearchValue] = React.useState('');
   const { user, isUserLoading } = useUser();
   const router = useRouter();
 
@@ -133,6 +136,12 @@ export function DashboardLayout({
       router.push('/auth');
     }
   }, [user, isUserLoading, router]);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchValue(value);
+    onSearch?.(value);
+  };
 
   if (isUserLoading || !user) {
     // You can return a loading spinner here
@@ -167,13 +176,15 @@ export function DashboardLayout({
             </Sheet>
 
             <div className="w-full flex-1">
-              <form>
+              <form onSubmit={(e) => e.preventDefault()}>
                 <div className="relative">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
                     type="search"
-                    placeholder="Search..."
+                    placeholder="Search vendors, riders..."
                     className="w-full appearance-none bg-background pl-8 shadow-none md:w-2/3 lg:w-1/3"
+                    value={searchValue}
+                    onChange={handleSearchChange}
                   />
                 </div>
               </form>

@@ -51,6 +51,7 @@ function VendorCardSkeleton() {
 export default function AdminDashboard() {
   const firestore = useFirestore();
   const { user, isUserLoading } = useUser();
+  const [searchQuery, setSearchQuery] = useState('');
   const [statsData, setStatsData] = useState({
     users: 0,
     activeVendors: 0,
@@ -137,6 +138,21 @@ export default function AdminDashboard() {
 
   const showLoading = isLoadingVendors || isLoadingRiders || isUserLoading;
 
+  // Filter vendors and riders based on search query
+  const filteredVendors = vendors?.filter(vendor =>
+    !searchQuery ||
+    vendor.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    vendor.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    vendor.id?.toLowerCase().includes(searchQuery.toLowerCase())
+  ) || [];
+
+  const filteredRiders = riders?.filter(rider =>
+    !searchQuery ||
+    rider.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    rider.vehicle?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    rider.id?.toLowerCase().includes(searchQuery.toLowerCase())
+  ) || [];
+
   const stats = [
     { title: 'Users', value: statsData.users.toString(), icon: Users },
     { title: 'Active Restaurants', value: statsData.activeVendors.toString(), icon: Store },
@@ -211,7 +227,7 @@ export default function AdminDashboard() {
         </div>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {showLoading && [...Array(3)].map((_, i) => <VendorCardSkeleton key={i} />)}
-          {vendors?.slice(0, 3).map((vendor) => (
+          {filteredVendors?.slice(0, 3).map((vendor) => (
             <AdminVendorCard key={vendor.id} vendor={vendor} />
           ))}
         </div>
@@ -231,7 +247,7 @@ export default function AdminDashboard() {
         </div>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {showLoading && [...Array(3)].map((_, i) => <RiderCardSkeleton key={i} />)}
-          {riders?.slice(0, 3).map((rider) => (
+          {filteredRiders?.slice(0, 3).map((rider) => (
             <AdminRiderCard key={rider.id} rider={rider} />
           ))}
         </div>
