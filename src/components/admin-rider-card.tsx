@@ -7,6 +7,8 @@ import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Power } from 'lucide-react';
 import { Button } from './ui/button';
+import { useFirestore } from '@/firebase';
+import { doc, updateDoc } from 'firebase/firestore';
 
 type AdminRiderCardProps = {
   rider: AdminRider;
@@ -14,6 +16,24 @@ type AdminRiderCardProps = {
 
 export function AdminRiderCard({ rider }: AdminRiderCardProps) {
   const [isEnabled, setIsEnabled] = useState(rider.enabled);
+  const firestore = useFirestore();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const toggleEnabled = async () => {
+    if (!firestore) return;
+    setIsLoading(true);
+    const newState = !isEnabled;
+    setIsEnabled(newState); // Optimistic update
+    try {
+      const riderRef = doc(firestore, 'riders', rider.id);
+      await updateDoc(riderRef, { enabled: newState });
+    } catch (error) {
+      console.error("Error toggling rider:", error);
+      setIsEnabled(!newState); // Revert on error
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   const getVerificationBadgeColor = (status: string) => {
     if (!status) return 'border-gray-300 bg-gray-50 text-gray-800 dark:bg-gray-900/50 dark:text-gray-300';
@@ -44,16 +64,18 @@ export function AdminRiderCard({ rider }: AdminRiderCardProps) {
       <div className="flex flex-col gap-2">
         <h3 className="text-base font-bold">{rider.name}</h3>
         <p className="text-sm text-muted-foreground capitalize">{rider.vehicle}</p>
+        {rider.email && <p className="text-xs text-muted-foreground">{rider.email}</p>}
+        {rider.phoneNumber && <p className="text-xs text-muted-foreground">{rider.phoneNumber}</p>}
         <div className="flex items-center gap-2">
-          <Badge variant="outline" className={cn(getVerificationBadgeColor(rider.verificationStatus))}>
-            {rider.verificationStatus || 'Unknown'}
+          <Badge variant="outline" className={cn(getVerificationBadgeColor(rider.verificationStatus || 'Unverified'))}>
+            {rider.verificationStatus || 'Unverified'}
           </Badge>
-          <Badge variant="outline" className={cn(getOnlineBadgeColor(rider.onlineStatus))}>
-            {rider.onlineStatus || 'Unknown'}
+          <Badge variant="outline" className={cn(getOnlineBadgeColor(rider.onlineStatus || 'Offline'))}>
+            {rider.onlineStatus || 'Offline'}
           </Badge>
         </div>
       </div>
-      <Button size="icon" variant={isEnabled ? 'secondary' : 'outline'} onClick={() => setIsEnabled(!isEnabled)}>
+      <Button size="icon" variant={isEnabled ? 'secondary' : 'outline'} onClick={toggleEnabled} disabled={isLoading}>
         <Power className={cn("h-5 w-5", isEnabled ? 'text-primary' : 'text-muted-foreground')} />
       </Button>
     </Card>

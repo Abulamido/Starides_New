@@ -38,14 +38,20 @@ export function AdminVendorCard({ vendor }: AdminVendorCardProps) {
 
   const toggleEnabled = async () => {
     if (!firestore) return;
+    setIsLoading(true);
     const newState = !isEnabled;
     setIsEnabled(newState); // Optimistic update
     try {
       const vendorRef = doc(firestore, 'vendors', vendor.id);
-      await updateDoc(vendorRef, { enabled: newState });
+      await updateDoc(vendorRef, {
+        enabled: newState,
+        activeStatus: newState ? 'Active' : 'Inactive'
+      });
     } catch (error) {
       console.error("Error toggling vendor:", error);
       setIsEnabled(!newState); // Revert on error
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -81,16 +87,17 @@ export function AdminVendorCard({ vendor }: AdminVendorCardProps) {
         <div className="flex flex-col gap-2">
           <h3 className="text-base font-bold">{vendor.name}</h3>
           <p className="text-sm text-muted-foreground capitalize">{vendor.category}</p>
+          {vendor.email && <p className="text-xs text-muted-foreground">{vendor.email}</p>}
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className={cn(getApprovalBadgeColor(vendor.approvalStatus))}>
-              {vendor.approvalStatus || 'Unknown'}
+            <Badge variant="outline" className={cn(getApprovalBadgeColor(vendor.approvalStatus || 'Pending'))}>
+              {vendor.approvalStatus || 'Pending'}
             </Badge>
-            <Badge variant="outline" className={cn(getActiveBadgeColor(vendor.activeStatus))}>
-              {vendor.activeStatus || 'Unknown'}
+            <Badge variant="outline" className={cn(getActiveBadgeColor(vendor.activeStatus || 'Inactive'))}>
+              {vendor.activeStatus || 'Inactive'}
             </Badge>
           </div>
         </div>
-        <Button size="icon" variant={isEnabled ? 'secondary' : 'outline'} onClick={toggleEnabled}>
+        <Button size="icon" variant={isEnabled ? 'secondary' : 'outline'} onClick={toggleEnabled} disabled={isLoading}>
           <Power className={cn("h-5 w-5", isEnabled ? 'text-primary' : 'text-muted-foreground')} />
         </Button>
       </div>

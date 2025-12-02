@@ -50,6 +50,8 @@ export type AdminVendor = {
   activeStatus: 'Active' | 'Inactive';
   enabled: boolean;
   vendorId: string;
+  email?: string;
+  phone?: string;
 }
 
 export type AdminRider = {
@@ -60,6 +62,8 @@ export type AdminRider = {
   onlineStatus: 'Online' | 'Offline';
   enabled: boolean;
   userId: string;
+  email?: string;
+  phoneNumber?: string;
 }
 
 export type Wallet = {

@@ -24,7 +24,7 @@ import Link from 'next/link';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useCollection, useFirestore, useUser, useMemoFirebase } from '@/firebase';
-import { collection, query, where, orderBy, limit } from 'firebase/firestore';
+import { collection, query, where, orderBy, limit, doc, updateDoc } from 'firebase/firestore';
 import type { Order } from '@/lib/data';
 
 const getStatusBadgeColor = (status: string) => {
@@ -100,6 +100,31 @@ export default function RiderDashboard() {
     },
   ];
 
+  // Query rider profile to get online status
+  const riderProfileQuery = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return query(
+      collection(firestore, 'riders'),
+      where('userId', '==', user.uid),
+      limit(1)
+    );
+  }, [firestore, user]);
+
+  const { data: riderProfiles } = useCollection<any>(riderProfileQuery);
+  const riderProfile = riderProfiles?.[0];
+
+  const handleStatusToggle = async (checked: boolean) => {
+    if (!firestore || !riderProfile) return;
+    try {
+      const newStatus = checked ? 'Online' : 'Offline';
+      await updateDoc(doc(firestore, 'riders', riderProfile.id), {
+        onlineStatus: newStatus
+      });
+    } catch (error) {
+      console.error('Error updating status:', error);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -108,8 +133,15 @@ export default function RiderDashboard() {
           <p className="text-muted-foreground">{user?.displayName || 'Rider'}</p>
         </div>
         <div className="flex items-center space-x-2">
-          <Switch id="online-status" />
-          <Label htmlFor="online-status" className="text-green-600 font-medium">Online</Label>
+          <Switch
+            id="online-status"
+            checked={riderProfile?.onlineStatus === 'Online'}
+            onCheckedChange={handleStatusToggle}
+            disabled={!riderProfile}
+          />
+          <Label htmlFor="online-status" className={`${riderProfile?.onlineStatus === 'Online' ? 'text-green-600' : 'text-muted-foreground'} font-medium`}>
+            {riderProfile?.onlineStatus === 'Online' ? 'Online' : 'Offline'}
+          </Label>
         </div>
       </div>
 

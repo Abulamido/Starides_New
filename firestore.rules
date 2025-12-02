@@ -80,6 +80,10 @@ service cloud.firestore {
         allow read: if isOwner(userId);
         allow write: if false; // Only server can write
       }
+
+      match /addresses/{addressId} {
+        allow read, write: if isOwner(userId);
+      }
     }
     
     // Customers collection - admins can read all

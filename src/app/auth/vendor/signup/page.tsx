@@ -107,6 +107,10 @@ export default function VendorSignupPage() {
                 imageHint: `${values.storeCategory} store`,
                 rating: 0,
                 reviewCount: 0,
+                email: values.email,
+                approvalStatus: 'Pending',
+                activeStatus: 'Inactive',
+                enabled: false,
                 createdAt: serverTimestamp(),
             });
 

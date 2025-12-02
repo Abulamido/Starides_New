@@ -27,8 +27,10 @@ import {
   Store,
 } from 'lucide-react';
 import Link from 'next/link';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { useCollection, useFirestore, useUser, useMemoFirebase } from '@/firebase';
-import { collection, query, where, orderBy, limit } from 'firebase/firestore';
+import { collection, query, where, orderBy, limit, doc, updateDoc } from 'firebase/firestore';
 import type { Order } from '@/lib/data';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -113,6 +115,31 @@ export default function VendorDashboard() {
 
   const showLoading = isUserLoading || isLoadingAll || isLoadingRecent;
 
+  // Query vendor profile to get active status
+  const vendorProfileQuery = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return query(
+      collection(firestore, 'vendors'),
+      where('vendorId', '==', user.uid), // Assuming vendor's user.uid is their vendor ID
+      limit(1)
+    );
+  }, [firestore, user]);
+
+  const { data: vendorProfiles } = useCollection<any>(vendorProfileQuery);
+  const vendorProfile = vendorProfiles?.[0];
+
+  const handleStatusToggle = async (checked: boolean) => {
+    if (!firestore || !vendorProfile) return;
+    try {
+      const newStatus = checked ? 'Active' : 'Inactive';
+      await updateDoc(doc(firestore, 'vendors', vendorProfile.id), {
+        activeStatus: newStatus
+      });
+    } catch (error) {
+      console.error('Error updating status:', error);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -120,7 +147,17 @@ export default function VendorDashboard() {
           <h1 className="text-2xl font-bold">{user?.displayName || 'Vendor'}</h1>
           <div className="flex items-center gap-2 mt-1">
             <Badge variant="outline" className="border-green-300 bg-green-50 text-green-700">Approved</Badge>
-            <Badge variant="outline" className="border-blue-300 bg-blue-50 text-blue-700">Active</Badge>
+            <div className="flex items-center space-x-2 ml-4">
+              <Switch
+                id="vendor-status"
+                checked={vendorProfile?.activeStatus === 'Active'}
+                onCheckedChange={handleStatusToggle}
+                disabled={!vendorProfile}
+              />
+              <Label htmlFor="vendor-status" className={`${vendorProfile?.activeStatus === 'Active' ? 'text-blue-700' : 'text-muted-foreground'} font-medium`}>
+                {vendorProfile?.activeStatus === 'Active' ? 'Active' : 'Inactive'}
+              </Label>
+            </div>
           </div>
         </div>
       </div>

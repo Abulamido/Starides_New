@@ -10,6 +10,8 @@ import {
   Sheet,
   SheetContent,
   SheetTrigger,
+  SheetTitle,
+  SheetDescription,
 } from '@/components/ui/sheet';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
@@ -158,6 +160,8 @@ export function DashboardLayout({
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="flex flex-col p-0">
+                <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+                <SheetDescription className="sr-only">Main navigation menu</SheetDescription>
                 <SidebarContent navItems={navItems} onNavigate={() => setOpen(false)} />
               </SheetContent>
             </Sheet>
@@ -214,6 +218,8 @@ export function DashboardLayout({
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="flex flex-col">
+            <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+            <SheetDescription className="sr-only">Main navigation menu</SheetDescription>
             <div className="flex items-center gap-2 border-b pb-4">
               <Link href="/" className="flex items-center gap-2 font-semibold" onClick={() => setOpen(false)}>
                 <StaridesLogo className="h-6 w-6 text-primary" />

@@ -102,6 +102,10 @@ export default function RiderSignupPage() {
                 vehicleType: values.vehicleType,
                 licensePlate: values.licensePlate,
                 status: 'available',
+                email: values.email,
+                verificationStatus: 'Unverified',
+                onlineStatus: 'Offline',
+                enabled: false,
                 createdAt: serverTimestamp(),
             });
 
