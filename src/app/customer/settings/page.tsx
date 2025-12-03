@@ -5,11 +5,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useUser, useFirestore, useMemoFirebase, useDoc, useCollection } from '@/firebase';
-import { Loader2, User, MapPin, Plus, Trash2 } from 'lucide-react';
+import { Loader2, User, MapPin, Plus, Trash2, Bell } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { doc, collection } from 'firebase/firestore';
 import { updateCustomerProfile, addDeliveryAddress, deleteDeliveryAddress, setDefaultAddress, type DeliveryAddress } from './actions';
 import { useToast } from '@/hooks/use-toast';
+import { MapsProvider } from '@/components/maps/maps-provider';
+import { AddressAutocomplete } from '@/components/address-autocomplete';
+import { ImageUpload } from '@/components/image-upload';
+import { Switch } from '@/components/ui/switch';
 
 export default function CustomerSettingsPage() {
   const { user, isUserLoading } = useUser();
@@ -47,6 +51,12 @@ export default function CustomerSettingsPage() {
     state: '',
   });
 
+  const [notificationPreferences, setNotificationPreferences] = useState({
+    orderUpdates: true,
+    promotions: true,
+    soundEnabled: true,
+  });
+
   // Update form when user data loads
   useEffect(() => {
     if (userData) {
@@ -55,6 +65,13 @@ export default function CustomerSettingsPage() {
         email: userData.email || user?.email || '',
         phone: userData.phone || '',
       });
+      if (userData.notificationPreferences) {
+        setNotificationPreferences({
+          orderUpdates: userData.notificationPreferences.orderUpdates ?? true,
+          promotions: userData.notificationPreferences.promotions ?? true,
+          soundEnabled: userData.notificationPreferences.soundEnabled ?? true,
+        });
+      }
     }
   }, [userData, user]);
 
@@ -81,6 +98,7 @@ export default function CustomerSettingsPage() {
         displayName: formData.name,
         phone: formData.phone,
         email: formData.email,
+        notificationPreferences,
       });
 
       if (result.success) {
@@ -208,7 +226,17 @@ export default function CustomerSettingsPage() {
           </div>
           <CardDescription>Update your personal details</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
+          <ImageUpload
+            currentImageUrl={userData?.photoURL}
+            path={`users/${user?.uid}/profile`}
+            onImageUploaded={async (url) => {
+              if (user) {
+                await updateCustomerProfile(user.uid, { photoURL: url });
+              }
+            }}
+          />
+
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="name">Full Name</Label>
@@ -285,16 +313,22 @@ export default function CustomerSettingsPage() {
                     placeholder="e.g., Home, Work"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="newAddress">Address</Label>
-                  <Input
-                    id="newAddress"
-                    name="address"
-                    value={newAddress.address}
-                    onChange={handleAddressChange}
-                    placeholder="Street address"
-                  />
+                <div className="space-y-2 md:col-span-2">
+                  <MapsProvider>
+                    <AddressAutocomplete
+                      onAddressSelect={(data) => {
+                        setNewAddress(prev => ({
+                          ...prev,
+                          address: data.fullAddress,
+                          city: data.city,
+                          state: data.state
+                        }));
+                      }}
+                      defaultValue={newAddress.address}
+                    />
+                  </MapsProvider>
                 </div>
+                {/* Hidden inputs for manual fallback if needed, or just display them as read-only/editable */}
                 <div className="space-y-2">
                   <Label htmlFor="newCity">City</Label>
                   <Input
@@ -374,6 +408,49 @@ export default function CustomerSettingsPage() {
         </CardContent>
       </Card>
 
+      {/* Notification Preferences */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+            <Bell className="h-5 w-5" />
+            <CardTitle>Notification Preferences</CardTitle>
+          </div>
+          <CardDescription>Manage how you receive notifications</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label>Order Updates</Label>
+              <p className="text-sm text-muted-foreground">Receive notifications about order status changes</p>
+            </div>
+            <Switch
+              checked={notificationPreferences.orderUpdates}
+              onCheckedChange={(checked) => setNotificationPreferences(prev => ({ ...prev, orderUpdates: checked }))}
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label>Promotional Offers</Label>
+              <p className="text-sm text-muted-foreground">Receive notifications about deals and offers</p>
+            </div>
+            <Switch
+              checked={notificationPreferences.promotions}
+              onCheckedChange={(checked) => setNotificationPreferences(prev => ({ ...prev, promotions: checked }))}
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label>Sound Notifications</Label>
+              <p className="text-sm text-muted-foreground">Play sound when receiving notifications</p>
+            </div>
+            <Switch
+              checked={notificationPreferences.soundEnabled}
+              onCheckedChange={(checked) => setNotificationPreferences(prev => ({ ...prev, soundEnabled: checked }))}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Save Button */}
       <div className="flex justify-end">
         <Button onClick={handleSave} disabled={isSaving} size="lg">
@@ -387,6 +464,6 @@ export default function CustomerSettingsPage() {
           )}
         </Button>
       </div>
-    </div>
+    </div >
   );
 }

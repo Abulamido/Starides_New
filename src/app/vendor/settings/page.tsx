@@ -13,6 +13,7 @@ import { updateVendorSettings } from './actions';
 import { useToast } from '@/hooks/use-toast';
 import { MapsProvider } from '@/components/maps/maps-provider';
 import { AddressAutocomplete } from '@/components/maps/address-autocomplete';
+import { ImageUpload } from '@/components/image-upload';
 
 export default function VendorSettingsPage() {
   const { user, isUserLoading } = useUser();
@@ -170,6 +171,28 @@ export default function VendorSettingsPage() {
             <CardDescription>Update your restaurant details and description</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="flex gap-6">
+              <ImageUpload
+                currentImageUrl={vendorData?.logoUrl}
+                path={`vendors/${user?.uid}/logo`}
+                label="Store Logo"
+                onImageUploaded={async (url) => {
+                  if (user) {
+                    await updateVendorSettings(user.uid, { logoUrl: url });
+                  }
+                }}
+              />
+              <ImageUpload
+                currentImageUrl={vendorData?.bannerUrl}
+                path={`vendors/${user?.uid}/banner`}
+                label="Store Banner"
+                onImageUploaded={async (url) => {
+                  if (user) {
+                    await updateVendorSettings(user.uid, { bannerUrl: url });
+                  }
+                }}
+              />
+            </div>
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="businessName">Business Name</Label>

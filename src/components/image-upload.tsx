@@ -1,28 +1,28 @@
 'use client';
 
-import { useState } from 'react';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { storage } from '@/firebase/storage';
+import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Loader2, Upload, X } from 'lucide-react';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { useToast } from '@/hooks/use-toast';
-import Image from 'next/image';
 
 interface ImageUploadProps {
+    currentImageUrl?: string;
     onImageUploaded: (url: string) => void;
-    currentImage?: string;
-    folder?: string;
+    path: string; // e.g., 'users/profile-photos'
     label?: string;
 }
 
-export function ImageUpload({ onImageUploaded, currentImage, folder = 'products', label = 'Product Image' }: ImageUploadProps) {
-    const [uploading, setUploading] = useState(false);
-    const [previewUrl, setPreviewUrl] = useState<string | null>(currentImage || null);
+export function ImageUpload({ currentImageUrl, onImageUploaded, path, label = "Profile Photo" }: ImageUploadProps) {
+    const [isUploading, setIsUploading] = useState(false);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(currentImageUrl || null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const { toast } = useToast();
+    const storage = getStorage();
 
-    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
@@ -30,8 +30,8 @@ export function ImageUpload({ onImageUploaded, currentImage, folder = 'products'
         if (!file.type.startsWith('image/')) {
             toast({
                 variant: 'destructive',
-                title: 'Invalid file',
-                description: 'Please select an image file.',
+                title: 'Invalid file type',
+                description: 'Please upload an image file (JPG, PNG)',
             });
             return;
         }
@@ -41,102 +41,81 @@ export function ImageUpload({ onImageUploaded, currentImage, folder = 'products'
             toast({
                 variant: 'destructive',
                 title: 'File too large',
-                description: 'Please select an image smaller than 5MB.',
+                description: 'Image must be less than 5MB',
             });
             return;
         }
 
-        setUploading(true);
-        console.log('Starting upload...');
+        setIsUploading(true);
         try {
             // Create a unique filename
             const timestamp = Date.now();
-            const filename = `${timestamp}-${file.name}`;
-            const storageRef = ref(storage, `${folder}/${filename}`);
-            console.log('Storage ref created:', storageRef.fullPath);
+            const extension = file.name.split('.').pop();
+            const filename = `${timestamp}.${extension}`;
+            const storageRef = ref(storage, `${path}/${filename}`);
 
-            // Upload file with timeout
-            console.log('Uploading bytes...');
-            const uploadTask = uploadBytes(storageRef, file);
+            // Upload file
+            await uploadBytes(storageRef, file);
+            const downloadUrl = await getDownloadURL(storageRef);
 
-            // Race against a timeout
-            const timeoutPromise = new Promise((_, reject) =>
-                setTimeout(() => reject(new Error('Upload timed out. This is likely a CORS issue on localhost.')), 15000)
-            );
-
-            await Promise.race([uploadTask, timeoutPromise]);
-            console.log('Upload complete.');
-
-            // Get download URL
-            console.log('Getting download URL...');
-            const url = await getDownloadURL(storageRef);
-            console.log('Got URL:', url);
-
-            setPreviewUrl(url);
-            onImageUploaded(url);
+            setPreviewUrl(downloadUrl);
+            onImageUploaded(downloadUrl);
 
             toast({
                 title: 'Image uploaded',
-                description: 'Your image has been uploaded successfully.',
+                description: 'Your profile photo has been updated.',
             });
-        } catch (error: any) {
-            console.error('Upload error details:', error);
+        } catch (error) {
+            console.error('Error uploading image:', error);
             toast({
                 variant: 'destructive',
                 title: 'Upload failed',
-                description: error.message || 'Failed to upload image.',
+                description: 'Could not upload image. Please try again.',
             });
         } finally {
-            setUploading(false);
+            setIsUploading(false);
         }
     };
 
-    const handleRemove = () => {
-        setPreviewUrl(null);
-        onImageUploaded('');
+    const triggerFileInput = () => {
+        fileInputRef.current?.click();
     };
 
     return (
-        <div className="space-y-4">
-            <Label>{label}</Label>
+        <div className="flex items-center gap-4">
+            <Avatar className="h-20 w-20 border-2 border-border">
+                <AvatarImage src={previewUrl || ''} alt={label} />
+                <AvatarFallback className="bg-muted">
+                    {isUploading ? <Loader2 className="h-8 w-8 animate-spin" /> : <Upload className="h-8 w-8 text-muted-foreground" />}
+                </AvatarFallback>
+            </Avatar>
 
-            {previewUrl ? (
-                <div className="relative w-full aspect-square max-w-xs rounded-lg overflow-hidden border">
-                    <Image
-                        src={previewUrl}
-                        alt="Preview"
-                        fill
-                        className="object-cover"
-                    />
+            <div className="flex flex-col gap-2">
+                <Label className="font-medium">{label}</Label>
+                <div className="flex gap-2">
                     <Button
                         type="button"
-                        variant="destructive"
-                        size="icon"
-                        className="absolute top-2 right-2"
-                        onClick={handleRemove}
-                        disabled={uploading}
+                        variant="outline"
+                        size="sm"
+                        onClick={triggerFileInput}
+                        disabled={isUploading}
                     >
-                        <X className="h-4 w-4" />
+                        {isUploading ? 'Uploading...' : 'Change Photo'}
                     </Button>
-                </div>
-            ) : (
-                <div className="flex items-center gap-4">
-                    <Input
+                    <input
+                        ref={fileInputRef}
                         type="file"
                         accept="image/*"
-                        onChange={handleFileChange}
-                        disabled={uploading}
-                        className="max-w-xs"
+                        className="hidden"
+                        onChange={handleFileSelect}
                     />
-                    {uploading && <Loader2 className="h-4 w-4 animate-spin" />}
                 </div>
-            )}
-
-            {uploading && (
-                <p className="text-sm text-muted-foreground">
-                    Uploading image...
+                <p className="text-xs text-muted-foreground">
+                    JPG, PNG or GIF. Max 5MB.
                 </p>
-            )}
+            </div>
         </div>
     );
 }
+
+

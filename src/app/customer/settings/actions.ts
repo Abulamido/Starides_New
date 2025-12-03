@@ -5,9 +5,15 @@ import { doc, updateDoc, serverTimestamp, collection, addDoc, getDocs, deleteDoc
 import { revalidatePath } from 'next/cache';
 
 export interface CustomerProfile {
-    displayName: string;
-    phone: string;
-    email: string;
+    displayName?: string;
+    phone?: string;
+    email?: string;
+    photoURL?: string;
+    notificationPreferences?: {
+        orderUpdates?: boolean;
+        promotions?: boolean;
+        soundEnabled?: boolean;
+    };
 }
 
 export interface DeliveryAddress {
@@ -26,12 +32,17 @@ export async function updateCustomerProfile(userId: string, data: CustomerProfil
         const { firestore } = initializeServerFirebase();
         const userRef = doc(firestore, 'users', userId);
 
-        await updateDoc(userRef, {
-            displayName: data.displayName,
-            phone: data.phone,
-            email: data.email,
+        const updateData: any = {
             updatedAt: serverTimestamp(),
-        });
+        };
+
+        if (data.displayName) updateData.displayName = data.displayName;
+        if (data.phone) updateData.phone = data.phone;
+        if (data.email) updateData.email = data.email;
+        if (data.photoURL) updateData.photoURL = data.photoURL;
+        if (data.notificationPreferences) updateData.notificationPreferences = data.notificationPreferences;
+
+        await updateDoc(userRef, updateData);
 
         revalidatePath('/customer/settings');
         return { success: true };

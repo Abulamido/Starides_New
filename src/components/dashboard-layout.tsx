@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Link from 'next/link';
 import { Input } from '@/components/ui/input';
@@ -6,6 +5,14 @@ import { Search, Menu, LogOut, Dot } from 'lucide-react';
 import { UserNav } from './user-nav';
 import { StaridesLogo } from './starides-logo';
 import { CartSheet } from './cart-sheet';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { ThemeToggle } from './theme-toggle';
+import { NotificationCenter } from './notification-center';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { useUser, useAuth } from '@/firebase';
+import { signOut } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
 import {
   Sheet,
   SheetContent,
@@ -13,14 +20,6 @@ import {
   SheetTitle,
   SheetDescription,
 } from '@/components/ui/sheet';
-import { Button } from './ui/button';
-import { cn } from '@/lib/utils';
-import { ThemeToggle } from './theme-toggle';
-import { Avatar, AvatarFallback } from './ui/avatar';
-import { useUser, useAuth } from '@/firebase';
-import { signOut } from 'firebase/auth';
-import { useRouter } from 'next/navigation';
-
 
 export type NavItem = {
   href: string;
@@ -189,9 +188,12 @@ export function DashboardLayout({
                 </div>
               </form>
             </div>
-            <CartSheet />
-            <ThemeToggle />
-            <UserNav />
+            <div className="flex items-center gap-2">
+              <NotificationCenter />
+              <CartSheet />
+              <ThemeToggle />
+              <UserNav />
+            </div>
           </header>
           <main className="flex-1 overflow-auto p-4 lg:p-6 bg-secondary/40">
             {children}

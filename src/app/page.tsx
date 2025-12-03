@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { StaridesLogo } from '@/components/starides-logo';
 import {
   ShoppingBag,
   Store,
@@ -56,6 +57,24 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen">
+      {/* Header */}
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container mx-auto px-4 flex h-16 items-center justify-between">
+          <Link href="/" className="flex items-center gap-2">
+            <StaridesLogo className="h-8 w-8" />
+            <span className="text-xl font-bold">Starides</span>
+          </Link>
+          <div className="flex items-center gap-4">
+            <Link href="/auth/login">
+              <Button variant="ghost">Log In</Button>
+            </Link>
+            <Link href="/auth/customer/signup">
+              <Button>Sign Up</Button>
+            </Link>
+          </div>
+        </div>
+      </header>
+
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-b from-primary/10 via-background to-background">
         <div className="container mx-auto px-4 py-20 md:py-32">

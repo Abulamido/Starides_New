@@ -9,6 +9,7 @@ import { Power } from 'lucide-react';
 import { Button } from './ui/button';
 import { useFirestore } from '@/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
+import { useToast } from '@/hooks/use-toast';
 
 type AdminVendorCardProps = {
   vendor: AdminVendor;
@@ -18,6 +19,7 @@ export function AdminVendorCard({ vendor }: AdminVendorCardProps) {
   const [isEnabled, setIsEnabled] = useState(vendor.enabled);
   const firestore = useFirestore();
   const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   const handleStatusUpdate = async (newStatus: 'Approved' | 'Rejected') => {
     if (!firestore) return;
@@ -29,8 +31,18 @@ export function AdminVendorCard({ vendor }: AdminVendorCardProps) {
         activeStatus: newStatus === 'Approved' ? 'Active' : 'Inactive',
         enabled: newStatus === 'Approved'
       });
+
+      toast({
+        title: `Vendor ${newStatus}`,
+        description: `${vendor.name} has been ${newStatus.toLowerCase()}.`,
+      });
     } catch (error) {
       console.error("Error updating vendor status:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to update vendor status.",
+      });
     } finally {
       setIsLoading(false);
     }

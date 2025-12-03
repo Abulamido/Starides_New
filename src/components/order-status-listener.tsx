@@ -7,6 +7,7 @@ import { collection, query, where } from 'firebase/firestore';
 import type { Order } from '@/lib/data';
 import { useToast } from '@/hooks/use-toast';
 import { PackageCheck, Truck } from 'lucide-react';
+import { playNotificationSound } from '@/lib/sounds';
 
 type OrderStatusListenerProps = {
   customerId: string;
@@ -36,6 +37,7 @@ export function OrderStatusListener({ customerId }: OrderStatusListenerProps) {
 
         // Check if the order is new or if the status has changed
         if (previousOrder && previousOrder.status !== currentOrder.status) {
+          playNotificationSound();
           if (currentOrder.status === 'Ready for Pickup') {
             toast({
               title: 'Your order is ready!',

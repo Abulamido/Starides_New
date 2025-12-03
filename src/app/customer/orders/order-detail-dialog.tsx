@@ -151,6 +151,19 @@ export function OrderDetailDialog({ order, open, onOpenChange }: OrderDetailDial
                         </div>
                     </div>
 
+                    {/* Order Tracking Map for In Transit Orders */}
+                    {order.status === 'In Transit' && (
+                        <div className="space-y-2">
+                            <h3 className="font-semibold flex items-center gap-2">
+                                <MapPin className="h-4 w-4" />
+                                Live Tracking
+                            </h3>
+                            <MapsProvider>
+                                <OrderTrackingMap order={order} />
+                            </MapsProvider>
+                        </div>
+                    )}
+
                     <div className="flex gap-2">
                         <Button
                             variant="outline"

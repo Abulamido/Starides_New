@@ -9,6 +9,7 @@ import { Power } from 'lucide-react';
 import { Button } from './ui/button';
 import { useFirestore } from '@/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
+import { useToast } from '@/hooks/use-toast';
 
 type AdminRiderCardProps = {
   rider: AdminRider;
@@ -18,6 +19,7 @@ export function AdminRiderCard({ rider }: AdminRiderCardProps) {
   const [isEnabled, setIsEnabled] = useState(rider.enabled);
   const firestore = useFirestore();
   const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   const handleStatusUpdate = async (newStatus: 'Verified' | 'Rejected') => {
     if (!firestore) return;
@@ -28,8 +30,18 @@ export function AdminRiderCard({ rider }: AdminRiderCardProps) {
         verificationStatus: newStatus,
         enabled: newStatus === 'Verified'
       });
+
+      toast({
+        title: `Rider ${newStatus}`,
+        description: `${rider.name} has been ${newStatus.toLowerCase()}.`,
+      });
     } catch (error) {
       console.error("Error updating rider status:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to update rider status.",
+      });
     } finally {
       setIsLoading(false);
     }

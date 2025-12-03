@@ -150,8 +150,8 @@ export function ProductFormDialog({
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                         <ImageUpload
                             onImageUploaded={setUploadedImage}
-                            currentImage={uploadedImage}
-                            folder="products"
+                            currentImageUrl={uploadedImage}
+                            path="products"
                             label="Product Image"
                         />
 

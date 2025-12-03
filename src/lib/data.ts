@@ -46,7 +46,7 @@ export type AdminVendor = {
   id: string;
   name: string;
   category: string;
-  approvalStatus: 'Pending' | 'Approved';
+  approvalStatus: 'Pending' | 'Approved' | 'Rejected';
   activeStatus: 'Active' | 'Inactive';
   enabled: boolean;
   vendorId: string;
@@ -58,7 +58,7 @@ export type AdminRider = {
   id: string;
   name: string;
   vehicle: 'motorcycle' | 'bike' | 'car';
-  verificationStatus: 'Verified' | 'Unverified';
+  verificationStatus: 'Verified' | 'Unverified' | 'Rejected';
   onlineStatus: 'Online' | 'Offline';
   enabled: boolean;
   userId: string;

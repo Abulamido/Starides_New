@@ -11,6 +11,7 @@ import { useState, useEffect } from 'react';
 import { doc } from 'firebase/firestore';
 import { updateRiderAvailability, updateRiderProfile, updateRiderVehicle, updateRiderDocuments } from './actions';
 import { useToast } from '@/hooks/use-toast';
+import { ImageUpload } from '@/components/image-upload';
 
 export default function RiderProfilePage() {
   const { user, isUserLoading } = useUser();
@@ -207,7 +208,16 @@ export default function RiderProfilePage() {
           </div>
           <CardDescription>Your contact details</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
+          <ImageUpload
+            currentImageUrl={userData?.photoURL}
+            path={`riders/${user?.uid}/profile`}
+            onImageUploaded={async (url) => {
+              if (user) {
+                await updateRiderProfile(user.uid, { photoURL: url });
+              }
+            }}
+          />
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="name">Full Name</Label>

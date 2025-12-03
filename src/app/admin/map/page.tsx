@@ -32,7 +32,7 @@ function LiveMapContent() {
 
   // Filter only online riders with location
   const onlineRiders = riders?.filter(r =>
-    r.onlineStatus === 'Online' && r.location
+    r.onlineStatus === 'Online' && (r as any).location
   ) || [];
 
   return (
@@ -95,25 +95,28 @@ function LiveMapContent() {
             }}
           >
             {/* Render online riders */}
-            {onlineRiders.map((rider) => (
-              <Marker
-                key={rider.id}
-                position={{ lat: rider.location!.lat, lng: rider.location!.lng }}
-                icon={{
-                  path: google.maps.SymbolPath.CIRCLE,
-                  scale: 12,
-                  fillColor: '#3b82f6',
-                  fillOpacity: 1,
-                  strokeColor: '#ffffff',
-                  strokeWeight: 3,
-                }}
-                label={{
-                  text: '🏍️',
-                  fontSize: '24px',
-                }}
-                title={rider.name}
-              />
-            ))}
+            {onlineRiders.map((rider) => {
+              const riderWithLocation = rider as any;
+              return (
+                <Marker
+                  key={rider.id}
+                  position={{ lat: riderWithLocation.location.lat, lng: riderWithLocation.location.lng }}
+                  icon={{
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 12,
+                    fillColor: '#3b82f6',
+                    fillOpacity: 1,
+                    strokeColor: '#ffffff',
+                    strokeWeight: 3,
+                  }}
+                  label={{
+                    text: '🏍️',
+                    fontSize: '24px',
+                  }}
+                  title={rider.name}
+                />
+              );
+            })}
           </GoogleMap>
 
           {/* Legend */}

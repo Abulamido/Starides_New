@@ -43,6 +43,7 @@ export async function updateRiderProfile(userId: string, data: {
     displayName?: string;
     phone?: string;
     address?: string;
+    photoURL?: string;
 }) {
     try {
         const { firestore } = initializeServerFirebase();
