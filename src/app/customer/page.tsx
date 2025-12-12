@@ -71,33 +71,22 @@ export default function CustomerDashboard() {
         </div>
       </div>
 
-      <div className="space-y-6">
-        <div className="relative max-w-2xl">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Search for restaurants and food..."
-            className="w-full pl-12 h-12 text-base md:text-lg shadow-sm transition-shadow focus-visible:shadow-md rounded-full bg-background/50 backdrop-blur-sm border-muted/40"
-          />
-        </div>
-
-        <div className="flex overflow-x-auto pb-4 md:pb-0 md:flex-wrap items-center gap-3 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
-          {categories.map((category, index) => (
-            <Button
-              key={category.name}
-              variant={(index === 0 ? 'default' : 'outline') as "default" | "outline"}
-              className={cn(
-                "h-10 px-6 rounded-full transition-all duration-300 shrink-0",
-                index === 0
-                  ? "shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5"
-                  : "hover:bg-secondary hover:text-secondary-foreground hover:border-secondary-foreground/10 hover:-translate-y-0.5 bg-background/50 backdrop-blur-sm"
-              )}
-            >
-              <category.icon className="mr-2 h-4 w-4" />
-              {category.name}
-            </Button>
-          ))}
-        </div>
+      <div className="flex overflow-x-auto pb-4 md:pb-0 md:flex-wrap items-center gap-3 scrollbar-hide -mx-4 px-4 md:mx-0 md:px-0">
+        {categories.map((category, index) => (
+          <Button
+            key={category.name}
+            variant={(index === 0 ? 'default' : 'outline') as "default" | "outline"}
+            className={cn(
+              "h-10 px-6 rounded-full transition-all duration-300 shrink-0",
+              index === 0
+                ? "shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5"
+                : "hover:bg-secondary hover:text-secondary-foreground hover:border-secondary-foreground/10 hover:-translate-y-0.5 bg-background/50 backdrop-blur-sm"
+            )}
+          >
+            <category.icon className="mr-2 h-4 w-4" />
+            {category.name}
+          </Button>
+        ))}
       </div>
 
       <div className="space-y-4">
@@ -122,6 +111,7 @@ export default function CustomerDashboard() {
           </div>
         )}
       </div>
+
     </div>
   );
 }

@@ -7,7 +7,7 @@ importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-comp
 // Initialize the Firebase app in the service worker by passing in
 // your app's Firebase config object.
 firebase.initializeApp({
-    apiKey: "REPLACE_WITH_YOUR_API_KEY",
+    apiKey: "AIzaSyDqtHYc1Jnfscx5X9d4vSFhgRLj8O7GpCA",
     authDomain: "studio-2143552053-ccbad.firebaseapp.com",
     projectId: "studio-2143552053-ccbad",
     storageBucket: "studio-2143552053-ccbad.firebasestorage.app",

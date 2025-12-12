@@ -87,7 +87,7 @@ service cloud.firestore {
       
       // Vendor owner or admin can update
       allow update: if isAdmin() || 
-                       (isVendor() && resource.data.ownerId == request.auth.uid);
+                       (isVendor() && (resource.data.ownerId == request.auth.uid || resource.data.userId == request.auth.uid));
       
       // Only admin can delete
       allow delete: if isAdmin();

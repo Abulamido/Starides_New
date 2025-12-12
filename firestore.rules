@@ -87,7 +87,7 @@ service cloud.firestore {
       
       // Vendor owner or admin can update
       allow update: if isAdmin() || 
-                       (isVendor() && resource.data.ownerId == request.auth.uid);
+                       (isVendor() && (resource.data.ownerId == request.auth.uid || resource.data.userId == request.auth.uid));
       
       // Only admin can delete
       allow delete: if isAdmin();
@@ -119,17 +119,19 @@ service cloud.firestore {
     
     match /orders/{orderId} {
       // Customer, vendor, assigned rider, or admin can read
+      // CRITICAL FIX: Allow riders to read all orders to see "New Orders"
       allow read: if isAdmin() ||
                      resource.data.customerId == request.auth.uid ||
                      resource.data.vendorId == request.auth.uid ||
                      resource.data.riderId == request.auth.uid ||
-                     isRider();
+                     isRider(); 
       
       // Only authenticated customers can create orders
       allow create: if isAuthenticated() && 
                        request.resource.data.customerId == request.auth.uid;
       
       // Vendor/Rider can update order status, admin can update anything
+      // CRITICAL FIX: Allow Riders to Claim unassigned orders
       allow update: if isAdmin() ||
                        (isVendor() && resource.data.vendorId == request.auth.uid) ||
                        (isRider() && resource.data.riderId == request.auth.uid) ||
@@ -225,6 +227,27 @@ service cloud.firestore {
       
       // Only admin can delete payouts
       allow delete: if isAdmin();
+    }
+    
+    // ============================================
+    // NOTIFICATIONS COLLECTION
+    // ============================================
+    
+    match /notifications/{notificationId} {
+      // Users can read their own notifications
+      allow read: if isAuthenticated() && 
+                     resource.data.userId == request.auth.uid;
+      
+      // System/admin can create notifications
+      allow create: if isAdmin();
+      
+      // Users can update their own notifications (mark as read)
+      allow update: if isAuthenticated() && 
+                       resource.data.userId == request.auth.uid;
+      
+      // Users can delete their own notifications
+      allow delete: if isAuthenticated() && 
+                       resource.data.userId == request.auth.uid;
     }
     
     // ============================================
