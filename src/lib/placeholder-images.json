@@ -1,0 +1,94 @@
+{
+  "placeholderImages": [
+    {
+      "id": "hero-1",
+      "description": "A vibrant and busy marketplace scene.",
+      "imageUrl": "https://images.unsplash.com/photo-1610635934389-e42f1242b373?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxtYXJrZXRwbGFjZSUyMGxvZ2lzdGljc3xlbnwwfHx8fDE3NjE5NjU4MTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "marketplace logistics"
+    },
+    {
+      "id": "product-1",
+      "description": "A modern wireless headphone.",
+      "imageUrl": "https://images.unsplash.com/photo-1612465289702-7c84b5258fde?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHx3aXJlbGVzcyUyMGhlYWRwaG9uZXN8ZW58MHx8fHwxNzYxODg4MTAyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "wireless headphones"
+    },
+    {
+      "id": "product-2",
+      "description": "A stylish smartwatch.",
+      "imageUrl": "https://images.unsplash.com/photo-1690016424217-03f4d9427a6a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxzbWFydHdhdGNoJTIwZml0bmVzc3xlbnwwfHx8fDE3NjE5NjU4MTB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "smartwatch fitness"
+    },
+    {
+      "id": "product-3",
+      "description": "A professional camera.",
+      "imageUrl": "https://images.unsplash.com/photo-1760437626278-20388a75b769?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxwcm9mZXNzaW9uYWwlMjBjYW1lcmF8ZW58MHx8fHwxNzYxODc2MzAyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "professional camera"
+    },
+    {
+      "id": "product-4",
+      "description": "A comfortable running shoe.",
+      "imageUrl": "https://images.unsplash.com/photo-1587587448924-b5a1db520d29?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxydW5uaW5nJTIwc2hvZXN8ZW58MHx8fHwxNzYxODYyNTM4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "running shoes"
+    },
+    {
+      "id": "product-5",
+      "description": "An elegant leather backpack.",
+      "imageUrl": "https://images.unsplash.com/photo-1682316967717-16b32a406559?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxsZWF0aGVyJTIwYmFja3BhY2t8ZW58MHx8fHwxNzYxODY3OTQ4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "leather backpack"
+    },
+    {
+      "id": "product-6",
+      "description": "A sleek coffee maker.",
+      "imageUrl": "https://images.unsplash.com/photo-1638129284529-bed6d6f588e7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxjb2ZmZWUlMjBtYWtlcnxlbnwwfHx8fDE3NjE5NDU4MDN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "coffee maker"
+    },
+    {
+      "id": "product-7",
+      "description": "A modern drone.",
+      "imageUrl": "https://images.unsplash.com/photo-1652317004812-bd3614bddb15?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxjYW1lcmElMjBkcm9uZXxlbnwwfHx8fDE3NjE5MTk3MzB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "camera drone"
+    },
+    {
+      "id": "product-8",
+      "description": "A classic fountain pen.",
+      "imageUrl": "https://images.unsplash.com/photo-1473186505569-9c61870c11f9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxmb3VudGFpbiUyMHBlbnxlbnwwfHx8fDE3NjE5MjIzNTR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "fountain pen"
+    },
+    {
+      "id": "vendor-grocery",
+      "description": "A variety of fresh groceries.",
+      "imageUrl": "https://images.unsplash.com/photo-1590779033100-9f60a05a013d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8ZnJlc2glMjBncm9jZXJpZXN8ZW58MHx8fHwxNzYxOTI5OTk1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "fresh groceries"
+    },
+    {
+      "id": "vendor-electronics",
+      "description": "A setup with modern electronics.",
+      "imageUrl": "https://images.unsplash.com/photo-1468495244123-6c6c332eeece?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHx0ZWNoJTIwZ2FkZ2V0c3xlbnwwfHx8fDE3NjE5NjEzNzJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "tech gadgets"
+    },
+    {
+      "id": "vendor-restaurant",
+      "description": "The interior of a modern restaurant.",
+      "imageUrl": "https://images.unsplash.com/photo-1531973819741-e27a5ae2cc7b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxtb2Rlcm4lMjByZXN0YXVyYW50fGVufDB8fHx8MTc2MTkyNDA4OHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "modern restaurant"
+    },
+    {
+      "id": "vendor-pharmacy",
+      "description": "A clean, modern pharmacy aisle.",
+      "imageUrl": "https://images.unsplash.com/photo-1698466632366-09fa1d925de6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8bW9kZXJuJTIwcGhhcm1hY3l8ZW58MHx8fHwxNzYxOTMwMzU0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "modern pharmacy"
+    },
+    {
+      "id": "vendor-fashion",
+      "description": "Stylish clothes on display.",
+      "imageUrl": "https://images.unsplash.com/photo-1761370571873-5d869310d731?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxmYXNoaW9uJTIwYm91dGlxdWV8ZW58MHx8fHwxNzYxOTUyMzE4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "fashion boutique"
+    },
+    {
+      "id": "vendor-restaurant-2",
+      "description": "A bowl of asian noodles.",
+      "imageUrl": "https://images.unsplash.com/photo-1511910849309-0dffb8785146?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxhc2lhbiUyMGZvb2R8ZW58MHx8fHwxNzYxODk1MDgzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "asian food"
+    }
+  ]
+}

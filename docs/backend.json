@@ -1,0 +1,409 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user in the marketplace platform. Abstract user since different roles will extend this.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the user.",
+          "format": "email"
+        },
+        "firstName": {
+          "type": "string",
+          "description": "First name of the user."
+        },
+        "lastName": {
+          "type": "string",
+          "description": "Last name of the user."
+        },
+        "phone": {
+          "type": "string",
+          "description": "Phone number of the user."
+        },
+        "address": {
+          "type": "string",
+          "description": "Address of the user."
+        },
+        "role": {
+          "type": "string",
+          "description": "Role of the user in the system (e.g., Customer, Vendor, Rider, Admin)."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp of when the user account was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp of when the user account was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "email",
+        "firstName",
+        "lastName",
+        "role",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Customer": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Customer",
+      "type": "object",
+      "description": "Represents a customer in the marketplace.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the customer."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:1 Customer)"
+        },
+        "walletBalance": {
+          "type": "number",
+          "description": "The current balance in the customer's wallet."
+        },
+        "paymentMethod": {
+          "type": "string",
+          "description": "Preferred payment method of the customer."
+        }
+      },
+      "required": [
+        "id",
+        "userId"
+      ]
+    },
+    "Vendor": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Vendor",
+      "type": "object",
+      "description": "Represents a vendor in the marketplace.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the vendor."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:1 Vendor)"
+        },
+        "storeName": {
+          "type": "string",
+          "description": "Name of the vendor's store."
+        },
+        "storeDescription": {
+          "type": "string",
+          "description": "Description of the vendor's store."
+        },
+        "products": {
+          "type": "array",
+          "description": "References to Products. (Relationship: Vendor 1:N Product)",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "storeName"
+      ]
+    },
+    "Rider": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Rider",
+      "type": "object",
+      "description": "Represents a rider in the marketplace.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the rider."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:1 Rider)"
+        },
+        "location": {
+          "type": "string",
+          "description": "Current location of the rider (e.g., GeoJSON point)."
+        },
+        "availability": {
+          "type": "boolean",
+          "description": "Availability status of the rider."
+        },
+        "currentOrders": {
+          "type": "array",
+          "description": "References to Orders currently assigned to the rider. (Relationship: Rider 1:N Order)",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "userId"
+      ]
+    },
+    "Admin": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Admin",
+      "type": "object",
+      "description": "Represents an administrator in the marketplace.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the admin."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:1 Admin)"
+        }
+      },
+      "required": [
+        "id",
+        "userId"
+      ]
+    },
+    "Product": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Product",
+      "type": "object",
+      "description": "Represents a product in the marketplace.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the product."
+        },
+        "vendorId": {
+          "type": "string",
+          "description": "Reference to Vendor. (Relationship: Vendor 1:N Product)"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the product."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the product."
+        },
+        "price": {
+          "type": "number",
+          "description": "Price of the product."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL of the product image.",
+          "format": "uri"
+        },
+        "category": {
+          "type": "string",
+          "description": "Category of the product."
+        },
+        "stockQuantity": {
+          "type": "number",
+          "description": "Number of units currently in stock."
+        }
+      },
+      "required": [
+        "id",
+        "vendorId",
+        "name",
+        "price",
+        "imageUrl",
+        "stockQuantity"
+      ]
+    },
+    "Order": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Order",
+      "type": "object",
+      "description": "Represents an order in the marketplace.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the order."
+        },
+        "customerId": {
+          "type": "string",
+          "description": "Reference to Customer. (Relationship: Customer 1:N Order)"
+        },
+        "vendorId": {
+          "type": "string",
+          "description": "Reference to Vendor. (Relationship: Vendor 1:N Order)"
+        },
+        "riderId": {
+          "type": "string",
+          "description": "Reference to Rider assigned to this order. (Relationship: Rider 1:N Order)"
+        },
+        "products": {
+          "type": "array",
+          "description": "List of product IDs and quantities in the order.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "totalAmount": {
+          "type": "number",
+          "description": "Total amount of the order."
+        },
+        "status": {
+          "type": "string",
+          "description": "Status of the order (e.g., Pending, Accepted, Shipped, Delivered)."
+        },
+        "orderDate": {
+          "type": "string",
+          "description": "Date and time when the order was placed.",
+          "format": "date-time"
+        },
+        "deliveryAddress": {
+          "type": "string",
+          "description": "Delivery address for the order."
+        }
+      },
+      "required": [
+        "id",
+        "customerId",
+        "vendorId",
+        "products",
+        "totalAmount",
+        "status",
+        "orderDate",
+        "deliveryAddress"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profiles. The `userId` parameter is the user's Firebase Authentication UID. Includes the user's `role` for authorization purposes.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The Firebase Authentication UID of the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/customers/{customerId}",
+        "definition": {
+          "entityName": "Customer",
+          "schema": {
+            "$ref": "#/backend/entities/Customer"
+          },
+          "description": "Stores customer-specific data. The `customerId` parameter is the customer's unique ID.",
+          "params": [
+            {
+              "name": "customerId",
+              "description": "The unique ID of the customer."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/vendors/{vendorId}",
+        "definition": {
+          "entityName": "Vendor",
+          "schema": {
+            "$ref": "#/backend/entities/Vendor"
+          },
+          "description": "Stores vendor-specific data. The `vendorId` parameter is the vendor's unique ID.",
+          "params": [
+            {
+              "name": "vendorId",
+              "description": "The unique ID of the vendor."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/riders/{riderId}",
+        "definition": {
+          "entityName": "Rider",
+          "schema": {
+            "$ref": "#/backend/entities/Rider"
+          },
+          "description": "Stores rider-specific data. The `riderId` parameter is the rider's unique ID.",
+          "params": [
+            {
+              "name": "riderId",
+              "description": "The unique ID of the rider."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/roles_admin/{userId}",
+        "definition": {
+          "entityName": "Admin",
+          "schema": {
+            "$ref": "#/backend/entities/Admin"
+          },
+          "description": "Collection to store admin roles. The existence of a document with the `userId` indicates admin privileges. Authorization relies on document existence.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The Firebase Authentication UID of the admin user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/products/{productId}",
+        "definition": {
+          "entityName": "Product",
+          "schema": {
+            "$ref": "#/backend/entities/Product"
+          },
+          "description": "Stores product information.  All documents must share the same security requirements.  Consider subcollections for products that need different security.",
+          "params": [
+            {
+              "name": "productId",
+              "description": "The unique ID of the product."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/orders/{orderId}",
+        "definition": {
+          "entityName": "Order",
+          "schema": {
+            "$ref": "#/backend/entities/Order"
+          },
+          "description": "Stores order information. Includes denormalized `customerId` and `vendorId` for authorization purposes. The `status` field models the order's state.",
+          "params": [
+            {
+              "name": "orderId",
+              "description": "The unique ID of the order."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "This Firestore structure is designed for a multi-role marketplace application, optimizing for security, scalability, and query efficiency. It adheres to the principle of Authorization Independence by denormalizing user role information where necessary, avoiding the use of `get()` calls in security rules. Structural Segregation is used to maintain homogeneous security postures within collections. Access Modeling is based on path-based ownership for user-specific data and membership maps for collaborative data. Data Clarity and Predictability are enforced through explicit state modeling and semantic naming conventions.\n\n**Authorization Independence:** User role information is denormalized into documents where role-based authorization is required. For example, order documents could include the customer's role or vendor's ID to simplify security rules and avoid hierarchical dependencies.\n\n**Structural Segregation:** Different types of data with different access needs (e.g., public vs. private products) are stored in separate collections. User profiles are stored in a dedicated collection (`/users/{userId}`) to apply consistent access control rules.\n\n**QAPs (Rules are not Filters):** Secure `list` operations are enabled through structural choices. For example, listing orders is made secure by restricting access based on the user's role and relationship to the order. Vendors can only list orders related to their products, while customers can only list their own orders.\n\n**Role Management:** User roles are managed through the `/users/{userId}` collection. Additional collections such as `/roles_admin/{userId}` are used to assign global roles based on document existence, ensuring secure and efficient role-based access control without relying on custom claims."
+  }
+}

@@ -1,0 +1,283 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ============================================
+    // HELPER FUNCTIONS
+    // ============================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    function isVendor() {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'vendor';
+    }
+    
+    function isRider() {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'rider';
+    }
+    
+    // ============================================
+    // USERS COLLECTION
+    // ============================================
+    
+    match /users/{userId} {
+      // Users can read their own profile, admins can read all
+      allow read: if isOwner(userId) || isAdmin();
+      
+      // Anyone authenticated can create their own profile
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      
+      // Users can update their own profile, admins can update any
+      allow update: if isOwner(userId) || isAdmin();
+      
+      // Only admins can delete users
+      allow delete: if isAdmin();
+      
+      // Subcollection: addresses
+      match /addresses/{addressId} {
+        allow read, write: if isOwner(userId) || isAdmin();
+      }
+      
+      // Subcollection: notifications (CRITICAL FIX)
+      match /notifications/{notificationId} {
+        // Users can read their own notifications
+        allow read: if isOwner(userId);
+        
+        // System can create notifications (authenticated users for now, ideally server-side only)
+        allow create: if isAuthenticated();
+        
+        // Users can update their own notifications (mark as read)
+        allow update: if isOwner(userId);
+        
+        // Users can delete their own notifications
+        allow delete: if isOwner(userId);
+      }
+
+      // Subcollection: savedCards (CRITICAL FIX)
+      match /savedCards/{cardId} {
+        // Users can manage their own saved cards
+        allow read, write: if isOwner(userId);
+      }
+    }
+    
+    // ============================================
+    // VENDORS COLLECTION
+    // ============================================
+    
+    match /vendors/{vendorId} {
+      // Public can read vendor information (for browsing)
+      allow read: if true;
+      
+      // Only admins can create vendors
+      allow create: if isAdmin();
+      
+      // Vendor owner or admin can update
+      allow update: if isAdmin() || 
+                       (isVendor() && resource.data.ownerId == request.auth.uid);
+      
+      // Only admin can delete
+      allow delete: if isAdmin();
+    }
+    
+    // ============================================
+    // RIDERS COLLECTION
+    // ============================================
+    
+    match /riders/{riderId} {
+      // Admins can read all, riders can read their own profile
+      allow read: if isAdmin() || 
+                     (isRider() && resource.data.userId == request.auth.uid);
+      
+      // Only admins can create riders
+      allow create: if isAdmin();
+      
+      // Rider owner or admin can update
+      allow update: if isAdmin() || 
+                       (isRider() && (request.auth.uid == riderId || resource.data.userId == request.auth.uid));
+      
+      // Only admin can delete
+      allow delete: if isAdmin();
+    }
+    
+    // ============================================
+    // ORDERS COLLECTION
+    // ============================================
+    
+    match /orders/{orderId} {
+      // Customer, vendor, assigned rider, or admin can read
+      // CRITICAL FIX: Allow riders to read all orders to see "New Orders"
+      allow read: if isAdmin() ||
+                     resource.data.customerId == request.auth.uid ||
+                     resource.data.vendorId == request.auth.uid ||
+                     resource.data.riderId == request.auth.uid ||
+                     isRider(); 
+      
+      // Only authenticated customers can create orders
+      allow create: if isAuthenticated() && 
+                       request.resource.data.customerId == request.auth.uid;
+      
+      // Vendor/Rider can update order status, admin can update anything
+      // CRITICAL FIX: Allow Riders to Claim unassigned orders
+      allow update: if isAdmin() ||
+                       (isVendor() && resource.data.vendorId == request.auth.uid) ||
+                       (isRider() && resource.data.riderId == request.auth.uid) ||
+                       (isRider() && (resource.data.riderId == null || resource.data.riderId == "") && request.resource.data.riderId == request.auth.uid);
+      
+      // Only admin can delete orders
+      allow delete: if isAdmin();
+    }
+    
+    // ============================================
+    // PRODUCTS COLLECTION
+    // ============================================
+    
+    match /products/{productId} {
+      // Anyone can read products (for browsing)
+      allow read: if true;
+      
+      // Vendor can create products for their own vendor
+      allow create: if isVendor() && 
+                       request.resource.data.vendorId == request.auth.uid;
+      
+      // Vendor can update their own products, admin can update any
+      allow update: if isAdmin() ||
+                       (isVendor() && resource.data.vendorId == request.auth.uid);
+      
+      // Vendor can delete their own products, admin can delete any
+      allow delete: if isAdmin() ||
+                       (isVendor() && resource.data.vendorId == request.auth.uid);
+    }
+    
+    // ============================================
+    // RIDER REVIEWS COLLECTION (CRITICAL FIX)
+    // ============================================
+    
+    match /riderReviews/{reviewId} {
+      // Authenticated users can read
+      allow read: if isAuthenticated();
+      
+      // Authenticated users (customers) can create reviews
+      allow create: if isAuthenticated();
+      
+      // Only admin can update/delete (to prevent tampering)
+      allow update, delete: if isAdmin();
+    }
+    
+    // ============================================
+    // REVIEWS COLLECTION
+    // ============================================
+    
+    match /reviews/{reviewId} {
+      // Anyone can read reviews
+      allow read: if true;
+      
+      // Authenticated users can create reviews
+      allow create: if isAuthenticated();
+      
+      // Only review author can update/delete their review
+      allow update, delete: if isAuthenticated() && 
+                               request.auth.uid == resource.data.userId;
+    }
+    
+    // ============================================
+    // TRANSACTIONS COLLECTION
+    // ============================================
+    
+    match /transactions/{transactionId} {
+      // User can read their own transactions, admin can read all
+      allow read: if isAdmin() || 
+                     resource.data.userId == request.auth.uid;
+      
+      // Only admin can create transactions (typically via Cloud Functions)
+      allow create: if isAdmin();
+      
+      // Only admin can update/delete transactions
+      allow update, delete: if isAdmin();
+    }
+    
+    // ============================================
+    // PAYOUTS COLLECTION
+    // ============================================
+    
+    match /payouts/{payoutId} {
+      // User can read their own payouts, admin can read all
+      allow read: if isAdmin() || 
+                     resource.data.userId == request.auth.uid;
+      
+      // Vendor/Rider can create payout requests for themselves
+      allow create: if (isVendor() || isRider()) && 
+                       request.resource.data.userId == request.auth.uid;
+      
+      // Only admin can update payouts (approve/reject)
+      allow update: if isAdmin();
+      
+      // Only admin can delete payouts
+      allow delete: if isAdmin();
+    }
+    
+    // ============================================
+    // NOTIFICATIONS COLLECTION
+    // ============================================
+    
+    match /notifications/{notificationId} {
+      // Users can read their own notifications
+      allow read: if isAuthenticated() && 
+                     resource.data.userId == request.auth.uid;
+      
+      // System/admin can create notifications
+      allow create: if isAdmin();
+      
+      // Users can update their own notifications (mark as read)
+      allow update: if isAuthenticated() && 
+                       resource.data.userId == request.auth.uid;
+      
+      // Users can delete their own notifications
+      allow delete: if isAuthenticated() && 
+                       resource.data.userId == request.auth.uid;
+    }
+    
+    // ============================================
+    // WALLETS COLLECTION
+    // ============================================
+    
+    match /wallets/{walletId} {
+      // Users can read their own wallet, admin can read all
+      allow read: if isOwner(walletId) || isAdmin();
+      
+      // Users can create their own wallet
+      allow create: if isAuthenticated() && request.auth.uid == walletId;
+      
+      // Only admin can update wallets (for security)
+      allow update: if isAdmin();
+      
+      // Only admin can delete wallets
+      allow delete: if isAdmin();
+    }
+    
+    // ============================================
+    // CATEGORIES COLLECTION (if exists)
+    // ============================================
+    
+    match /categories/{categoryId} {
+      // Anyone can read categories
+      allow read: if true;
+      
+      // Only admin can create/update/delete categories
+      allow create, update, delete: if isAdmin();
+    }
+  }
+}

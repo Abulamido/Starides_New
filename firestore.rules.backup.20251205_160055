@@ -1,0 +1,18 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Reviews collection - allow authenticated users to read, only order participants to write
+    match /reviews/{reviewId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null && request.auth.uid == resource.data.userId;
+    }
+    
+    // Other collections - maintain open access for development
+    // TODO: Add specific rules for each collection before production
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
