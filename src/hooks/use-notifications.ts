@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { getMessaging, getToken, onMessage } from 'firebase/messaging';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, setDoc } from 'firebase/firestore';
 import { useFirestore, useUser } from '@/firebase';
 import { useToast } from './use-toast';
 
@@ -66,10 +66,10 @@ export function useNotifications() {
                 if (user && firestore) {
                     try {
                         const userRef = doc(firestore, 'users', user.uid);
-                        await updateDoc(userRef, {
+                        await setDoc(userRef, {
                             fcmToken: token,
                             fcmTokenUpdatedAt: new Date(),
-                        });
+                        }, { merge: true });
                     } catch (err) {
                         console.log('Could not save FCM token to user document:', err);
                     }

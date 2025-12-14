@@ -57,7 +57,7 @@ service cloud.firestore {
         // Users can read their own notifications
         allow read: if isOwner(userId);
         
-        // System can create notifications (authenticated users for now, ideally server-side only)
+        // System can create notifications (authenticated users for now)
         allow create: if isAuthenticated();
         
         // Users can update their own notifications (mark as read)
@@ -67,11 +67,28 @@ service cloud.firestore {
         allow delete: if isOwner(userId);
       }
 
-      // Subcollection: savedCards (CRITICAL FIX)
       match /savedCards/{cardId} {
         // Users can manage their own saved cards
         allow read, write: if isOwner(userId);
       }
+    }
+
+    // ============================================
+    // CUSTOMERS COLLECTION (NEW)
+    // ============================================
+
+    match /customers/{customerId} {
+      // Users can read their own profile, admins can read all
+      allow read: if isOwner(customerId) || isAdmin();
+      
+      // Allow users to create their own customer profile
+      allow create: if isAuthenticated() && request.auth.uid == customerId;
+      
+      // Allow users to update their own customer profile
+      allow update: if isOwner(customerId) || isAdmin();
+      
+      // Only admins can delete
+      allow delete: if isAdmin();
     }
     
     // ============================================
@@ -82,8 +99,8 @@ service cloud.firestore {
       // Public can read vendor information (for browsing)
       allow read: if true;
       
-      // Only admins can create vendors
-      allow create: if isAdmin();
+      // Admins can create vendors, or users can create their own if their ID matches
+      allow create: if isAdmin() || (isAuthenticated() && request.auth.uid == vendorId);
       
       // Vendor owner or admin can update
       allow update: if isAdmin() || 
@@ -102,8 +119,8 @@ service cloud.firestore {
       allow read: if isAdmin() || 
                      (isRider() && resource.data.userId == request.auth.uid);
       
-      // Only admins can create riders
-      allow create: if isAdmin();
+      // Admins can create riders, or users can create their own if their ID matches
+      allow create: if isAdmin() || (isAuthenticated() && request.auth.uid == riderId);
       
       // Rider owner or admin can update
       allow update: if isAdmin() || 

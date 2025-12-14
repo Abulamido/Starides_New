@@ -4,14 +4,15 @@
 import { AdminVendorCard } from '@/components/admin-vendor-card';
 import { AdminRiderCard } from '@/components/admin-rider-card';
 import Link from 'next/link';
-import { ArrowRight, Users, Store, Bike, Package, CheckCircle, DollarSign, MapPin, BarChart } from 'lucide-react';
+import { ArrowRight, Users, Store, Bike, Package, CheckCircle, DollarSign, MapPin, BarChart, Search, User } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
-import { collection, getCountFromServer, query, where, getDocs } from 'firebase/firestore';
+import { collection, getCountFromServer, query, where, getDocs, orderBy } from 'firebase/firestore';
 import { useState, useEffect } from 'react';
-import type { AdminVendor, AdminRider } from '@/lib/data';
+import type { AdminVendor, AdminRider, Order } from '@/lib/data';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSearch } from '@/contexts/search-context';
+import { Badge } from '@/components/ui/badge';
 
 const stats = [
   { title: 'Users', value: '0', icon: Users },
@@ -94,18 +95,7 @@ export default function AdminDashboard() {
         const completedOrdersSnapshot = await getCountFromServer(completedOrdersQuery);
         const completedOrdersCount = completedOrdersSnapshot.data().count;
 
-        // Revenue (Sum of totalAmount for delivered orders)
-        // Note: getAggregateFromServer might not be available in all environments/versions, 
-        // but it is standard in v9+. If it fails, we fallback or handle error.
-        // For now, we'll try to use it if available, otherwise fetch docs.
-        // To be safe and simple for this environment without checking SDK version deeply, 
-        // let's fetch the documents for revenue. It might be expensive if many orders, 
-        // but for a start it's fine. 
-        // actually, let's try getAggregateFromServer first if we can import it.
-        // If not, we'll just fetch.
-
-        // Let's use getDocs for revenue for now to be safe against SDK version issues in this environment
-        // unless I see it imported. I'll stick to getDocs for revenue for now.
+        // Revenue
         const revenueSnapshot = await getDocs(completedOrdersQuery);
         const revenue = revenueSnapshot.docs.reduce((acc, doc) => acc + (doc.data().totalAmount || 0), 0);
 
@@ -125,36 +115,74 @@ export default function AdminDashboard() {
     fetchStats();
   }, [firestore, user]);
 
+  // Fetch Vendors
   const vendorsQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null;
     return collection(firestore, 'vendors');
   }, [firestore, user]);
   const { data: vendors, isLoading: isLoadingVendors } = useCollection<AdminVendor>(vendorsQuery);
 
+  // Fetch Riders
   const ridersQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null;
     return collection(firestore, 'riders');
   }, [firestore, user]);
   const { data: riders, isLoading: isLoadingRiders } = useCollection<AdminRider>(ridersQuery);
 
-  const showLoading = isLoadingVendors || isLoadingRiders || isUserLoading;
+  // Fetch Orders
+  const ordersQuery = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return query(collection(firestore, 'orders'), orderBy('orderDate', 'desc'));
+  }, [firestore, user]);
+  const { data: orders, isLoading: isLoadingOrders } = useCollection<Order>(ordersQuery);
 
-  // Filter vendors and riders based on search query
+  // Fetch Users
+  const usersQuery = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return collection(firestore, 'users');
+  }, [firestore, user]);
+  const { data: users, isLoading: isLoadingUsers } = useCollection<any>(usersQuery);
+
+
+  const showLoading = isLoadingVendors || isLoadingRiders || isLoadingOrders || isLoadingUsers || isUserLoading;
+
+  // Search Logic
+  const isSearchActive = searchQuery.length > 0;
+
   const filteredVendors = vendors?.filter(vendor =>
     !searchQuery ||
     vendor.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     vendor.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    vendor.id?.toLowerCase().includes(searchQuery.toLowerCase())
+    vendor.id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    vendor.email?.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
 
   const filteredRiders = riders?.filter(rider =>
     !searchQuery ||
     rider.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     rider.vehicle?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    rider.id?.toLowerCase().includes(searchQuery.toLowerCase())
+    rider.id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    rider.email?.toLowerCase().includes(searchQuery.toLowerCase())
   ) || [];
 
-  const stats = [
+  const filteredOrders = orders?.filter(order =>
+    !searchQuery ||
+    order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    order.status.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    order.totalAmount.toString().includes(searchQuery)
+  ) || [];
+
+  const filteredUsers = users?.filter((u: any) =>
+    !searchQuery ||
+    u.displayName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    u.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    u.phoneNumber?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    u.role?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    u.id?.toLowerCase().includes(searchQuery.toLowerCase()) // assuming useCollection adds id
+  ) || [];
+
+
+  const statsDisplay = [
     { title: 'Users', value: statsData.users.toString(), icon: Users },
     { title: 'Active Restaurants', value: statsData.activeVendors.toString(), icon: Store },
     { title: 'Active Riders', value: statsData.activeRiders.toString(), icon: Bike },
@@ -163,13 +191,115 @@ export default function AdminDashboard() {
     { title: 'Revenue', value: `₦${statsData.revenue.toLocaleString()}`, icon: DollarSign },
   ];
 
+  if (isSearchActive) {
+    return (
+      <div className="space-y-8">
+        <h1 className="text-3xl font-bold tracking-tight">Search Results</h1>
+        <p className="text-muted-foreground">
+          Showing results for "<span className="font-semibold">{searchQuery}</span>"
+        </p>
+
+        {/* Orders Results */}
+        {(filteredOrders.length > 0) && (
+          <section>
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <Package className="h-5 w-5" /> Matching Orders ({filteredOrders.length})
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredOrders.map(order => (
+                <Card key={order.id} className="hover:bg-accent/5 transition-colors">
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <div className="font-semibold text-sm">Order #{order.id.substring(0, 8)}...</div>
+                        <div className="text-xs text-muted-foreground">
+                          {new Date(order.orderDate?.seconds * 1000).toLocaleDateString()}
+                        </div>
+                      </div>
+                      <Badge variant={order.status === 'Delivered' ? 'default' : 'secondary'}>
+                        {order.status}
+                      </Badge>
+                    </div>
+                    <div className="text-sm font-medium">₦{order.totalAmount.toLocaleString()}</div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Users Results */}
+        {(filteredUsers.length > 0) && (
+          <section>
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <User className="h-5 w-5" /> Matching Users ({filteredUsers.length})
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredUsers.map((u: any) => (
+                <Card key={u.id || Math.random()} className="hover:bg-accent/5 transition-colors">
+                  <CardContent className="p-4 flex items-center gap-3">
+                    <div className="bg-primary/10 p-2 rounded-full">
+                      <User className="h-4 w-4 text-primary" />
+                    </div>
+                    <div className="overflow-hidden">
+                      <div className="font-semibold truncate">{u.displayName || 'Unnamed User'}</div>
+                      <div className="text-xs text-muted-foreground truncate">{u.email}</div>
+                      <div className="text-xs text-muted-foreground capitalize">{u.role}</div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Vendors Results */}
+        {(filteredVendors.length > 0) && (
+          <section>
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <Store className="h-5 w-5" /> Matching Vendors ({filteredVendors.length})
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredVendors.map((vendor) => (
+                <AdminVendorCard key={vendor.id} vendor={vendor} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Riders Results */}
+        {(filteredRiders.length > 0) && (
+          <section>
+            <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+              <Bike className="h-5 w-5" /> Matching Riders ({filteredRiders.length})
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredRiders.map((rider) => (
+                <AdminRiderCard key={rider.id} rider={rider} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {filteredOrders.length === 0 && filteredUsers.length === 0 && filteredVendors.length === 0 && filteredRiders.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+            <Search className="h-12 w-12 mb-4 opacity-20" />
+            <p className="text-lg font-medium">No results found</p>
+            <p>Try searching for a name, ID, email, or usage type.</p>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // DEFAULT DASHBOARD VIEW
   return (
     <div className="space-y-8">
       <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
 
       <section>
         <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-6">
-          {stats.map((stat) => (
+          {statsDisplay.map((stat) => (
             <Card key={stat.title}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>

@@ -22,6 +22,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
+import { GoogleLoginButton } from '@/components/google-login-button';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email.' }),
@@ -132,12 +133,7 @@ export function LoginForm() {
         </div>
 
         <div className="space-y-2">
-          <Button variant="outline" className="w-full" disabled={isLoading}>
-            Login with Google
-          </Button>
-          <Button variant="outline" className="w-full" disabled={isLoading}>
-            Login with Facebook
-          </Button>
+          <GoogleLoginButton />
         </div>
       </form>
     </Form>

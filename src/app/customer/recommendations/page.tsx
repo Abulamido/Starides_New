@@ -8,11 +8,15 @@ import { Loader2, Star, TrendingUp, Heart, ShoppingCart } from 'lucide-react';
 import type { Order, Product } from '@/lib/data';
 import Image from 'next/image';
 import { useState } from 'react';
+import { useCart } from '@/context/cart-context';
+import { useToast } from '@/hooks/use-toast';
 
 export default function CustomerRecommendationsPage() {
   const firestore = useFirestore();
   const { user, isUserLoading } = useUser();
   const [addingToCart, setAddingToCart] = useState<string | null>(null);
+  const { addToCart } = useCart();
+  const { toast } = useToast();
 
   // Query customer's orders
   const ordersQuery = useMemoFirebase(() => {
@@ -80,12 +84,20 @@ export default function CustomerRecommendationsPage() {
     orderedProductIds.has(product.id)
   ).slice(0, 4) || [];
 
-  const handleAddToCart = async (productId: string) => {
-    setAddingToCart(productId);
-    // Simulate adding to cart
+  const handleAddToCart = async (product: Product) => {
+    setAddingToCart(product.id);
+
+    // Simulate network delay for better UX feel
     await new Promise(resolve => setTimeout(resolve, 500));
+
+    addToCart(product);
+
+    toast({
+      title: "Added to cart",
+      description: `${product.name} has been added to your cart.`,
+    });
+
     setAddingToCart(null);
-    // In a real app, you'd add to cart state/context here
   };
 
   return (
@@ -131,7 +143,7 @@ export default function CustomerRecommendationsPage() {
                     <span className="text-2xl font-bold">₦{product.price.toLocaleString()}</span>
                     <Button
                       size="sm"
-                      onClick={() => handleAddToCart(product.id)}
+                      onClick={() => handleAddToCart(product)}
                       disabled={addingToCart === product.id}
                     >
                       {addingToCart === product.id ? (
@@ -187,7 +199,7 @@ export default function CustomerRecommendationsPage() {
                     <span className="text-2xl font-bold">₦{product.price.toLocaleString()}</span>
                     <Button
                       size="sm"
-                      onClick={() => handleAddToCart(product.id)}
+                      onClick={() => handleAddToCart(product)}
                       disabled={addingToCart === product.id}
                     >
                       {addingToCart === product.id ? (
@@ -238,7 +250,7 @@ export default function CustomerRecommendationsPage() {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => handleAddToCart(product.id)}
+                      onClick={() => handleAddToCart(product)}
                       disabled={addingToCart === product.id}
                     >
                       {addingToCart === product.id ? (

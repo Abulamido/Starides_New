@@ -29,6 +29,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
+import { GoogleSignInButton } from '@/components/google-sign-in-button';
 
 const formSchema = z.object({
   fullName: z.string().min(1, { message: 'Full name is required.' }),
@@ -207,12 +208,7 @@ export function SignupForm() {
         </div>
 
         <div className="space-y-2">
-          <Button variant="outline" className="w-full" disabled={isLoading}>
-            Sign up with Google
-          </Button>
-          <Button variant="outline" className="w-full" disabled={isLoading}>
-            Sign up with Facebook
-          </Button>
+          <GoogleSignInButton role={form.watch('role')} mode="signup" />
         </div>
       </form>
     </Form>

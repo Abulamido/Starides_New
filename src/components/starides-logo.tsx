@@ -10,6 +10,7 @@ export function StaridesLogo({ className }: { className?: string }) {
         width={150}
         height={50}
         className="object-contain"
+        style={{ width: 'auto', height: 'auto' }}
         priority
         unoptimized
       />
