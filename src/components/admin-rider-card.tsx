@@ -168,27 +168,31 @@ export function AdminRiderCard({ rider }: AdminRiderCardProps) {
         </Button>
       </div>
 
-      {rider.verificationStatus === 'Unverified' && (
-        <div className="flex gap-2 mt-2">
-          <Button
-            size="sm"
-            className="w-full bg-green-600 hover:bg-green-700 text-white"
-            onClick={() => handleStatusUpdate('Verified')}
-            disabled={isLoading}
-          >
-            Verify
-          </Button>
-          <Button
-            size="sm"
-            variant="destructive"
-            className="w-full"
-            onClick={() => handleStatusUpdate('Rejected')}
-            disabled={isLoading}
-          >
-            Reject
-          </Button>
-        </div>
-      )}
+      <div className="flex gap-2 mt-2">
+        {rider.verificationStatus !== 'Verified' && (
+          <>
+            <Button
+              size="sm"
+              className="w-full bg-green-600 hover:bg-green-700 text-white"
+              onClick={() => handleStatusUpdate('Verified')}
+              disabled={isLoading}
+            >
+              {rider.verificationStatus === 'Rejected' ? 'Re-Verify' : 'Verify'}
+            </Button>
+            {rider.verificationStatus !== 'Rejected' && (
+              <Button
+                size="sm"
+                variant="destructive"
+                className="w-full"
+                onClick={() => handleStatusUpdate('Rejected')}
+                disabled={isLoading}
+              >
+                Reject
+              </Button>
+            )}
+          </>
+        )}
+      </div>
     </Card>
   );
 }

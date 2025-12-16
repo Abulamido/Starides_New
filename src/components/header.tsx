@@ -13,7 +13,7 @@ export function Header() {
       <div className="container flex h-16 items-center">
         <div className="mr-auto hidden md:flex">
           <Link href="/" className="mr-6 flex items-center space-x-2">
-            <StaridesLogo className="h-10 w-auto" />
+            <StaridesLogo className="h-20 w-auto" />
           </Link>
         </div>
 
@@ -26,7 +26,7 @@ export function Header() {
           </SheetTrigger>
           <SheetContent side="left" className="pr-0">
             <Link href="/" className="mr-6 flex items-center space-x-2">
-              <StaridesLogo className="h-10 w-auto" />
+              <StaridesLogo className="h-20 w-auto" />
             </Link>
             <div className="my-4 h-[calc(100vh-8rem)] pb-10 pl-6">
               <div className="flex flex-col space-y-3">

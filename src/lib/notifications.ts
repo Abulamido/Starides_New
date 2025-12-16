@@ -31,7 +31,6 @@ export async function createNotification(params: CreateNotificationParams) {
             notificationData
         );
 
-        console.log('Notification created for user:', userId, title);
         return { success: true };
     } catch (error) {
         console.error('Error creating notification:', error);

@@ -22,6 +22,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth, useFirestore } from '@/firebase';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
@@ -40,10 +41,20 @@ const formSchema = z.object({
     password: z.string().min(8, { message: 'Password must be at least 8 characters.' }),
     storeName: z.string().min(1, { message: 'Store name is required.' }),
     storeDescription: z.string().min(10, { message: 'Please provide a description (at least 10 characters).' }),
-    storeCategory: z.enum(['Grocery', 'Electronics', 'Restaurant', 'Fashion', 'Pharmacy'], {
-        required_error: 'Please select a category.',
+
+    cuisine: z.array(z.string()).refine((value) => value.length > 0, {
+        message: 'You have to select at least one cuisine type.',
     }),
 });
+
+const cuisineOptions = [
+    { id: 'African', label: 'African' },
+    { id: 'Fast Food', label: 'Fast Food' },
+    { id: 'Continental', label: 'Continental' },
+    { id: 'Desserts', label: 'Desserts' },
+    { id: 'Drinks', label: 'Drinks' },
+    { id: 'Healthy', label: 'Healthy' },
+];
 
 export default function VendorSignupPage() {
     const auth = useAuth();
@@ -59,7 +70,9 @@ export default function VendorSignupPage() {
             email: '',
             password: '',
             storeName: '',
+
             storeDescription: '',
+            cuisine: [],
         },
     });
 
@@ -103,9 +116,10 @@ export default function VendorSignupPage() {
                 userId: user.uid,
                 name: values.storeName,
                 description: values.storeDescription,
-                category: values.storeCategory,
+                category: 'Restaurant', // Hardcoded as we are now Restaurant-only
+                cuisine: values.cuisine,
                 image: `https://api.dicebear.com/7.x/shapes/svg?seed=${values.storeName}`,
-                imageHint: `${values.storeCategory} store`,
+                imageHint: `${values.cuisine.join(', ')} restaurant`,
                 rating: 0,
                 reviewCount: 0,
                 email: values.email,
@@ -140,7 +154,7 @@ export default function VendorSignupPage() {
             <div className="w-full max-w-md">
                 <div className="mb-4 flex justify-center">
                     <Link href="/auth" className="flex items-center text-foreground">
-                        <StaridesLogo className="h-8 w-auto" />
+                        <StaridesLogo className="h-24 w-auto" />
                     </Link>
                 </div>
 
@@ -246,24 +260,50 @@ export default function VendorSignupPage() {
 
                                 <FormField
                                     control={form.control}
-                                    name="storeCategory"
-                                    render={({ field }) => (
+                                    name="cuisine"
+                                    render={() => (
                                         <FormItem>
-                                            <FormLabel>Store Category</FormLabel>
-                                            <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoading}>
-                                                <FormControl>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Select a category" />
-                                                    </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    <SelectItem value="Grocery">Grocery</SelectItem>
-                                                    <SelectItem value="Electronics">Electronics</SelectItem>
-                                                    <SelectItem value="Restaurant">Restaurant</SelectItem>
-                                                    <SelectItem value="Fashion">Fashion</SelectItem>
-                                                    <SelectItem value="Pharmacy">Pharmacy</SelectItem>
-                                                </SelectContent>
-                                            </Select>
+                                            <div className="mb-4">
+                                                <FormLabel className="text-base">Cuisine Type</FormLabel>
+                                                <FormDescription>
+                                                    Select the types of food you serve.
+                                                </FormDescription>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                {cuisineOptions.map((item) => (
+                                                    <FormField
+                                                        key={item.id}
+                                                        control={form.control}
+                                                        name="cuisine"
+                                                        render={({ field }) => {
+                                                            return (
+                                                                <FormItem
+                                                                    key={item.id}
+                                                                    className="flex flex-row items-start space-x-3 space-y-0"
+                                                                >
+                                                                    <FormControl>
+                                                                        <Checkbox
+                                                                            checked={field.value?.includes(item.id)}
+                                                                            onCheckedChange={(checked) => {
+                                                                                return checked
+                                                                                    ? field.onChange([...field.value, item.id])
+                                                                                    : field.onChange(
+                                                                                        field.value?.filter(
+                                                                                            (value) => value !== item.id
+                                                                                        )
+                                                                                    )
+                                                                            }}
+                                                                        />
+                                                                    </FormControl>
+                                                                    <FormLabel className="font-normal">
+                                                                        {item.label}
+                                                                    </FormLabel>
+                                                                </FormItem>
+                                                            )
+                                                        }}
+                                                    />
+                                                ))}
+                                            </div>
                                             <FormMessage />
                                         </FormItem>
                                     )}

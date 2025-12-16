@@ -24,7 +24,6 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const { searchQuery, setSearchQuery } = useSearch();
 
   const handleSearch = (query: string) => {
-    console.log('AdminLayout: handleSearch called with:', query);
     setSearchQuery(query);
   };
 

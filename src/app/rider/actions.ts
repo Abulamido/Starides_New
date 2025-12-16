@@ -29,6 +29,7 @@ export async function acceptOrder(orderId: string, riderId: string) {
         const { adminDb } = await import('@/firebase/admin');
         await adminDb.collection('orders').doc(orderId).update({
             riderId: riderId,
+            status: 'Ready for Pickup', // Set status when rider accepts
             updatedAt: new Date()
         });
 

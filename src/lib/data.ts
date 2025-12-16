@@ -28,6 +28,21 @@ export type Order = {
   deliveryLocation?: { lat: number; lng: number };
   riderLocation?: { lat: number; lng: number; timestamp: any }; // Live rider location
   eta?: number; // Estimated time of arrival in minutes
+  hasReview?: boolean; // Track if customer has reviewed this order
+};
+
+export type Review = {
+  id: string;
+  orderId: string;
+  customerId: string;
+  vendorId: string;
+  riderId?: string;
+  vendorRating: number; // 1-5 stars
+  vendorReview?: string;
+  riderRating?: number; // 1-5 stars (optional if no rider)
+  riderReview?: string;
+  createdAt: any; // Firestore Timestamp
+  updatedAt: any;
 };
 
 export type Vendor = {
@@ -37,6 +52,7 @@ export type Vendor = {
   rating: number;
   reviewCount: number;
   category: 'Grocery' | 'Electronics' | 'Restaurant' | 'Fashion' | 'Pharmacy';
+  cuisine?: string[]; // E.g. ['African', 'Fast Food']
   image: string;
   imageHint: string;
   userId: string;     // Firebase Auth user.uid of the vendor owner

@@ -221,12 +221,12 @@ export function ProductFormDialog({
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
-                                                <SelectItem value="Grocery">Grocery</SelectItem>
-                                                <SelectItem value="Electronics">Electronics</SelectItem>
-                                                <SelectItem value="Fashion">Fashion</SelectItem>
-                                                <SelectItem value="Pharmacy">Pharmacy</SelectItem>
-                                                <SelectItem value="Restaurant">Restaurant</SelectItem>
-                                                <SelectItem value="Other">Other</SelectItem>
+                                                <SelectItem value="African">African</SelectItem>
+                                                <SelectItem value="Fast Food">Fast Food</SelectItem>
+                                                <SelectItem value="Continental">Continental</SelectItem>
+                                                <SelectItem value="Desserts">Desserts</SelectItem>
+                                                <SelectItem value="Drinks">Drinks</SelectItem>
+                                                <SelectItem value="Healthy">Healthy</SelectItem>
                                             </SelectContent>
                                         </Select>
                                         <FormMessage />

@@ -18,7 +18,6 @@ export function useNotifications() {
 
         // Check if notifications are supported
         if (!('Notification' in window)) {
-            console.log('This browser does not support notifications');
             return;
         }
 
@@ -71,7 +70,7 @@ export function useNotifications() {
                             fcmTokenUpdatedAt: new Date(),
                         }, { merge: true });
                     } catch (err) {
-                        console.log('Could not save FCM token to user document:', err);
+                        // Ignore error
                     }
                 }
 
@@ -80,7 +79,6 @@ export function useNotifications() {
 
             // Handle foreground messages
             onMessage(messaging, (payload) => {
-                console.log('Foreground message received:', payload);
 
                 // Show toast notification
                 toast({

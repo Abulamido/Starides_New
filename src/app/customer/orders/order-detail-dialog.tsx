@@ -11,13 +11,14 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { ShoppingCart, MapPin, Calendar, Package } from 'lucide-react';
+import { ShoppingCart, MapPin, Calendar, Package, Star } from 'lucide-react';
 import type { Order } from '@/lib/data';
 import { format } from 'date-fns';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { OrderTrackingMap } from '@/components/order-tracking-map';
 import { MapsProvider } from '@/components/maps/maps-provider';
+import { ReviewDialog } from '@/components/review-dialog';
 
 interface OrderDetailDialogProps {
     order: Order | null;
@@ -51,6 +52,7 @@ export function OrderDetailDialog({ order, open, onOpenChange }: OrderDetailDial
     const router = useRouter();
     const { toast } = useToast();
     const [isReordering, setIsReordering] = useState(false);
+    const [showReviewDialog, setShowReviewDialog] = useState(false);
 
     if (!order) return null;
 
@@ -165,6 +167,15 @@ export function OrderDetailDialog({ order, open, onOpenChange }: OrderDetailDial
                     )}
 
                     <div className="flex gap-2">
+                        {order.status === 'Delivered' && !order.hasReview && (
+                            <Button
+                                className="flex-1"
+                                onClick={() => setShowReviewDialog(true)}
+                            >
+                                <Star className="mr-2 h-4 w-4" />
+                                Leave Review
+                            </Button>
+                        )}
                         <Button
                             variant="outline"
                             className="flex-1"
@@ -182,6 +193,20 @@ export function OrderDetailDialog({ order, open, onOpenChange }: OrderDetailDial
                     </div>
                 </div>
             </DialogContent>
+
+            {/* Review Dialog */}
+            <ReviewDialog
+                order={order}
+                open={showReviewDialog}
+                onOpenChange={setShowReviewDialog}
+                onReviewSubmitted={() => {
+                    // Optionally refresh order data or show success message
+                    toast({
+                        title: 'Review Submitted',
+                        description: 'Thank you for your feedback!',
+                    });
+                }}
+            />
         </Dialog>
     );
 }

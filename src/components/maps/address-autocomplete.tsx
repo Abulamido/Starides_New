@@ -5,7 +5,7 @@ import usePlacesAutocomplete, {
     getLatLng,
 } from 'use-places-autocomplete';
 import { Input } from '@/components/ui/input';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { MapPin } from 'lucide-react';
 
@@ -20,6 +20,11 @@ export function AddressAutocomplete({
     defaultValue = '',
     className,
 }: AddressAutocompleteProps) {
+    // Memoize requestOptions to prevent mutation issues in Next.js 15
+    const requestOptions = useMemo(() => ({
+        /* Define search scope here */
+    }), []);
+
     const {
         ready,
         value,
@@ -27,9 +32,7 @@ export function AddressAutocomplete({
         setValue,
         clearSuggestions,
     } = usePlacesAutocomplete({
-        requestOptions: {
-            /* Define search scope here */
-        },
+        requestOptions,
         debounce: 300,
         defaultValue,
     });

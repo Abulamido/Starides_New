@@ -8,7 +8,6 @@ export const playNotificationSound = () => {
     try {
         // Check if Web Audio API is supported
         if (typeof window === 'undefined' || !window.AudioContext) {
-            console.log('Web Audio API not supported');
             return;
         }
 

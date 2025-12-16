@@ -7,15 +7,7 @@ import { collection, query, where, orderBy } from 'firebase/firestore';
 import { format } from 'date-fns';
 import { Loader2 } from 'lucide-react';
 
-interface Review {
-  id: string;
-  customerId: string;
-  customerName: string;
-  orderId: string;
-  rating: number;
-  comment: string;
-  createdAt: any;
-}
+import type { Review } from '@/lib/data';
 
 export default function VendorReviewsPage() {
   const { user } = useUser();
@@ -35,14 +27,15 @@ export default function VendorReviewsPage() {
 
   // Calculate average rating
   const averageRating = reviews && reviews.length > 0
-    ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length
+    ? reviews.reduce((sum, review) => sum + (review.vendorRating || 0), 0) / reviews.length
     : 0;
 
   const totalReviews = reviews?.length || 0;
 
   // Rating distribution
   const ratingCounts = reviews?.reduce((acc, review) => {
-    acc[review.rating] = (acc[review.rating] || 0) + 1;
+    const rating = review.vendorRating || 0;
+    acc[rating] = (acc[rating] || 0) + 1;
     return acc;
   }, {} as Record<number, number>) || {};
 
@@ -150,15 +143,15 @@ export default function VendorReviewsPage() {
           {reviews && reviews.length > 0 ? (
             <div className="space-y-6">
               {reviews.map((review) => (
-                <div key={review.id} className="border-b pb-6 last:border-0 last:pb-0">
+                <div className="border-b pb-6 last:border-0 last:pb-0">
                   <div className="flex items-start justify-between mb-2">
                     <div>
-                      <p className="font-semibold">{review.customerName || 'Anonymous'}</p>
+                      <p className="font-semibold">Customer</p>
                       <div className="flex items-center gap-1 mt-1">
                         {[1, 2, 3, 4, 5].map((star) => (
                           <Star
                             key={star}
-                            className={`h-4 w-4 ${star <= review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                            className={`h-4 w-4 ${star <= (review.vendorRating || 0) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
                           />
                         ))}
                       </div>
@@ -167,8 +160,8 @@ export default function VendorReviewsPage() {
                       {review.createdAt?.toDate ? format(review.createdAt.toDate(), 'PPP') : 'Recent'}
                     </span>
                   </div>
-                  {review.comment && (
-                    <p className="text-sm text-muted-foreground mt-2">{review.comment}</p>
+                  {review.vendorReview && (
+                    <p className="text-sm text-muted-foreground mt-2">{review.vendorReview}</p>
                   )}
                   <p className="text-xs text-muted-foreground mt-2">
                     Order #{review.orderId.substring(0, 8)}

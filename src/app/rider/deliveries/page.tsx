@@ -1,13 +1,14 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { useCollection, useFirestore, useUser, useMemoFirebase } from '@/firebase';
-import { collection, query, where, orderBy, or, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, where, orderBy, or, doc, updateDoc, serverTimestamp, limit } from 'firebase/firestore';
 import type { Order } from '@/lib/data';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Package, MapPin, Phone, CheckCircle, Bike, Clock } from 'lucide-react';
@@ -29,6 +30,7 @@ export default function RiderDeliveriesPage() {
   const firestore = useFirestore();
   const { user, isUserLoading } = useUser();
   const { toast } = useToast();
+  const router = useRouter();
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
   const [activeDeliveryId, setActiveDeliveryId] = useState<string | null>(null);
 
@@ -38,14 +40,28 @@ export default function RiderDeliveriesPage() {
     enabled: !!activeDeliveryId,
   });
 
-  // Available deliveries (New Order, Pending Acceptance, Preparing, Ready for Pickup, no rider assigned)
-  const availableQuery = useMemoFirebase(() => {
+  // Fetch rider profile to check online status
+  const riderProfileQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null;
+    return query(
+      collection(firestore, 'riders'),
+      where('userId', '==', user.uid),
+      limit(1)
+    );
+  }, [firestore, user]);
+
+  const { data: riderProfiles } = useCollection<any>(riderProfileQuery);
+  const riderProfile = riderProfiles?.[0];
+  const isOnline = riderProfile?.onlineStatus === 'Online';
+
+  // Available deliveries - ONLY if Online
+  const availableQuery = useMemoFirebase(() => {
+    if (!firestore || !user || !isOnline) return null; // Prevent fetching if offline
     return query(
       collection(firestore, 'orders'),
       where('status', 'in', ['New Order', 'Pending Acceptance', 'Preparing', 'Ready for Pickup'])
     );
-  }, [firestore, user]);
+  }, [firestore, user, isOnline]);
 
   // Active deliveries (assigned to this rider, not delivered)
   const activeQuery = useMemoFirebase(() => {
@@ -225,18 +241,19 @@ export default function RiderDeliveriesPage() {
               <MapPin className="mr-2 h-4 w-4" />
               Navigate to Customer
             </Button>
-            {order.status === 'Ready for Pickup' && (
+            {order.status !== 'In Transit' && order.status !== 'Delivered' && (
               <Button
                 className="w-full"
                 onClick={() => handleUpdateStatus(order.id, 'In Transit')}
                 disabled={loadingStates[order.id]}
               >
+                <Bike className="mr-2 h-4 w-4" />
                 Mark as In Transit
               </Button>
             )}
-            {order.status === 'In Transit' && (
+            {(order.status === 'In Transit' || order.status === 'Ready for Pickup') && (
               <Button
-                className="w-full"
+                className="w-full bg-green-600 hover:bg-green-700"
                 onClick={() => handleCompleteDelivery(order.id)}
                 disabled={loadingStates[order.id]}
               >
@@ -279,7 +296,17 @@ export default function RiderDeliveriesPage() {
             {!showLoading && filteredAvailable?.map(order => (
               <DeliveryCard key={order.id} order={order} type="available" />
             ))}
-            {!showLoading && filteredAvailable?.length === 0 && (
+
+            {!showLoading && !isOnline && (
+              <div className="col-span-full text-center py-12 text-muted-foreground bg-secondary/20 rounded-lg border border-dashed">
+                <Bike className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <h3 className="text-lg font-semibold mb-2">You are currently Offline</h3>
+                <p>Please go to your Dashboard and toggle your status to <strong>Online</strong> to receive new delivery requests.</p>
+                <Button className="mt-4" onClick={() => router.push('/rider')}>Go to Dashboard</Button>
+              </div>
+            )}
+
+            {!showLoading && isOnline && filteredAvailable?.length === 0 && (
               <div className="col-span-full text-center py-12 text-muted-foreground">
                 <Package className="h-12 w-12 mx-auto mb-4" />
                 <p>No available deliveries at the moment.</p>

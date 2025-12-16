@@ -4,13 +4,11 @@ import { revalidatePath } from 'next/cache';
 
 export async function updateRiderStatus(riderId: string, data: { verificationStatus?: 'Verified' | 'Rejected' | 'Unverified', enabled?: boolean }) {
     try {
-        console.log(`[updateRiderStatus] Attempting to update rider: ${riderId}`, data);
 
         const { adminDb, adminAuth, app } = await import('@/firebase/admin');
 
         // Debug admin app initialization
         const options = app.options;
-        console.log(`[updateRiderStatus] Admin App Project ID: ${options.projectId}`);
 
         const riderRef = adminDb.collection('riders').doc(riderId);
 
@@ -30,15 +28,12 @@ export async function updateRiderStatus(riderId: string, data: { verificationSta
             updatedAt: new Date()
         });
 
-        console.log(`[updateRiderStatus] Firestore update successful for rider: ${riderId}`);
-
         // Sync with Auth User if userId exists (for enabled/disabled status)
         if (userId && data.enabled !== undefined) {
             try {
                 await adminAuth.updateUser(userId, {
                     disabled: !data.enabled
                 });
-                console.log(`[updateRiderStatus] Auth user ${userId} disabled status set to: ${!data.enabled}`);
             } catch (authError) {
                 console.error(`[updateRiderStatus] Failed to update Auth user ${userId}:`, authError);
                 // Don't fail the whole action if Auth update fails, but warn.

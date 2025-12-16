@@ -78,7 +78,6 @@ export default function CustomerWalletPage() {
   };
 
   const handlePaystackClose = () => {
-    console.log('Paystack closed');
   };
 
   const paystackConfig = {

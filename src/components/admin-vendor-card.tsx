@@ -114,27 +114,31 @@ export function AdminVendorCard({ vendor }: AdminVendorCardProps) {
         </Button>
       </div>
 
-      {vendor.approvalStatus === 'Pending' && (
-        <div className="flex gap-2 mt-2">
-          <Button
-            size="sm"
-            className="w-full bg-green-600 hover:bg-green-700 text-white"
-            onClick={() => handleStatusUpdate('Approved')}
-            disabled={isLoading}
-          >
-            Approve
-          </Button>
-          <Button
-            size="sm"
-            variant="destructive"
-            className="w-full"
-            onClick={() => handleStatusUpdate('Rejected')}
-            disabled={isLoading}
-          >
-            Reject
-          </Button>
-        </div>
-      )}
+      <div className="flex gap-2 mt-2">
+        {vendor.approvalStatus !== 'Approved' && (
+          <>
+            <Button
+              size="sm"
+              className="w-full bg-green-600 hover:bg-green-700 text-white"
+              onClick={() => handleStatusUpdate('Approved')}
+              disabled={isLoading}
+            >
+              {vendor.approvalStatus === 'Rejected' ? 'Re-Approve' : 'Approve'}
+            </Button>
+            {vendor.approvalStatus !== 'Rejected' && (
+              <Button
+                size="sm"
+                variant="destructive"
+                className="w-full"
+                onClick={() => handleStatusUpdate('Rejected')}
+                disabled={isLoading}
+              >
+                Reject
+              </Button>
+            )}
+          </>
+        )}
+      </div>
     </Card>
   );
 }

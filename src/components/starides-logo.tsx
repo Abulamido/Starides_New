@@ -9,8 +9,7 @@ export function StaridesLogo({ className }: { className?: string }) {
         alt="Starides Logo"
         width={150}
         height={50}
-        className="object-contain"
-        style={{ width: 'auto', height: 'auto' }}
+        className="object-contain h-full w-auto" // Ensure it takes full height of container
         priority
         unoptimized
       />

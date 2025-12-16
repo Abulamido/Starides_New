@@ -82,7 +82,7 @@ function SidebarContent({ navItems, onNavigate }: { navItems: NavItem[], onNavig
     <div className="flex h-full flex-col gap-2">
       <div className="flex h-16 shrink-0 items-center border-b px-4 lg:h-[60px] lg:px-6">
         <Link href="/" className="flex items-center gap-2 font-semibold text-foreground" onClick={onNavigate}>
-          <StaridesLogo className="h-14 w-auto text-primary" />
+          <StaridesLogo className="h-20 w-auto text-primary" />
         </Link>
       </div>
       <div className="flex-1 overflow-auto py-2">
@@ -219,7 +219,7 @@ export function DashboardLayout({
       <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-4 border-b bg-background px-4 md:px-6">
         <div className="flex items-center gap-2">
           <Link href="/" className="flex items-center gap-2 font-semibold">
-            <StaridesLogo className="h-6 w-6 text-primary" />
+            <StaridesLogo className="h-16 w-auto text-primary" />
           </Link>
         </div>
 
@@ -244,7 +244,7 @@ export function DashboardLayout({
             <SheetDescription className="sr-only">Main navigation menu</SheetDescription>
             <div className="flex items-center gap-2 border-b pb-4">
               <Link href="/" className="flex items-center gap-2 font-semibold" onClick={() => setOpen(false)}>
-                <StaridesLogo className="h-6 w-6 text-primary" />
+                <StaridesLogo className="h-16 w-auto text-primary" />
               </Link>
             </div>
             <div className='py-4'>

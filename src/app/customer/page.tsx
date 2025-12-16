@@ -1,6 +1,8 @@
 
 'use client';
 
+import { useState } from 'react';
+
 import { VendorCard } from '@/components/vendor-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,14 +10,15 @@ import {
   Search,
   Store,
   Utensils,
-  Carrot,
-  Pill,
-  Laptop,
-  Shirt,
+  Coffee,
+  Pizza,
+  IceCream,
+  Salad,
+  Globe,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
-import { collection } from 'firebase/firestore';
+import { collection, query, where } from 'firebase/firestore';
 import type { Vendor } from '@/lib/data';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
@@ -23,12 +26,12 @@ import { cn } from '@/lib/utils';
 
 const categories = [
   { name: 'All', icon: Store },
-  { name: 'Restaurants', icon: Utensils },
-  // Future categories - will be enabled after pilot phase
-  // { name: 'Groceries', icon: Carrot },
-  // { name: 'Pharmacy', icon: Pill },
-  // { name: 'Electronics', icon: Laptop },
-  // { name: 'Fashion', icon: Shirt },
+  { name: 'African', icon: Utensils },
+  { name: 'Fast Food', icon: Pizza },
+  { name: 'Continental', icon: Globe },
+  { name: 'Desserts', icon: IceCream },
+  { name: 'Drinks', icon: Coffee },
+  { name: 'Healthy', icon: Salad },
 ];
 
 function VendorCardSkeleton() {
@@ -50,10 +53,25 @@ function VendorCardSkeleton() {
 export default function CustomerDashboard() {
   const firestore = useFirestore();
   const { user, isUserLoading } = useUser();
+  const [selectedCategory, setSelectedCategory] = useState('All');
+
   const vendorsQuery = useMemoFirebase(() => {
     if (!firestore) return null;
-    return collection(firestore, 'vendors')
-  }, [firestore]);
+
+    const constraints: any[] = [
+      where('activeStatus', '==', 'Active'),
+      where('approvalStatus', '==', 'Approved')
+    ];
+
+    if (selectedCategory !== 'All') {
+      constraints.push(where('cuisine', 'array-contains', selectedCategory));
+    }
+
+    return query(
+      collection(firestore, 'vendors'),
+      ...constraints
+    );
+  }, [firestore, selectedCategory]);
   const { data: vendors, isLoading } = useCollection<Vendor>(vendorsQuery);
 
   const showLoading = isLoading;
@@ -75,10 +93,11 @@ export default function CustomerDashboard() {
         {categories.map((category, index) => (
           <Button
             key={category.name}
-            variant={(index === 0 ? 'default' : 'outline') as "default" | "outline"}
+            variant={selectedCategory === category.name ? 'default' : 'outline'}
+            onClick={() => setSelectedCategory(category.name)}
             className={cn(
               "h-10 px-6 rounded-full transition-all duration-300 shrink-0",
-              index === 0
+              selectedCategory === category.name
                 ? "shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5"
                 : "hover:bg-secondary hover:text-secondary-foreground hover:border-secondary-foreground/10 hover:-translate-y-0.5 bg-background/50 backdrop-blur-sm"
             )}

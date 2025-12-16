@@ -30,7 +30,7 @@ export default function AdminVendorsPage() {
   const { searchQuery, setSearchQuery } = useSearch();
   const [statusFilter, setStatusFilter] = useState<'All' | 'Pending' | 'Approved' | 'Rejected'>('All');
 
-  console.log('AdminVendorsPage: searchQuery:', searchQuery);
+
 
   const vendorsQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null;
@@ -39,8 +39,6 @@ export default function AdminVendorsPage() {
   const { data: vendors, isLoading } = useCollection<AdminVendor>(vendorsQuery);
 
   // Debug logging
-  console.log('AdminVendorsPage Render. SearchQuery:', searchQuery);
-  console.log('Vendors count:', vendors?.length);
 
   // Filter vendors based on search and status
   const filteredVendors = vendors?.filter(vendor => {

@@ -108,7 +108,7 @@ export default function AdminSignupPage() {
             <div className="w-full max-w-md">
                 <div className="mb-4 flex justify-center">
                     <Link href="/auth" className="flex items-center text-foreground">
-                        <StaridesLogo className="h-8 w-auto" />
+                        <StaridesLogo className="h-24 w-auto" />
                     </Link>
                 </div>
 

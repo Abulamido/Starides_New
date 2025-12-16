@@ -388,7 +388,7 @@ export default function CheckoutPage() {
                     {...paystackConfig}
                     text={isLoading ? "Processing..." : "Pay Now"}
                     onSuccess={handlePaystackSuccess}
-                    onClose={() => console.log("Closed")}
+                    onClose={() => { }}
                     className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 rounded-md font-medium disabled:opacity-50"
                     disabled={isLoading || !user || !deliveryAddress}
                   />
