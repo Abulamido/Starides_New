@@ -1,7 +1,8 @@
 'use server';
 
-import { initializeServerFirebase } from '@/firebase/server-sdk';
-import { collection, addDoc, serverTimestamp, doc, updateDoc, query, where, getDocs } from 'firebase/firestore';
+import { adminDb } from '@/firebase/admin';
+import { FieldValue } from 'firebase-admin/firestore';
+import { revalidatePath } from 'next/cache';
 
 interface SubmitReviewData {
     orderId: string;
@@ -16,29 +17,25 @@ interface SubmitReviewData {
 
 export async function submitReview(reviewData: SubmitReviewData) {
     try {
-        const { firestore: db } = initializeServerFirebase();
-
         // Check if review already exists for this order
-        const reviewsRef = collection(db, 'reviews');
-        const existingReviewQuery = query(reviewsRef, where('orderId', '==', reviewData.orderId));
-        const existingReviews = await getDocs(existingReviewQuery);
+        const reviewsRef = adminDb.collection('reviews');
+        const existingReviewQuery = await reviewsRef.where('orderId', '==', reviewData.orderId).get();
 
-        if (!existingReviews.empty) {
+        if (!existingReviewQuery.empty) {
             return { success: false, error: 'You have already reviewed this order.' };
         }
 
         // Create review document
-        await addDoc(reviewsRef, {
+        await reviewsRef.add({
             ...reviewData,
-            createdAt: serverTimestamp(),
-            updatedAt: serverTimestamp(),
+            createdAt: FieldValue.serverTimestamp(),
+            updatedAt: FieldValue.serverTimestamp(),
         });
 
         // Mark order as reviewed
-        const orderRef = doc(db, 'orders', reviewData.orderId);
-        await updateDoc(orderRef, {
+        await adminDb.collection('orders').doc(reviewData.orderId).update({
             hasReview: true,
-            updatedAt: serverTimestamp(),
+            updatedAt: FieldValue.serverTimestamp(),
         });
 
         // Update vendor rating
@@ -49,6 +46,7 @@ export async function submitReview(reviewData: SubmitReviewData) {
             await calculateRiderRating(reviewData.riderId);
         }
 
+        revalidatePath('/customer/orders'); // Optional: revalidate orders list
         return { success: true };
     } catch (error: any) {
         console.error('Error submitting review:', error);
@@ -58,12 +56,10 @@ export async function submitReview(reviewData: SubmitReviewData) {
 
 export async function calculateVendorRating(vendorId: string) {
     try {
-        const { firestore: db } = initializeServerFirebase();
-
         // Get all reviews for this vendor
-        const reviewsRef = collection(db, 'reviews');
-        const vendorReviewsQuery = query(reviewsRef, where('vendorId', '==', vendorId));
-        const reviewsSnapshot = await getDocs(vendorReviewsQuery);
+        const reviewsSnapshot = await adminDb.collection('reviews')
+            .where('vendorId', '==', vendorId)
+            .get();
 
         let totalRating = 0;
         let count = 0;
@@ -79,11 +75,10 @@ export async function calculateVendorRating(vendorId: string) {
         const averageRating = count > 0 ? totalRating / count : 0;
 
         // Update vendor document
-        const vendorRef = doc(db, 'vendors', vendorId);
-        await updateDoc(vendorRef, {
+        await adminDb.collection('vendors').doc(vendorId).update({
             rating: Number(averageRating.toFixed(1)),
             reviewCount: count,
-            updatedAt: serverTimestamp(),
+            updatedAt: FieldValue.serverTimestamp(),
         });
 
         return { success: true, rating: averageRating, count };
@@ -95,12 +90,10 @@ export async function calculateVendorRating(vendorId: string) {
 
 export async function calculateRiderRating(riderId: string) {
     try {
-        const { firestore: db } = initializeServerFirebase();
-
         // Get all reviews for this rider
-        const reviewsRef = collection(db, 'reviews');
-        const riderReviewsQuery = query(reviewsRef, where('riderId', '==', riderId));
-        const reviewsSnapshot = await getDocs(riderReviewsQuery);
+        const reviewsSnapshot = await adminDb.collection('reviews')
+            .where('riderId', '==', riderId)
+            .get();
 
         let totalRating = 0;
         let count = 0;
@@ -116,11 +109,10 @@ export async function calculateRiderRating(riderId: string) {
         const averageRating = count > 0 ? totalRating / count : 0;
 
         // Update rider document
-        const riderRef = doc(db, 'riders', riderId);
-        await updateDoc(riderRef, {
+        await adminDb.collection('riders').doc(riderId).update({
             rating: Number(averageRating.toFixed(1)),
             reviewCount: count,
-            updatedAt: serverTimestamp(),
+            updatedAt: FieldValue.serverTimestamp(),
         });
 
         return { success: true, rating: averageRating, count };
@@ -132,10 +124,9 @@ export async function calculateRiderRating(riderId: string) {
 
 export async function getVendorReviews(vendorId: string) {
     try {
-        const { firestore: db } = initializeServerFirebase();
-        const reviewsRef = collection(db, 'reviews');
-        const vendorReviewsQuery = query(reviewsRef, where('vendorId', '==', vendorId));
-        const reviewsSnapshot = await getDocs(vendorReviewsQuery);
+        const reviewsSnapshot = await adminDb.collection('reviews')
+            .where('vendorId', '==', vendorId)
+            .get();
 
         const reviews: any[] = [];
         reviewsSnapshot.forEach((doc) => {
@@ -151,10 +142,9 @@ export async function getVendorReviews(vendorId: string) {
 
 export async function getRiderReviews(riderId: string) {
     try {
-        const { firestore: db } = initializeServerFirebase();
-        const reviewsRef = collection(db, 'reviews');
-        const riderReviewsQuery = query(reviewsRef, where('riderId', '==', riderId));
-        const reviewsSnapshot = await getDocs(riderReviewsQuery);
+        const reviewsSnapshot = await adminDb.collection('reviews')
+            .where('riderId', '==', riderId)
+            .get();
 
         const reviews: any[] = [];
         reviewsSnapshot.forEach((doc) => {
