@@ -59,9 +59,9 @@ export default function LandingPage() {
     <div className="min-h-screen">
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-4 flex h-16 items-center justify-between">
+        <div className="container mx-auto px-4 flex h-20 items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <StaridesLogo className="h-14 w-auto" />
+            <StaridesLogo className="h-16 w-auto" />
           </Link>
           <div className="flex items-center gap-4">
             <Link href="/auth/login">

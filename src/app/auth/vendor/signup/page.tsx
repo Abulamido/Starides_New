@@ -154,7 +154,7 @@ export default function VendorSignupPage() {
             <div className="w-full max-w-md">
                 <div className="mb-4 flex justify-center">
                     <Link href="/auth" className="flex items-center text-foreground">
-                        <StaridesLogo className="h-24 w-auto" />
+                        <StaridesLogo className="h-32 w-auto" />
                     </Link>
                 </div>
 

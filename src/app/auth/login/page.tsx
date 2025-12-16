@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { LoginForm } from '@/components/login-form';
 import Link from 'next/link';
 import { StaridesLogo } from '@/components/starides-logo';
-import { FirebaseConnectivityCheck } from '@/components/firebase-connectivity-check';
+
 
 export default function LoginPage() {
     return (
@@ -12,7 +12,7 @@ export default function LoginPage() {
             <div className="w-full max-w-md">
                 <div className="mb-4 flex justify-center">
                     <Link href="/auth" className="flex items-center text-foreground">
-                        <StaridesLogo className="h-24 w-auto" />
+                        <StaridesLogo className="h-32 w-auto" />
                     </Link>
                 </div>
 
@@ -35,7 +35,7 @@ export default function LoginPage() {
                             </p>
                         </div>
 
-                        <FirebaseConnectivityCheck />
+
                     </CardContent>
                 </Card>
             </div>
