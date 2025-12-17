@@ -29,7 +29,11 @@ const formSchema = z.object({
   password: z.string().min(1, { message: 'Password is required.' }),
 });
 
-export function LoginForm() {
+interface LoginFormProps {
+  googlePosition?: 'top' | 'bottom';
+}
+
+export function LoginForm({ googlePosition = 'top' }: LoginFormProps) {
   const auth = useAuth();
   const { toast } = useToast();
   const router = useRouter();
@@ -83,9 +87,26 @@ export function LoginForm() {
     }
   }
 
+  const GoogleSection = () => (
+    <>
+      <div className="relative">
+        <Separator className="my-4" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-2 bg-card text-muted-foreground text-sm">
+          OR
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <GoogleLoginButton />
+      </div>
+    </>
+  );
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        {googlePosition === 'top' && <GoogleSection />}
+
         <FormField
           control={form.control}
           name="email"
@@ -125,16 +146,7 @@ export function LoginForm() {
           Login
         </Button>
 
-        <div className="relative">
-          <Separator className="my-4" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-2 bg-card text-muted-foreground text-sm">
-            OR
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <GoogleLoginButton />
-        </div>
+        {googlePosition === 'bottom' && <GoogleSection />}
       </form>
     </Form>
   );

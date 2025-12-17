@@ -12,7 +12,7 @@ export default function LoginPage() {
             <div className="w-full max-w-md">
                 <div className="mb-4 flex justify-center">
                     <Link href="/auth" className="flex items-center text-foreground">
-                        <StaridesLogo className="h-32 w-auto" />
+                        <StaridesLogo className="h-40 w-auto" />
                     </Link>
                 </div>
 
@@ -24,7 +24,7 @@ export default function LoginPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <LoginForm />
+                        <LoginForm googlePosition="bottom" />
 
                         <div className="mt-4 text-center text-sm">
                             <p className="text-muted-foreground">

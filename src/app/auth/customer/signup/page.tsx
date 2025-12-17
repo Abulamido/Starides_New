@@ -115,9 +115,10 @@ export default function CustomerSignupPage() {
             <div className="w-full max-w-md">
                 <div className="mb-4 flex justify-center">
                     <Link href="/auth" className="flex items-center text-foreground">
-                        <StaridesLogo className="h-32 w-auto" />
+                        <StaridesLogo className="h-40 w-auto" />
                     </Link>
                 </div>
+
 
                 <Card>
                     <CardHeader>
@@ -127,19 +128,6 @@ export default function CustomerSignupPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <GoogleSignInButton role="customer" mode="signup" />
-
-                        <div className="relative my-6">
-                            <div className="absolute inset-0 flex items-center">
-                                <span className="w-full border-t" />
-                            </div>
-                            <div className="relative flex justify-center text-xs uppercase">
-                                <span className="bg-background px-2 text-muted-foreground">
-                                    Or continue with email
-                                </span>
-                            </div>
-                        </div>
-
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                                 <FormField
@@ -188,6 +176,19 @@ export default function CustomerSignupPage() {
                             </form>
                         </Form>
 
+                        <div className="relative my-6">
+                            <div className="absolute inset-0 flex items-center">
+                                <span className="w-full border-t" />
+                            </div>
+                            <div className="relative flex justify-center text-xs uppercase">
+                                <span className="bg-background px-2 text-muted-foreground">
+                                    Or continue with
+                                </span>
+                            </div>
+                        </div>
+
+                        <GoogleSignInButton role="customer" mode="signup" />
+
                         <div className="mt-4 text-center text-sm">
                             <p className="text-muted-foreground">
                                 Already have an account?{' '}
@@ -198,7 +199,7 @@ export default function CustomerSignupPage() {
                         </div>
                     </CardContent>
                 </Card>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }
