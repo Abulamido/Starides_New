@@ -56,6 +56,22 @@ export default function RiderDashboard() {
     );
   }, [firestore, user]);
 
+  // Query AVAILABLE orders (not assigned to anyone)
+  // We fetch all 'Ready for Pickup' and filter client-side for those without a riderId
+  // to avoid issues with null vs empty string fields in Firestore queries.
+  const availableOrdersQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(
+      collection(firestore, 'orders'),
+      where('status', '==', 'Ready for Pickup')
+    );
+  }, [firestore]);
+
+  const { data: allReadyOrders } = useCollection<Order>(availableOrdersQuery);
+
+  const availableOrders = allReadyOrders?.filter(order => !order.riderId) || [];
+
+
   const { data: orders, isLoading: isOrdersLoading } = useCollection<Order>(ordersQuery);
 
   // Query rider profile to get online status - MOVED BEFORE EARLY RETURN
@@ -100,6 +116,11 @@ export default function RiderDashboard() {
     {
       title: 'Active',
       value: activeDeliveries.toString(),
+      icon: Package,
+    },
+    {
+      title: 'Available',
+      value: (availableOrders?.length || 0).toString(),
       icon: Package,
     },
     {

@@ -59,6 +59,7 @@ export default function AdminDashboard() {
     activeVendors: 0,
     activeRiders: 0,
     totalOrders: 0,
+    pendingOrders: 0,
     completedOrders: 0,
     revenue: 0,
   });
@@ -90,6 +91,12 @@ export default function AdminDashboard() {
         const totalOrdersSnapshot = await getCountFromServer(ordersColl);
         const totalOrdersCount = totalOrdersSnapshot.data().count;
 
+        // Pending Orders (Approximation: active statuses)
+        // Firestore 'in' query supports up to 10 values
+        const pendingOrdersQuery = query(ordersColl, where('status', 'in', ['New Order', 'Pending Acceptance', 'Preparing', 'Ready for Pickup']));
+        const pendingOrdersSnapshot = await getCountFromServer(pendingOrdersQuery);
+        const pendingOrdersCount = pendingOrdersSnapshot.data().count;
+
         // Completed Orders
         const completedOrdersQuery = query(ordersColl, where('status', '==', 'Delivered'));
         const completedOrdersSnapshot = await getCountFromServer(completedOrdersQuery);
@@ -104,6 +111,7 @@ export default function AdminDashboard() {
           activeVendors: activeVendorsCount,
           activeRiders: activeRidersCount,
           totalOrders: totalOrdersCount,
+          pendingOrders: pendingOrdersCount,
           completedOrders: completedOrdersCount,
           revenue: revenue,
         });
@@ -187,6 +195,7 @@ export default function AdminDashboard() {
     { title: 'Active Restaurants', value: statsData.activeVendors.toString(), icon: Store },
     { title: 'Active Riders', value: statsData.activeRiders.toString(), icon: Bike },
     { title: 'Total Orders', value: statsData.totalOrders.toString(), icon: Package },
+    { title: 'Pending Orders', value: statsData.pendingOrders.toString(), icon: CheckCircle }, // Using CheckCircle temporarily or change icon
     { title: 'Completed', value: statsData.completedOrders.toString(), icon: CheckCircle },
     { title: 'Revenue', value: `₦${statsData.revenue.toLocaleString()}`, icon: DollarSign },
   ];
