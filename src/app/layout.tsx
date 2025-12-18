@@ -13,6 +13,12 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 export const metadata: Metadata = {
   title: 'Starides',
   description: 'The unified marketplace for all your needs',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Starides',
+  },
   icons: {
     icon: '/icon.png',
     shortcut: '/icon.png',
@@ -24,9 +30,10 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
+  userScalable: false,
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: 'white' },
-    { media: '(prefers-color-scheme: dark)', color: 'black' },
+    { media: '(prefers-color-scheme: light)', color: '#688fb6' },
+    { media: '(prefers-color-scheme: dark)', color: '#1a1d27' },
   ],
 };
 

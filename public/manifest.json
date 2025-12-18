@@ -1,0 +1,35 @@
+{
+    "name": "Starides",
+    "short_name": "Starides",
+    "description": "Your local marketplace, delivered fast",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#e4e8ed",
+    "theme_color": "#688fb6",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "/icon.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ],
+    "categories": [
+        "food",
+        "shopping",
+        "lifestyle"
+    ],
+    "screenshots": [],
+    "prefer_related_applications": false
+}
