@@ -74,7 +74,7 @@ export function useNotifications() {
                     }
                 }
 
-                console.log('FCM Token:', token);
+                // Token obtained successfully
             }
 
             // Handle foreground messages
