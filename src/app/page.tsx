@@ -3,6 +3,9 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { StaridesLogo } from '@/components/starides-logo';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import { useUserRole } from '@/hooks/use-user-role';
 import {
   ShoppingBag,
   Store,
@@ -16,6 +19,15 @@ import {
 } from 'lucide-react';
 
 export default function LandingPage() {
+  const router = useRouter();
+  const { role, isLoading } = useUserRole();
+
+  useEffect(() => {
+    if (!isLoading && role) {
+      router.push(`/${role}`);
+    }
+  }, [role, isLoading, router]);
+
   const services = [
     "African Dishes",
     "Fast Food",
