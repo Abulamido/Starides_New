@@ -7,6 +7,8 @@ import type { FirebaseApp } from 'firebase/app';
 import type { Auth } from 'firebase/auth';
 import type { Firestore } from 'firebase/firestore';
 
+import { StartupSplash } from '@/components/startup-splash';
+
 interface FirebaseClientProviderProps {
   children: ReactNode;
 }
@@ -29,9 +31,9 @@ export function FirebaseClientProvider({ children }: FirebaseClientProviderProps
   }, [firebaseServices]);
 
   if (!firebaseServices) {
-    // Return a loader or null while waiting for client-side initialization.
+    // Show branded splash screen while waiting for client-side Firebase initialization.
     // This prevents any child components from rendering and attempting to use Firebase prematurely.
-    return <div className="flex h-screen w-full items-center justify-center">Loading...</div>;
+    return <StartupSplash />;
   }
 
   return (

@@ -6,6 +6,7 @@ import { StaridesLogo } from '@/components/starides-logo';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { useUserRole } from '@/hooks/use-user-role';
+import { useUser } from '@/firebase';
 import {
   ShoppingBag,
   Store,
@@ -20,15 +21,26 @@ import {
 
 export default function LandingPage() {
   const router = useRouter();
-  const { role, isLoading } = useUserRole();
+  const { user, isUserLoading } = useUser();
+  const { role, isLoading: isRoleLoading } = useUserRole();
+
+  // Unified loading state - wait for auth restoration and role fetching
+  const isTransitioning = isUserLoading || (user && isRoleLoading && !role);
 
   useEffect(() => {
-    if (!isLoading && role) {
+    // If not loading and no user, keep on landing page (users can browse before signup)
+    if (!isUserLoading && !user) {
+      return;
+    }
+
+    // If user is authenticated and we have a role, redirect to their dashboard
+    // Use replace() to prevent back-navigation to landing page
+    if (user && role) {
       router.replace(`/${role}`);
     }
-  }, [role, isLoading, router]);
+  }, [user, isUserLoading, role, isRoleLoading, router]);
 
-  if (isLoading || role) {
+  if (isTransitioning || (user && role)) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
         <div className="relative">

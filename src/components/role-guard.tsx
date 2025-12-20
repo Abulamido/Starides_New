@@ -22,7 +22,8 @@ export function RoleGuard({ allowedRole, children }: RoleGuardProps) {
 
         // Not logged in - redirect to login
         if (!user) {
-            router.push('/auth/login');
+            // Use replace to prevent back-navigation to protected pages
+            router.replace('/auth/login');
             return;
         }
 
@@ -31,7 +32,8 @@ export function RoleGuard({ allowedRole, children }: RoleGuardProps) {
 
         // Wrong role - redirect to correct dashboard
         if (role && role !== allowedRole) {
-            router.push(`/${role}`);
+            // Use replace to prevent back-navigation issues
+            router.replace(`/${role}`);
         }
     }, [user, role, isUserLoading, isRoleLoading, allowedRole, router]);
 
