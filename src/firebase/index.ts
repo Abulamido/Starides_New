@@ -2,13 +2,20 @@
 
 import { firebaseConfig } from '@/firebase/config';
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { getAuth, setPersistence, browserLocalPersistence } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore'
 
 // IMPORTANT: DO NOT MODIFY THIS FUNCTION
 export function initializeFirebase() {
   if (!getApps().length) {
     const firebaseApp = initializeApp(firebaseConfig);
+    const auth = getAuth(firebaseApp);
+
+    // Ensure persistence is set to LOCAL for PWA longevity
+    setPersistence(auth, browserLocalPersistence).catch(err => {
+      console.error('Firebase persistence error:', err);
+    });
+
     return getSdks(firebaseApp);
   }
 

@@ -20,6 +20,7 @@ import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { sendPushNotification } from '@/app/actions/push';
 import {
   Dialog,
   DialogContent,
@@ -100,6 +101,17 @@ export default function VendorOrdersPage() {
         title: "Order Accepted",
         description: `Order #${orderId.substring(0, 7)} is now being prepared.`,
       });
+
+      // Send push notification to customer
+      const order = orders?.find(o => o.id === orderId);
+      if (order?.customerId) {
+        sendPushNotification({
+          userId: order.customerId,
+          title: "Order Accepted! 🍳",
+          body: `Your order #${orderId.substring(0, 7)} is being prepared.`,
+          data: { orderId, type: 'order_accepted' }
+        });
+      }
     } catch (e) {
       toast({
         variant: "destructive",
@@ -123,6 +135,17 @@ export default function VendorOrdersPage() {
         title: "Order Updated",
         description: `Order #${orderId.substring(0, 7)} is ready for pickup.`,
       });
+
+      // Send push notification to customer
+      const order = orders?.find(o => o.id === orderId);
+      if (order?.customerId) {
+        sendPushNotification({
+          userId: order.customerId,
+          title: "Order Ready! 🛍️",
+          body: `Your order #${orderId.substring(0, 7)} is ready for pickup.`,
+          data: { orderId, type: 'order_ready' }
+        });
+      }
     } catch (e) {
       toast({
         variant: "destructive",

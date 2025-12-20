@@ -5,6 +5,7 @@ import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 import { doc, setDoc } from 'firebase/firestore';
 import { useFirestore, useUser } from '@/firebase';
 import { useToast } from './use-toast';
+import { playNotificationSound } from '@/lib/sounds';
 
 export function useNotifications() {
     const { user } = useUser();
@@ -85,6 +86,9 @@ export function useNotifications() {
                     title: payload.notification?.title || 'New Notification',
                     description: payload.notification?.body || '',
                 });
+
+                // Play sound
+                playNotificationSound();
             });
         } catch (error) {
             console.error('Error setting up messaging:', error);

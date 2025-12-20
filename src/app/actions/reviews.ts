@@ -3,6 +3,7 @@
 import { adminDb } from '@/firebase/admin';
 import { FieldValue } from 'firebase-admin/firestore';
 import { revalidatePath } from 'next/cache';
+import { sendPushNotification } from './push';
 
 interface SubmitReviewData {
     orderId: string;
@@ -41,9 +42,25 @@ export async function submitReview(reviewData: SubmitReviewData) {
         // Update vendor rating
         await calculateVendorRating(reviewData.vendorId);
 
+        // Notify vendor
+        await sendPushNotification({
+            userId: reviewData.vendorId,
+            title: 'New Review! ⭐',
+            body: `A customer rated you ${reviewData.vendorRating} stars for order #${reviewData.orderId.slice(0, 8)}`,
+            data: { orderId: reviewData.orderId, type: 'new_review' }
+        });
+
         // Update rider rating if applicable
         if (reviewData.riderId && reviewData.riderRating) {
             await calculateRiderRating(reviewData.riderId);
+
+            // Notify rider
+            await sendPushNotification({
+                userId: reviewData.riderId,
+                title: 'New Review! ⭐',
+                body: `A customer rated you ${reviewData.riderRating} stars for order #${reviewData.orderId.slice(0, 8)}`,
+                data: { orderId: reviewData.orderId, type: 'new_review' }
+            });
         }
 
         revalidatePath('/customer/orders'); // Optional: revalidate orders list

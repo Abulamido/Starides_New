@@ -24,7 +24,7 @@ export default function LandingPage() {
 
   useEffect(() => {
     if (!isLoading && role) {
-      router.push(`/${role}`);
+      router.replace(`/${role}`);
     }
   }, [role, isLoading, router]);
 

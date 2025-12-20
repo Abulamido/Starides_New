@@ -28,6 +28,7 @@ import { Label } from '@/components/ui/label';
 import { useUser, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { collection, addDoc, serverTimestamp, doc, getDoc } from 'firebase/firestore';
 import { createNotification, NotificationTemplates } from '@/lib/notifications';
+import { sendPushNotification } from '@/app/actions/push';
 
 import { MapsProvider } from '@/components/maps/maps-provider';
 import { AddressAutocomplete } from '@/components/maps/address-autocomplete';
@@ -144,6 +145,14 @@ export default function CheckoutPage() {
     await createNotification({
       userId: vendorId,
       ...NotificationTemplates.orderPlaced(docRef.id)
+    });
+
+    // Also send actual push notification to Vendor
+    sendPushNotification({
+      userId: vendorId,
+      title: 'New Order! 🎉',
+      body: `You have a new order #${docRef.id.slice(0, 8)}`,
+      data: { orderId: docRef.id, type: 'order_placed' }
     });
 
     return docRef.id;

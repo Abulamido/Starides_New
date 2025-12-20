@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { sendPushNotification } from '@/app/actions/push';
 
 /**
  * Updates the rider's online status in the 'riders' collection.
@@ -27,11 +28,25 @@ export async function updateRiderStatus(riderId: string, status: 'Online' | 'Off
 export async function acceptOrder(orderId: string, riderId: string) {
     try {
         const { adminDb } = await import('@/firebase/admin');
-        await adminDb.collection('orders').doc(orderId).update({
+        const orderRef = adminDb.collection('orders').doc(orderId);
+        const orderDoc = await orderRef.get();
+        const orderData = orderDoc.data();
+
+        await orderRef.update({
             riderId: riderId,
             status: 'Ready for Pickup', // Set status when rider accepts
             updatedAt: new Date()
         });
+
+        // Send push to customer
+        if (orderData?.customerId) {
+            await sendPushNotification({
+                userId: orderData.customerId,
+                title: 'Rider Assigned! 🏍️',
+                body: `A rider has accepted your order #${orderId.slice(0, 8)} and is heading to the restaurant.`,
+                data: { orderId, type: 'rider_assigned' }
+            });
+        }
 
         revalidatePath('/rider/deliveries');
         return { success: true };
@@ -47,6 +62,10 @@ export async function acceptOrder(orderId: string, riderId: string) {
 export async function updateOrderStatus(orderId: string, status: string) {
     try {
         const { adminDb } = await import('@/firebase/admin');
+        const orderRef = adminDb.collection('orders').doc(orderId);
+        const orderDoc = await orderRef.get();
+        const orderData = orderDoc.data();
+
         const updateData: any = {
             status: status,
             updatedAt: new Date()
@@ -56,7 +75,28 @@ export async function updateOrderStatus(orderId: string, status: string) {
             updateData.deliveredAt = new Date();
         }
 
-        await adminDb.collection('orders').doc(orderId).update(updateData);
+        await orderRef.update(updateData);
+
+        // Send push to customer
+        if (orderData?.customerId) {
+            let title = 'Order Update';
+            let body = `Your order #${orderId.slice(0, 8)} is now ${status}.`;
+
+            if (status === 'In Transit') {
+                title = 'On the way! 🚀';
+                body = `Your order #${orderId.slice(0, 8)} is in transit and will arrive soon.`;
+            } else if (status === 'Delivered') {
+                title = 'Order Delivered! ✅';
+                body = `Your order #${orderId.slice(0, 8)} has been delivered. Enjoy!`;
+            }
+
+            await sendPushNotification({
+                userId: orderData.customerId,
+                title,
+                body,
+                data: { orderId, type: `order_${status.toLowerCase().replace(/ /g, '_')}` }
+            });
+        }
 
         revalidatePath('/rider/deliveries');
         return { success: true };

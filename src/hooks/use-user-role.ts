@@ -13,6 +13,8 @@ export function useUserRole() {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
+        console.log('[Auth] State check:', { isUserLoading, hasUser: !!user });
+
         // Wait for user loading to complete
         if (isUserLoading) {
             setIsLoading(true);
