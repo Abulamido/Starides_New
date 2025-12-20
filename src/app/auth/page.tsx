@@ -10,8 +10,10 @@ export default function AuthPage() {
   return (
     <div className="container max-w-6xl py-16 px-4">
       <div className="text-center mb-12">
-        <div className="flex justify-center items-center mb-4">
-          <StaridesLogo className="h-40 w-auto" />
+        <div className="flex justify-center items-center mb-2">
+          <Link href="/">
+            <StaridesLogo className="h-24 w-auto" />
+          </Link>
         </div>
         <p className="text-lg text-muted-foreground">
           Choose how you want to use Starides

@@ -105,8 +105,8 @@ export default function LandingPage() {
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 flex h-20 items-center justify-between">
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="neumorphic-flat p-5 transition-all duration-300 group-hover:shadow-[8px_8px_16px_#bec3c9,-8px_-8px_16px_#ffffff] dark:group-hover:shadow-[8px_8px_16px_#11131a,-8px_-8px_16px_#232734]">
-              <StaridesLogo className="h-20 w-auto" />
+            <div className="neumorphic-flat p-2 transition-all duration-300 group-hover:shadow-[4px_4px_8px_#bec3c9,-4px_-4px_8px_#ffffff] dark:group-hover:shadow-[4px_4px_8px_#11131a,-4px_-4px_8px_#232734]">
+              <StaridesLogo className="h-12 w-auto" />
             </div>
           </Link>
           <div className="flex items-center gap-3">
@@ -154,6 +154,13 @@ export default function LandingPage() {
             <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto leading-relaxed mb-12">
               Everything you need from your local neighborhood, delivered safely and fast.
             </p>
+
+            {/* Hero Logo */}
+            <div className="mb-12 animate-fade-in delay-200">
+              <div className="neumorphic-flat p-6 inline-block rounded-[2.5rem] transition-all duration-500 hover:shadow-[10px_10px_20px_#bec3c9,-10px_-10px_20px_#ffffff] dark:hover:shadow-[10px_10px_20px_#11131a,-10px_-10px_20px_#232734]">
+                <StaridesLogo className="h-32 w-auto" />
+              </div>
+            </div>
 
             {/* Main Action Area */}
             <div className="w-full max-w-2xl p-2 md:p-4 neumorphic-flat rounded-[2.5rem] flex flex-col md:flex-row gap-2 transition-all duration-500 hover:shadow-[10px_10px_20px_#bec3c9,-10px_-10px_20px_#ffffff] dark:hover:shadow-[10px_10px_20px_#11131a,-10px_-10px_20px_#232734]">
