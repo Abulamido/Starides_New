@@ -1,13 +1,10 @@
-
 'use client';
 
-import { useState } from 'react';
-
+import { useState, Suspense, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { VendorCard } from '@/components/vendor-card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
-  Search,
   Store,
   Utensils,
   Coffee,
@@ -15,6 +12,7 @@ import {
   IceCream,
   Salad,
   Globe,
+  Search
 } from 'lucide-react';
 import Link from 'next/link';
 import { useCollection, useFirestore, useMemoFirebase, useUser } from '@/firebase';
@@ -22,6 +20,7 @@ import { collection, query, where } from 'firebase/firestore';
 import type { Vendor } from '@/lib/data';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import { Input } from '@/components/ui/input';
 
 
 const categories = [
@@ -32,6 +31,7 @@ const categories = [
   { name: 'Desserts', icon: IceCream },
   { name: 'Drinks', icon: Coffee },
   { name: 'Healthy', icon: Salad },
+  { name: 'Restaurants', icon: Store } // Added Restaurants back as it was requested before
 ];
 
 function VendorCardSkeleton() {
@@ -50,10 +50,21 @@ function VendorCardSkeleton() {
   )
 }
 
-export default function CustomerDashboard() {
+function VendorList() {
   const firestore = useFirestore();
-  const { user, isUserLoading } = useUser();
+  const searchParams = useSearchParams();
+  const initialSearch = searchParams.get('search') || '';
+
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [searchTerm, setSearchTerm] = useState(initialSearch);
+
+  // Sync with URL params if they change
+  useEffect(() => {
+    const querySearch = searchParams.get('search');
+    if (querySearch) {
+      setSearchTerm(querySearch);
+    }
+  }, [searchParams]);
 
   const vendorsQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -63,7 +74,10 @@ export default function CustomerDashboard() {
       where('approvalStatus', '==', 'Approved')
     ];
 
-    if (selectedCategory !== 'All') {
+    // Note: We are NOT filtering by category in Firestore if a search term exists, 
+    // to allow searching across all categories.
+    // However, if NO search term, we respect the category filter.
+    if (selectedCategory !== 'All' && !searchTerm) {
       constraints.push(where('cuisine', 'array-contains', selectedCategory));
     }
 
@@ -71,21 +85,45 @@ export default function CustomerDashboard() {
       collection(firestore, 'vendors'),
       ...constraints
     );
-  }, [firestore, selectedCategory]);
+  }, [firestore, selectedCategory, searchTerm]); // Add searchTerm to dependency to re-fetch if logic changes
+
   const { data: vendors, isLoading } = useCollection<Vendor>(vendorsQuery);
 
+  // Client-side filtering for search term
+  const filteredVendors = vendors?.filter(vendor => {
+    if (!searchTerm) return true;
+    const term = searchTerm.toLowerCase();
+    const matchesName = vendor.name?.toLowerCase().includes(term);
+    const matchesCuisine = vendor.cuisine?.some(c => c.toLowerCase().includes(term));
+    return matchesName || matchesCuisine;
+  }) || [];
+
   const showLoading = isLoading;
+  const displayVendors = filteredVendors;
 
   return (
     <div className="space-y-8 pb-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight lg:text-5xl bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-            Discover Vendors
+            {searchTerm ? `Results for "${searchTerm}"` : 'Discover Vendors'}
           </h1>
           <p className="mt-2 text-base md:text-lg text-muted-foreground">
-            Find your favorite restaurants and products near you.
+            {searchTerm ? 'Best matches for your craving.' : 'Find your favorite restaurants and products near you.'}
           </p>
+        </div>
+
+        {/* In-page search bar to clear/change search */}
+        <div className="relative w-full md:w-72">
+          <div className="absolute left-2 top-2.5 text-muted-foreground">
+            <Search className="h-4 w-4" />
+          </div>
+          <Input
+            placeholder="Search vendors..."
+            className="pl-8"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
       </div>
 
@@ -93,11 +131,14 @@ export default function CustomerDashboard() {
         {categories.map((category, index) => (
           <Button
             key={category.name}
-            variant={selectedCategory === category.name ? 'default' : 'outline'}
-            onClick={() => setSelectedCategory(category.name)}
+            variant={selectedCategory === category.name && !searchTerm ? 'default' : 'outline'}
+            onClick={() => {
+              setSelectedCategory(category.name);
+              setSearchTerm(''); // Clear search when picking a category
+            }}
             className={cn(
               "h-10 px-6 rounded-full transition-all duration-300 shrink-0",
-              selectedCategory === category.name
+              selectedCategory === category.name && !searchTerm
                 ? "shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5"
                 : "hover:bg-secondary hover:text-secondary-foreground hover:border-secondary-foreground/10 hover:-translate-y-0.5 bg-background/50 backdrop-blur-sm"
             )}
@@ -110,27 +151,42 @@ export default function CustomerDashboard() {
 
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-semibold tracking-tight">Featured Restaurants</h2>
+          <h2 className="text-2xl font-semibold tracking-tight">
+            {searchTerm ? 'Search Results' : 'Featured Restaurants'}
+          </h2>
           <Button variant="link" className="text-primary">View all</Button>
         </div>
 
         <div className="grid grid-cols-1 gap-3 md:gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {showLoading && [...Array(8)].map((_, i) => <VendorCardSkeleton key={i} />)}
-          {!showLoading && vendors && vendors.length > 0 && vendors.map((vendor) => (
+          {!showLoading && displayVendors.length > 0 && displayVendors.map((vendor) => (
             <Link key={vendor.id} href={`/customer/vendor/${vendor.id}`} className="block h-full">
               <VendorCard vendor={vendor} />
             </Link>
           ))}
         </div>
-        {!showLoading && vendors?.length === 0 && (
+        {!showLoading && displayVendors.length === 0 && (
           <div className="flex flex-col items-center justify-center py-20 text-center text-muted-foreground bg-card/30 rounded-lg border border-dashed">
             <Store className="h-16 w-16 mb-4 opacity-20" />
             <h3 className="text-lg font-semibold">No vendors found</h3>
             <p>Try adjusting your search or filters.</p>
+            {searchTerm && (
+              <Button variant="link" onClick={() => setSearchTerm('')} className="mt-2">
+                Clear Search
+              </Button>
+            )}
           </div>
         )}
       </div>
 
     </div>
+  );
+}
+
+export default function CustomerDashboard() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center">Loading marketplace...</div>}>
+      <VendorList />
+    </Suspense>
   );
 }

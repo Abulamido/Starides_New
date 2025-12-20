@@ -31,7 +31,7 @@
     --border: 220 13% 81%;
     --input: 220 13% 86%;
     --ring: 210 35% 56%;
-    
+
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
@@ -78,7 +78,7 @@
     --border: 224 10% 15%;
     --input: 224 10% 15%;
     --ring: 210 35% 56%;
-    
+
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
@@ -100,6 +100,7 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -107,23 +108,60 @@
 
 @layer components {
   .neumorphic-flat {
-    @apply bg-background rounded-lg shadow-[5px_5px_10px_#bec3c9,-5px_-5px_10px_#ffffff];
+    @apply bg-background rounded-lg shadow-neumorphic-flat;
   }
+
   .dark .neumorphic-flat {
-    @apply bg-background rounded-lg shadow-[5px_5px_10px_#11131a,-5px_-5px_10px_#232734];
+    @apply bg-background rounded-lg shadow-neumorphic-flat-dark;
   }
 
   .neumorphic-pressed {
-    @apply bg-background rounded-lg shadow-[inset_5px_5px_10px_#bec3c9,inset_-5px_-5px_10px_#ffffff];
+    @apply bg-background rounded-lg shadow-neumorphic-pressed;
   }
+
   .dark .neumorphic-pressed {
-    @apply bg-background rounded-lg shadow-[inset_5px_5px_10px_#11131a,inset_-5px_-5px_10px_#232734];
+    @apply bg-background rounded-lg shadow-neumorphic-pressed-dark;
   }
 
   .neumorphic-active {
-     @apply shadow-[inset_5px_5px_10px_#bec3c9,inset_-5px_-5px_10px_#ffffff] text-primary;
+    @apply shadow-neumorphic-pressed text-primary;
   }
+
   .dark .neumorphic-active {
-    @apply shadow-[inset_5px_5px_10px_#11131a,inset_-5px_-5px_10px_#232734] text-primary;
+    @apply shadow-neumorphic-pressed-dark text-primary;
+  }
+
+  /* Animated Text Cycle for Hero */
+  .text-cycle-container {
+    @apply relative block overflow-hidden h-[1.3em] w-full text-center;
+  }
+
+  .text-cycle-item {
+    @apply absolute left-0 w-full opacity-0 translate-y-full animate-text-cycle flex justify-center;
+  }
+
+  /* 6 items = 15s total (2.5s each) */
+  .text-cycle-item:nth-child(1) {
+    animation-delay: 0s;
+  }
+
+  .text-cycle-item:nth-child(2) {
+    animation-delay: 2.5s;
+  }
+
+  .text-cycle-item:nth-child(3) {
+    animation-delay: 5s;
+  }
+
+  .text-cycle-item:nth-child(4) {
+    animation-delay: 7.5s;
+  }
+
+  .text-cycle-item:nth-child(5) {
+    animation-delay: 10s;
+  }
+
+  .text-cycle-item:nth-child(6) {
+    animation-delay: 12.5s;
   }
 }

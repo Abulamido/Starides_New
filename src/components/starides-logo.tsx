@@ -5,7 +5,7 @@ export function StaridesLogo({ className }: { className?: string }) {
   return (
     <div className={`relative flex items-center ${className}`}>
       <Image
-        src="/logo_option_b.png"
+        src="/starides_logo_new.png"
         alt="Starides Logo"
         width={150}
         height={50}

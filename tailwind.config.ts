@@ -1,4 +1,4 @@
-import type {Config} from 'tailwindcss';
+import type { Config } from 'tailwindcss';
 
 export default {
   darkMode: ['class'],
@@ -66,6 +66,12 @@ export default {
           ring: 'hsl(var(--sidebar-ring))',
         },
       },
+      boxShadow: {
+        'neumorphic-flat': '5px 5px 10px #bec3c9, -5px -5px 10px #ffffff',
+        'neumorphic-flat-dark': '5px 5px 10px #11131a, -5px -5px 10px #232734',
+        'neumorphic-pressed': 'inset 5px 5px 10px #bec3c9, inset -5px -5px 10px #ffffff',
+        'neumorphic-pressed-dark': 'inset 5px 5px 10px #11131a, inset -5px -5px 10px #232734',
+      },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
@@ -88,10 +94,18 @@ export default {
             height: '0',
           },
         },
+        'text-cycle': {
+          '0%': { opacity: '0', transform: 'translateY(100%)' },
+          '5%': { opacity: '1', transform: 'translateY(0)' },
+          '15%': { opacity: '1', transform: 'translateY(0)' },
+          '20%': { opacity: '0', transform: 'translateY(-100%)' },
+          '100%': { opacity: '0', transform: 'translateY(-100%)' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        'text-cycle': 'text-cycle 15s infinite',
       },
     },
   },
