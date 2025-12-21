@@ -30,7 +30,7 @@ export function NotificationsInitializer() {
         if (user && permission === 'default') {
             const timer = setTimeout(() => {
                 requestPermission();
-            }, 5000); // 5s delay
+            }, 1000); // Reduced delay to 1s for better UX
 
             return () => clearTimeout(timer);
         }
