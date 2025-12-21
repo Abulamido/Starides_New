@@ -25,7 +25,8 @@ export default function LandingPage() {
   const { role, isLoading: isRoleLoading } = useUserRole();
 
   // Unified loading state - wait for auth restoration and role fetching
-  const isTransitioning = isUserLoading || (user && isRoleLoading && !role);
+  // Only show loading if: user auth is loading, OR user exists and role is still loading
+  const isTransitioning = isUserLoading || (user && isRoleLoading);
 
   useEffect(() => {
     // If not loading and no user, keep on landing page (users can browse before signup)
@@ -33,13 +34,23 @@ export default function LandingPage() {
       return;
     }
 
+    // Wait for role to finish loading
+    if (isRoleLoading) return;
+
     // If user is authenticated and we have a role, redirect to their dashboard
-    // Use replace() to prevent back-navigation to landing page
     if (user && role) {
       router.replace(`/${role}`);
+      return;
+    }
+
+    // If user exists but no role, redirect to login (user data missing in Firestore)
+    if (user && !role && !isRoleLoading) {
+      console.warn('User has no role in Firestore, redirecting to login');
+      router.replace('/auth/login');
     }
   }, [user, isUserLoading, role, isRoleLoading, router]);
 
+  // Show loading splash during transitions
   if (isTransitioning || (user && role)) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">

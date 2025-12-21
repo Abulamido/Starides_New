@@ -22,7 +22,6 @@ export function RoleGuard({ allowedRole, children }: RoleGuardProps) {
 
         // Not logged in - redirect to login
         if (!user) {
-            // Use replace to prevent back-navigation to protected pages
             router.replace('/auth/login');
             return;
         }
@@ -30,9 +29,17 @@ export function RoleGuard({ allowedRole, children }: RoleGuardProps) {
         // Wait for role to load
         if (isRoleLoading) return;
 
+        // Role loaded but is null - user exists in Firebase Auth but not in Firestore
+        // This can happen if user data wasn't created properly during signup
+        // Redirect to login to re-authenticate
+        if (!role) {
+            console.warn('User has no role in Firestore, redirecting to login');
+            router.replace('/auth/login');
+            return;
+        }
+
         // Wrong role - redirect to correct dashboard
-        if (role && role !== allowedRole) {
-            // Use replace to prevent back-navigation issues
+        if (role !== allowedRole) {
             router.replace(`/${role}`);
         }
     }, [user, role, isUserLoading, isRoleLoading, allowedRole, router]);
@@ -64,6 +71,15 @@ export function RoleGuard({ allowedRole, children }: RoleGuardProps) {
         );
     }
 
+    // No role found - show loading while redirecting to login
+    if (!role) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+        );
+    }
+
     // Wrong role - show loading while redirecting
     if (role !== allowedRole) {
         return (
@@ -76,3 +92,4 @@ export function RoleGuard({ allowedRole, children }: RoleGuardProps) {
     // Correct role - show content
     return <>{children}</>;
 }
+
