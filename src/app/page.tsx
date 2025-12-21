@@ -40,14 +40,9 @@ export default function LandingPage() {
     // If user is authenticated and we have a role, redirect to their dashboard
     if (user && role) {
       router.replace(`/${role}`);
-      return;
     }
-
-    // If user exists but no role, redirect to login (user data missing in Firestore)
-    if (user && !role && !isRoleLoading) {
-      console.warn('User has no role in Firestore, redirecting to login');
-      router.replace('/auth/login');
-    }
+    // Note: If user exists but no role, stay on landing page (allow browsing)
+    // This handles edge cases where Firestore data might be slow or missing
   }, [user, isUserLoading, role, isRoleLoading, router]);
 
   // Show loading splash during transitions

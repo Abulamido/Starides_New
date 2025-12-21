@@ -29,19 +29,12 @@ export function RoleGuard({ allowedRole, children }: RoleGuardProps) {
         // Wait for role to load
         if (isRoleLoading) return;
 
-        // Role loaded but is null - user exists in Firebase Auth but not in Firestore
-        // This can happen if user data wasn't created properly during signup
-        // Redirect to login to re-authenticate
-        if (!role) {
-            console.warn('User has no role in Firestore, redirecting to login');
-            router.replace('/auth/login');
-            return;
-        }
-
-        // Wrong role - redirect to correct dashboard
-        if (role !== allowedRole) {
+        // If we have a role and it's the wrong one, redirect to correct dashboard
+        if (role && role !== allowedRole) {
             router.replace(`/${role}`);
         }
+        // Note: If role is null but user exists, we don't redirect - 
+        // this can happen during signup flow or if Firestore is slow
     }, [user, role, isUserLoading, isRoleLoading, allowedRole, router]);
 
     // Show loading while checking authentication
@@ -71,17 +64,8 @@ export function RoleGuard({ allowedRole, children }: RoleGuardProps) {
         );
     }
 
-    // No role found - show loading while redirecting to login
-    if (!role) {
-        return (
-            <div className="flex items-center justify-center min-h-screen">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-        );
-    }
-
     // Wrong role - show loading while redirecting
-    if (role !== allowedRole) {
+    if (role && role !== allowedRole) {
         return (
             <div className="flex items-center justify-center min-h-screen">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -89,7 +73,8 @@ export function RoleGuard({ allowedRole, children }: RoleGuardProps) {
         );
     }
 
-    // Correct role - show content
+    // Correct role OR no role yet (allow content to show) - show content
     return <>{children}</>;
 }
+
 
