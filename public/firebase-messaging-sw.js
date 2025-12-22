@@ -39,18 +39,35 @@ self.addEventListener('notificationclick', (event) => {
     console.log('[Service Worker] Notification click received.');
     event.notification.close();
 
+    const data = event.notification.data;
+    let targetUrl = '/';
+
+    // Contextual navigation based on notification data
+    if (data?.orderId) {
+        if (data.type?.includes('rider')) {
+            targetUrl = '/rider/deliveries';
+        } else if (data.type?.includes('vendor')) {
+            targetUrl = '/vendor/orders';
+        } else {
+            targetUrl = '/customer/orders';
+        }
+    }
+
     // Open the app or focus existing window
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-            // If a window is already open, focus it
+            // If a window is already open, focus it and navigate
             for (const client of clientList) {
                 if (client.url.includes(self.location.origin) && 'focus' in client) {
+                    if (targetUrl !== '/' && 'navigate' in client) {
+                        client.navigate(targetUrl);
+                    }
                     return client.focus();
                 }
             }
             // Otherwise, open a new window
             if (clients.openWindow) {
-                return clients.openWindow('/');
+                return clients.openWindow(targetUrl);
             }
         })
     );

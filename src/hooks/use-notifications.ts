@@ -1,9 +1,7 @@
-'use client';
-
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 import { doc, setDoc } from 'firebase/firestore';
-import { useFirestore, useUser } from '@/firebase';
+import { useFirestore, useUser, useDoc } from '@/firebase';
 import { useToast } from './use-toast';
 import { playNotificationSound } from '@/lib/sounds';
 
@@ -13,6 +11,14 @@ export function useNotifications() {
     const { toast } = useToast();
     const [permission, setPermission] = useState<NotificationPermission>('default');
     const [fcmToken, setFcmToken] = useState<string | null>(null);
+
+    // Fetch user preferences for sound settings
+    const userQuery = useMemo(() => {
+        if (!firestore || !user) return null;
+        return doc(firestore, 'users', user.uid);
+    }, [firestore, user]);
+
+    const { data: userData } = useDoc(userQuery);
 
     useEffect(() => {
         if (typeof window === 'undefined' || !user || !firestore) return;
@@ -74,21 +80,20 @@ export function useNotifications() {
                         // Ignore error
                     }
                 }
-
-                // Token obtained successfully
             }
 
             // Handle foreground messages
             onMessage(messaging, (payload) => {
-
                 // Show toast notification
                 toast({
                     title: payload.notification?.title || 'New Notification',
                     description: payload.notification?.body || '',
                 });
 
-                // Play sound
-                playNotificationSound();
+                // Play sound ONLY if enabled in preferences
+                if (userData?.notificationPreferences?.soundEnabled !== false) {
+                    playNotificationSound();
+                }
             });
         } catch (error) {
             console.error('Error setting up messaging:', error);
