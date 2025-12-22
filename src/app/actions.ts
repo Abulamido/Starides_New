@@ -130,25 +130,26 @@ export async function placeOrder(order: {
 
 export async function updateOrderStatus(orderId: string, status: 'New Order' | 'Pending Acceptance' | 'Preparing' | 'Ready for Pickup' | 'In Transit' | 'Delivered' | 'Canceled', riderId?: string) {
   try {
-    const { firestore } = initializeServerFirebase();
-    const orderRef = doc(firestore, 'orders', orderId);
+    const { adminDb } = await import('@/firebase/admin');
+    const orderRef = adminDb.collection('orders').doc(orderId);
+    const orderDoc = await orderRef.get();
 
-    // Fetch order to get user IDs for notifications
-    const orderSnap = await getDocs(query(collection(firestore, 'orders'), where('__name__', '==', orderId)));
-    const orderDoc = orderSnap.docs[0];
-
-    if (!orderDoc) {
+    if (!orderDoc.exists) {
       throw new Error('Order not found');
     }
 
-    const order = orderDoc.data();
+    const order = orderDoc.data()!;
 
-    const updateData: { status: string; riderId?: string } = { status };
+    const updateData: any = { status, updatedAt: new Date() };
     if (riderId) {
       updateData.riderId = riderId;
     }
 
-    await updateDoc(orderRef, updateData);
+    if (status === 'Delivered') {
+      updateData.deliveredAt = new Date();
+    }
+
+    await orderRef.update(updateData);
 
     // CRITICAL FIX: Send notifications based on status changes
     const { createNotification, NotificationTemplates } = await import('@/lib/notifications');

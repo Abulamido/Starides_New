@@ -324,6 +324,45 @@ export default function VendorSettingsPage() {
           </CardContent>
         </Card>
 
+        {/* Notification Preferences */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Loader2 className="h-5 w-5" />
+              <CardTitle>Notification Preferences</CardTitle>
+            </div>
+            <CardDescription>Manage how you receive notifications</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Order Updates</Label>
+                <p className="text-sm text-muted-foreground">Receive notifications about new orders and status changes</p>
+              </div>
+              <Switch
+                checked={formData.notificationPreferences.orderUpdates}
+                onCheckedChange={(checked) => setFormData(prev => ({
+                  ...prev,
+                  notificationPreferences: { ...prev.notificationPreferences, orderUpdates: checked }
+                }))}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Sound Notifications</Label>
+                <p className="text-sm text-muted-foreground">Play sound when receiving notifications</p>
+              </div>
+              <Switch
+                checked={formData.notificationPreferences.soundEnabled}
+                onCheckedChange={(checked) => setFormData(prev => ({
+                  ...prev,
+                  notificationPreferences: { ...prev.notificationPreferences, soundEnabled: checked }
+                }))}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Operating Hours */}
         <Card>
           <CardHeader>
@@ -355,45 +394,6 @@ export default function VendorSettingsPage() {
                   onChange={handleChange}
                 />
               </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Notification Preferences */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Clock className="h-5 w-5" />
-              <CardTitle>Notification Preferences</CardTitle>
-            </div>
-            <CardDescription>Manage how you receive notifications</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label>Order Updates</Label>
-                <p className="text-sm text-muted-foreground">Receive notifications about new orders and status changes</p>
-              </div>
-              <Switch
-                checked={formData.notificationPreferences.orderUpdates}
-                onCheckedChange={(checked) => setFormData(prev => ({
-                  ...prev,
-                  notificationPreferences: { ...prev.notificationPreferences, orderUpdates: checked }
-                }))}
-              />
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label>Sound Notifications</Label>
-                <p className="text-sm text-muted-foreground">Play sound when receiving notifications</p>
-              </div>
-              <Switch
-                checked={formData.notificationPreferences.soundEnabled}
-                onCheckedChange={(checked) => setFormData(prev => ({
-                  ...prev,
-                  notificationPreferences: { ...prev.notificationPreferences, soundEnabled: checked }
-                }))}
-              />
             </div>
           </CardContent>
         </Card>
