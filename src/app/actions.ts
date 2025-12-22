@@ -152,49 +152,63 @@ export async function updateOrderStatus(orderId: string, status: 'New Order' | '
 
     // CRITICAL FIX: Send notifications based on status changes
     const { createNotification, NotificationTemplates } = await import('@/lib/notifications');
+    const { sendPushNotification } = await import('@/app/actions/push');
 
     // Notify customer about order status changes
-    if (status === 'Preparing' && order.customerId) {
-      await createNotification({
-        userId: order.customerId,
-        ...NotificationTemplates.orderAccepted(orderId)
-      });
-    }
+    if (order.customerId) {
+      if (status === 'Preparing') {
+        await createNotification({
+          userId: order.customerId,
+          ...NotificationTemplates.orderAccepted(orderId)
+        });
+        await sendPushNotification({
+          userId: order.customerId,
+          title: "Order Accepted! 🍳",
+          body: `Your order #${orderId.slice(0, 8)} is being prepared.`,
+          data: { orderId, type: 'order_accepted' }
+        });
+      }
 
-    if (status === 'Ready for Pickup') {
-      // Notify customer
-      if (order.customerId) {
+      if (status === 'Ready for Pickup') {
         await createNotification({
           userId: order.customerId,
           ...NotificationTemplates.orderReady(orderId)
         });
-      }
-      // Notify rider if assigned
-      if (riderId) {
-        await createNotification({
-          userId: riderId,
-          ...NotificationTemplates.orderReady(orderId)
+        await sendPushNotification({
+          userId: order.customerId,
+          title: "Order Ready! 🛍️",
+          body: `Your order #${orderId.slice(0, 8)} is ready for pickup.`,
+          data: { orderId, type: 'order_ready' }
         });
       }
-    }
 
-    if (status === 'In Transit' && order.customerId) {
-      await createNotification({
-        userId: order.customerId,
-        ...NotificationTemplates.orderInTransit(orderId)
-      });
-    }
+      if (status === 'In Transit') {
+        await createNotification({
+          userId: order.customerId,
+          ...NotificationTemplates.orderInTransit(orderId)
+        });
+        await sendPushNotification({
+          userId: order.customerId,
+          title: "In Transit! 🚀",
+          body: `Your order #${orderId.slice(0, 8)} is on the way.`,
+          data: { orderId, type: 'order_in_transit' }
+        });
+      }
 
-    if (status === 'Delivered' && order.customerId) {
-      await createNotification({
-        userId: order.customerId,
-        ...NotificationTemplates.orderDelivered(orderId)
-      });
-    }
+      if (status === 'Delivered') {
+        await createNotification({
+          userId: order.customerId,
+          ...NotificationTemplates.orderDelivered(orderId)
+        });
+        await sendPushNotification({
+          userId: order.customerId,
+          title: "Order Delivered! ✅",
+          body: `Your order #${orderId.slice(0, 8)} has been delivered. Enjoy!`,
+          data: { orderId, type: 'order_delivered' }
+        });
+      }
 
-    if (status === 'Canceled') {
-      // Notify customer
-      if (order.customerId) {
+      if (status === 'Canceled') {
         await createNotification({
           userId: order.customerId,
           title: 'Order Canceled',
@@ -202,17 +216,41 @@ export async function updateOrderStatus(orderId: string, status: 'New Order' | '
           type: 'error',
           data: { orderId, eventType: 'order_canceled' }
         });
-      }
-      // Notify vendor
-      if (order.vendorId) {
-        await createNotification({
-          userId: order.vendorId,
-          title: 'Order Canceled',
-          message: `Order #${orderId.slice(0, 8)} has been canceled`,
-          type: 'warning',
-          data: { orderId, eventType: 'order_canceled' }
+        await sendPushNotification({
+          userId: order.customerId,
+          title: "Order Canceled",
+          body: `Your order #${orderId.slice(0, 8)} has been canceled.`,
+          data: { orderId, type: 'order_canceled' }
         });
       }
+    }
+
+    // Notify rider if assigned and order is ready
+    if (status === 'Ready for Pickup' && (riderId || order.riderId)) {
+      const rId = riderId || order.riderId;
+      await sendPushNotification({
+        userId: rId,
+        title: "Order Ready for Pickup! 🏍️",
+        body: `Order #${orderId.slice(0, 8)} is ready for pickup.`,
+        data: { orderId, type: 'order_ready' }
+      });
+    }
+
+    // Notify vendor if canceled
+    if (status === 'Canceled' && order.vendorId) {
+      await createNotification({
+        userId: order.vendorId,
+        title: 'Order Canceled',
+        message: `Order #${orderId.slice(0, 8)} has been canceled`,
+        type: 'warning',
+        data: { orderId, eventType: 'order_canceled' }
+      });
+      await sendPushNotification({
+        userId: order.vendorId,
+        title: "Order Canceled",
+        body: `Order #${orderId.slice(0, 8)} has been canceled.`,
+        data: { orderId, type: 'order_canceled' }
+      });
     }
 
     revalidatePath('/customer/orders');
@@ -220,8 +258,10 @@ export async function updateOrderStatus(orderId: string, status: 'New Order' | '
     revalidatePath('/vendor/orders');
     revalidatePath('/rider/deliveries');
 
+    return { success: true };
+
   } catch (error) {
     console.error("Error updating order status:", error);
-    throw new Error("Could not update order status.");
+    return { success: false, error: "Could not update order status." };
   }
 }

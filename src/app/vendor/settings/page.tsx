@@ -14,6 +14,8 @@ import { useToast } from '@/hooks/use-toast';
 import { MapsProvider } from '@/components/maps/maps-provider';
 import { AddressAutocomplete } from '@/components/maps/address-autocomplete';
 import { ImageUpload } from '@/components/image-upload';
+import { Switch } from '@/components/ui/switch';
+import { useDoc as useDocUser } from '@/firebase'; // Added to fetch user doc for notifications
 
 export default function VendorSettingsPage() {
   const { user, isUserLoading } = useUser();
@@ -29,6 +31,15 @@ export default function VendorSettingsPage() {
 
   const { data: vendorData, isLoading: isVendorLoading } = useDoc(vendorQuery);
 
+  // Fetch user data from Firestore
+  const userQuery = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [firestore, user]);
+
+  // Fetch user data for notification preferences
+  const { data: userData } = useDocUser(userQuery);
+
   const [formData, setFormData] = useState({
     businessName: '',
     description: '',
@@ -42,6 +53,11 @@ export default function VendorSettingsPage() {
     deliveryRadius: '10',
     latitude: null as number | null,
     longitude: null as number | null,
+    notificationPreferences: {
+      orderUpdates: true,
+      promotions: true,
+      soundEnabled: true,
+    },
   });
 
   // Update form when vendor data loads
@@ -60,9 +76,14 @@ export default function VendorSettingsPage() {
         deliveryRadius: vendorData.deliveryRadius?.toString() || '10',
         latitude: vendorData.location?.lat || null,
         longitude: vendorData.location?.lng || null,
+        notificationPreferences: {
+          orderUpdates: userData?.notificationPreferences?.orderUpdates ?? true,
+          promotions: userData?.notificationPreferences?.promotions ?? true,
+          soundEnabled: userData?.notificationPreferences?.soundEnabled ?? true,
+        },
       });
     }
-  }, [vendorData, user]);
+  }, [vendorData, user, userData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData(prev => ({
@@ -115,7 +136,10 @@ export default function VendorSettingsPage() {
         };
       }
 
-      const result = await updateVendorSettings(user.uid, settingsData);
+      const result = await updateVendorSettings(user.uid, {
+        ...settingsData,
+        notificationPreferences: formData.notificationPreferences,
+      });
 
       if (result.success) {
         toast({
@@ -331,6 +355,45 @@ export default function VendorSettingsPage() {
                   onChange={handleChange}
                 />
               </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Notification Preferences */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Clock className="h-5 w-5" />
+              <CardTitle>Notification Preferences</CardTitle>
+            </div>
+            <CardDescription>Manage how you receive notifications</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Order Updates</Label>
+                <p className="text-sm text-muted-foreground">Receive notifications about new orders and status changes</p>
+              </div>
+              <Switch
+                checked={formData.notificationPreferences.orderUpdates}
+                onCheckedChange={(checked) => setFormData(prev => ({
+                  ...prev,
+                  notificationPreferences: { ...prev.notificationPreferences, orderUpdates: checked }
+                }))}
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <Label>Sound Notifications</Label>
+                <p className="text-sm text-muted-foreground">Play sound when receiving notifications</p>
+              </div>
+              <Switch
+                checked={formData.notificationPreferences.soundEnabled}
+                onCheckedChange={(checked) => setFormData(prev => ({
+                  ...prev,
+                  notificationPreferences: { ...prev.notificationPreferences, soundEnabled: checked }
+                }))}
+              />
             </div>
           </CardContent>
         </Card>

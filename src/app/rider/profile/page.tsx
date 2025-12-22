@@ -37,6 +37,11 @@ export default function RiderProfilePage() {
     licenseNumber: '',
     address: '',
     licenseUrl: '',
+    notificationPreferences: {
+      orderUpdates: true,
+      promotions: true,
+      soundEnabled: true,
+    },
   });
 
   const [availability, setAvailability] = useState({
@@ -56,6 +61,11 @@ export default function RiderProfilePage() {
         licenseNumber: userData.riderProfile?.documents?.licenseNumber || '',
         licenseUrl: userData.riderProfile?.documents?.licenseUrl || '',
         address: userData.address || '',
+        notificationPreferences: {
+          orderUpdates: userData.notificationPreferences?.orderUpdates ?? true,
+          promotions: userData.notificationPreferences?.promotions ?? true,
+          soundEnabled: userData.notificationPreferences?.soundEnabled ?? true,
+        },
       });
 
       setAvailability({
@@ -110,6 +120,7 @@ export default function RiderProfilePage() {
         displayName: formData.name,
         phone: formData.phone,
         address: formData.address,
+        notificationPreferences: formData.notificationPreferences,
       });
 
       if (!profileResult.success) {

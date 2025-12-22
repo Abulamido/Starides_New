@@ -23,6 +23,11 @@ export interface VendorSettings {
         lat: number;
         lng: number;
     };
+    notificationPreferences?: {
+        orderUpdates?: boolean;
+        promotions?: boolean;
+        soundEnabled?: boolean;
+    };
 }
 
 export async function updateVendorSettings(vendorId: string, data: Partial<VendorSettings>) {
@@ -50,6 +55,15 @@ export async function updateVendorSettings(vendorId: string, data: Partial<Vendo
         if (data.location !== undefined) updateData.location = data.location;
 
         await vendorRef.update(updateData);
+
+        // Also update notification preferences in users collection if provided
+        if (data.notificationPreferences !== undefined) {
+            const userRef = adminDb.collection('users').doc(vendorId);
+            await userRef.set({
+                notificationPreferences: data.notificationPreferences,
+                updatedAt: new Date(),
+            }, { merge: true });
+        }
 
         revalidatePath('/vendor/settings');
         return { success: true };

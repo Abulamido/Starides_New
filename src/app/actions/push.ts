@@ -19,9 +19,17 @@ export async function sendPushNotification(params: SendPushParams) {
             return { success: false, error: 'User not found' };
         }
 
-        const fcmToken = userDoc.data()?.fcmToken;
+        const userData = userDoc.data();
+        const fcmToken = userData?.fcmToken;
         if (!fcmToken) {
             return { success: false, error: 'User has no FCM token' };
+        }
+
+        // 1.5 Check notification preferences (default to true if not set)
+        const prefs = userData?.notificationPreferences;
+        if (prefs?.orderUpdates === false) {
+            console.log(`[Push] Skipping for user ${userId} due to preferences.`);
+            return { success: false, error: 'User has disabled order update notifications' };
         }
 
         // 2. Send message via FCM

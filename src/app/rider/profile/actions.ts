@@ -44,6 +44,11 @@ export async function updateRiderProfile(userId: string, data: {
     phone?: string;
     address?: string;
     photoURL?: string;
+    notificationPreferences?: {
+        orderUpdates?: boolean;
+        promotions?: boolean;
+        soundEnabled?: boolean;
+    };
 }) {
     try {
         const { adminDb } = await import('@/firebase/admin');
